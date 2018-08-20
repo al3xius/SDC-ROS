@@ -1,0 +1,3 @@
+cd ~/catkin_ws/src
+git pull
+sdcmake
