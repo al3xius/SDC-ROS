@@ -41,8 +41,8 @@ import RPi.GPIO as GPIO
 from geometry_msgs.msg import Twist
 
 def callback(data):
-    rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data)
-    print(data.linear.x)
+    #rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data)
+    #print(data.linear.x)
     duty = data.linear.x+(50)
     my_pwm.ChangeDutyCycle(duty)
 
