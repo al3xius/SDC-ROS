@@ -43,7 +43,7 @@ from geometry_msgs.msg import Twist
 def callback(data):
     #rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data)
     #print(data.linear.x)
-    duty = data.linear.x+(50)
+    duty = data.linear.x*(50)
     print(duty)
     my_pwm.ChangeDutyCycle(duty)
 
