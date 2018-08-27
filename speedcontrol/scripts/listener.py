@@ -44,7 +44,7 @@ def callback(data):
     #rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data)
     #print(data.linear.x)
     duty = data.linear.x*(50)
-    my_pwm = GPIO.PWM(12, abs(duty))
+    my_pwm.start(abs(duty))
 
 
 def listener():
