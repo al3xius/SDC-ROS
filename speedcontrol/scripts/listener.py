@@ -63,7 +63,7 @@ def listener():
 
 if __name__ == '__main__':
     GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(11, GPIO.OUT)
-    my_pwm=GPIO.PWM(11,100)
+    GPIO.setup(12, GPIO.OUT)
+    my_pwm=GPIO.PWM(12,100)
     my_pwm.start(50)
     listener()
