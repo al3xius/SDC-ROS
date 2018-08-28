@@ -1,0 +1,3 @@
+GPIO:
+  pwmFreq: 500
+  speedcontrolerPin: 12

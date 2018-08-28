@@ -41,29 +41,27 @@ import RPi.GPIO as GPIO
 from geometry_msgs.msg import Twist
 
 def callback(data):
-    #rospy.loginfo(rospy.get_caller_id() + 'I heard %s', data)
-    #print(data.linear.x)
-    duty = data.linear.x*(50)
-    my_pwm.start(abs(duty))
+    duty = data.linear.x
+    pwm.start(abs(duty))
 
 
 def listener():
 
-    # In ROS, nodes are uniquely named. If two nodes with the same
-    # name are launched, the previous one is kicked off. The
-    # anonymous=True flag means that rospy will choose a unique
-    # name for our 'listener' node so that multiple listeners can
-    # run simultaneously.
     rospy.init_node('speedcontrol', anonymous=False)
 
     sub = rospy.Subscriber('turtle1/cmd_vel', Twist, callback)
 
-    # spin() simply keeps python from exiting until this node is stopped
     rospy.spin()
 
 if __name__ == '__main__':
+    # get Param
+    pin = rospy.get_param("/GPIO/speedcontrolerPin")
+    freq = rospy.get_param("/GPIO/pwmFreq")
+
+    # set GPIO
     GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(12, GPIO.OUT)
-    my_pwm=GPIO.PWM(12,100)
-    my_pwm.start(0)
+    GPIO.setup(pin, GPIO.OUT)
+    pwm = GPIO.PWM(pin, freq)
+    pwm.start(0)
+
     listener()
