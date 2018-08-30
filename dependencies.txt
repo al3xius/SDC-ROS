@@ -1,4 +1,0 @@
-sudo apt-get install ros-kinetic-joy
-sudo pip install opencv-python
-sudo apt-get install ros-kinetic-rosserial-arduino ros-kinetic-rosserial
-

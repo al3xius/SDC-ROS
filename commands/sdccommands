@@ -1,1 +1,3 @@
 sudo cp -r ~/catkin_ws/src/commands/. /usr/bin
+cd /usr/bin
+find . -type f -name "sdc*" -execdir sudo chmod +x {} \;
