@@ -1,3 +1,11 @@
 GPIO:
   pwmFreq: 500
   speedcontrolerPin: 12
+
+lane:
+  heightmultiplier: 10
+  cropmultiplier: 5
+  bottommultiplier: 5
+
+usb_cam:
+  video_device: /dev/video1
