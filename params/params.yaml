@@ -3,9 +3,11 @@ GPIO:
   speedcontrolerPin: 12
 
 lane:
-  heightmultiplier: 10
-  cropmultiplier: 5
-  bottommultiplier: 5
+  heightmultiplier: 9
+  cropmultiplier: 2
+  bottommultiplier: 9
+  lowend: 50
+  highend: 150
 
 usb_cam:
   video_device: /dev/video1
