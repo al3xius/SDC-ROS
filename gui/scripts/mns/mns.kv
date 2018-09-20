@@ -1,0 +1,27 @@
+#:kivy 1.10.1
+
+<MenuButton@Button>:
+    text_size: self.size
+    font_size: '20sp'
+    size_hint: .5, .15
+    halign: 'center'
+    valign: 'middle'
+    markup: True
+
+<ScreenMNS>:
+
+    BoxLayout:
+        cols: 3
+        orientation: 'horizontal'
+        padding: 0
+        spacing: 15
+
+        MenuButton:
+            text: 'OPTIONS'
+            on_release: root.manager.current = 'OPT'
+        MenuButton:
+            text: 'CURRENT\nCAR\nDATA'
+            on_release: root.manager.current = 'CCD'
+        MenuButton:
+            text: 'CAMERA VIEW'
+            on_release: root.manager.current = 'CAV'
