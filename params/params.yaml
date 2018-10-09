@@ -1,13 +1,20 @@
-GPIO:
-  pwmFreq: 500
-  speedcontrolerPin: 12
+arduino:
+ 	batteryPin: A0
+	speedControlerL: 12
+	speedControlerR: 13
+
+battery:
+	voltage: 12
+	factor: 3,428
+	k: 0,013
+	d: 11,7
 
 lane:
-  heightmultiplier: 9
-  cropmultiplier: 2
-  bottommultiplier: 9
-  lowend: 50
-  highend: 150
+	heightmultiplier: 9
+	cropmultiplier: 2
+	bottommultiplier: 9
+	lowend: 50
+	highend: 150
 
 usb_cam:
-  video_device: /dev/video1
+	video_device: /dev/video1
