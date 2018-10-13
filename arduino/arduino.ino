@@ -1,3 +1,7 @@
+//#include <ArduinoTcpHardware.h>
+#include <ArduinoHardware.h>
+#include <ros.h>
+
 /* 
  * rosserial ADC Example
  */
@@ -8,23 +12,23 @@
  #include <WProgram.h>
 #endif
 #include <ros.h>
-#include <rosserial_arduino/Adc.h>
-#include <geometry_msgs/Twist.h>
+#include <sdc_msgs/arduinoIn.h>
+#include <sdc_msgs/state.h>
 
 ros::NodeHandle nh;
 
 //Publisher
-rosserial_arduino::Adc adc_msg;
-ros::Publisher p("adc", &adc_msg);
+sdc_msgs::arduinoIn arduinoIn_msg;
+ros::Publisher p("/arduino/in", &arduinoIn_msg);
 
 //Subscriber
-void messageCb( const geometry_msgs::Twist& data){
-  int duty = data.linear.x;
+void messageCb( const sdc_msgs::state& data){
+  int duty = data.throttle;
   duty = map(duty, 0, 100, 0, 255);
   analogWrite(11, duty);
 }
 
-ros::Subscriber<geometry_msgs::Twist> sub("turtle1/cmd_vel", &messageCb );
+ros::Subscriber<sdc_msgs::state> sub("state", &messageCb );
 
 
 void setup()
@@ -47,14 +51,14 @@ long adc_timer;
 
 void loop()
 {
-  adc_msg.adc0 = averageAnalog(0);
-  adc_msg.adc1 = averageAnalog(1);
-  adc_msg.adc2 = averageAnalog(2);
-  adc_msg.adc3 = averageAnalog(3);
-  adc_msg.adc4 = averageAnalog(4);
-  adc_msg.adc5 = averageAnalog(5);
+  arduinoIn_msg.adc0 = averageAnalog(0);
+  arduinoIn_msg.adc1 = averageAnalog(1);
+  arduinoIn_msg.adc2 = averageAnalog(2);
+  arduinoIn_msg.adc3 = averageAnalog(3);
+  arduinoIn_msg.adc4 = averageAnalog(4);
+  arduinoIn_msg.adc5 = averageAnalog(5);
     
-  p.publish(&adc_msg);
+  p.publish(&arduinoIn_msg);
 
   nh.spinOnce();
 }
