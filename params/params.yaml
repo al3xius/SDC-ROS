@@ -1,13 +1,16 @@
 arduino:
   batteryPin: adc0
   gasPedalPin: adc1
-  gasPedalSwitchPin: D6
+  stopPin: D2
+  gasPedalSwitchPin: D3
+  keySwitchPin: D4
+  forwardInPin: D7
+  backwardInPin: D8
   speedControlerL: D10
   speedControlerR: D11
-  forwardLPin: D2
-  backwardsLPin: D3
-  forwardRPin: D4
-  backwardsRPin: D5
+  forwardControlPin: D12
+  forwardControlPin: D13
+  
 
 battery:
   voltage: 12
