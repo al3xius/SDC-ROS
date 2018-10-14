@@ -40,10 +40,10 @@ class StateMachine():
 		voltage = interp(getattr(arduinoIn, self.batteryPin), [0, 1015], [0, 5]) * self.batteryFactor
 		self.percent = limitValue((voltage - self.batteryD)/self.batteryK, 0, 100)
 
-		# Gaspeddal -> output
+		# get gaspeddal
 		self.gasPedal = limitValue(interp(getattr(arduinoIn, self.gasPedalPin), [0, 1015], [0, 100]), 0, 100)
 		
-		# Direction
+		# get direction
 		if not getattr(arduinoIn, self.forwardInPin) and not getattr(arduinoIn, self.gasPedalSwitchPin) and getattr(arduinoIn, self.backwardInPin):
 			self.manEnableMotor = True
 			self.manDirection = 1
@@ -53,6 +53,23 @@ class StateMachine():
 		else:
 			self.manEnableMotor = False
 			self.manDirection = 0
+
+		# keyswitch -> lock car if not turned on
+		# reset to previous mode
+		keySwitch = getattr(arduinoIn, self.keySwitchPin)
+		if keySwitch and not self._key:
+			self.pervMode = self.mode
+
+		if keySwitch:
+			self._key = True
+			self.mode = "locked"
+		else:
+			self._key = False
+			# safety: prevent gettings stuck in a loop
+			if self.pervMode == "locked":
+				self.pervMode = "manual"
+			
+			self.mode = self.pervMode
 
 
 		self.publishState()
@@ -67,16 +84,17 @@ class StateMachine():
 			self.mode = "remote"
 		else:
 			self._remote = False
-			#safety
+			# safety: prevent gettings stuck in a loop
 			if self.pervMode == "remote":
 				self.pervMode = "manual"
-				self.mode = self.pervMode
-			else:
-				self.mode = self.pervMode
+			
+			self.mode = self.pervMode
 		
+
 		self.joyThrottle = interp(Joy.axes[1], [-1, 1], [-100, 100])
 		self.joySteeringAngle = interp(Joy.axes[0], [-1, 1], [-100, 100])
 		self.publishState()
+
 
 	def publishState(self):
 
@@ -107,6 +125,13 @@ class StateMachine():
 			self.enableSteering = True
 			self.steeringAngle = self.joySteeringAngle
 
+		elif self.mode == "locked":
+			self.enableSteering = False
+			self.steeringAngle = 0
+			self.enableMotor = False
+			self.throttle = 0
+			self.direction = 0
+
 		else:
 			self.enableSteering = False
 			self.steeringAngle = 0
@@ -114,11 +139,13 @@ class StateMachine():
 			self.throttle = 0
 			self.direction = 0
 
+
+		# publish curent state
 		self.state.throttle = limitValue(self.throttle, 0, 100)
 		self.state.mode = self.mode
 		self.state.batteryCharge = self.percent
 		self.state.gasPedal = self.gasPedal
-		self.state.velocity = 0
+		self.state.velocity = 0 #TODO get velocity from gps
 		self.state.steeringAngle = limitValue(self.steeringAngle, -100, 100)
 		self.state.enableSteering = self.enableSteering
 		self.state.enableMotor = self.enableMotor
@@ -129,13 +156,13 @@ class StateMachine():
 	def __init__(self):
 		# get params
 		# Pins
-		self.batteryPin = rospy.get_param("/arduino/batteryPin")
-		self.gasPedalPin = rospy.get_param("/arduino/gasPedalPin")
-		self.forwardInPin = rospy.get_param("/arduino/forwardInPin")
-		self.backwardInPin = rospy.get_param("/arduino/backwardInPin")
-		self.gasPedalSwitchPin = rospy.get_param("/arduino/gasPedalSwitchPin")
-		self.stopPin = rospy.get_param("/arduino/stopPin")
-		self.keySwitchPin = rospy.get_param("/arduino/keySwitchPin")
+		self.batteryPin = rospy.get_param("/arduino/pin/battery")
+		self.gasPedalPin = rospy.get_param("/arduino/pin/gasPedal")
+		self.forwardInPin = rospy.get_param("/arduino/pin/forwardIn")
+		self.backwardInPin = rospy.get_param("/arduino/pin/backwardIn")
+		self.gasPedalSwitchPin = rospy.get_param("/arduino/pin/gasPedalSwitch")
+		self.stopPin = rospy.get_param("/arduino/pin/stop")
+		self.keySwitchPin = rospy.get_param("/arduino/pin/keySwitch")
 
 		# Battery
 		self.batteryK = float(rospy.get_param("/battery/k"))
@@ -146,6 +173,7 @@ class StateMachine():
 		self.mode = "manual"
 		self.pervMode = self.mode
 		self._remote = False
+		self._key = False
 
 		self.state = state()
 

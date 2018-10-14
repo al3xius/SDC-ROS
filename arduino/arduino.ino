@@ -1,6 +1,3 @@
-//#include <ArduinoTcpHardware.h>
-#include <ArduinoHardware.h>
-#include <ros.h>
 
 /* 
  * rosserial ADC Example
@@ -19,7 +16,10 @@ ros::NodeHandle nh;
 
 //Publisher
 sdc_msgs::arduinoIn arduinoIn_msg;
+sdc_msgs::state starte_msg;
 ros::Publisher p("/arduino/in", &arduinoIn_msg);
+
+unsigned long previousMillis = 0;
 
 //Subscriber
 void messageCb( const sdc_msgs::state& data){
@@ -37,33 +37,37 @@ void messageCb( const sdc_msgs::state& data){
   else{
     throttle = 0;
   }
-  
+    
   int duty = map(throttle, 0, 100, 0, 255);
   analogWrite(10, duty);
   analogWrite(11, duty);
   
+
   //direction
   if (data.direction > 0 && data.enableMotor){
     digitalWrite(12, LOW);
     digitalWrite(13, HIGH);
   }
-  if(data.direction < 0 && data.enableMotor){
+  else if(data.direction < 0 && data.enableMotor){
     digitalWrite(12, HIGH);
     digitalWrite(13, LOW);
   }
-  /*else{
+  else{
     digitalWrite(12, HIGH);
     digitalWrite(13, HIGH);
-  }*/
+  }
   
   //TODO: Steering
 }
 
 ros::Subscriber<sdc_msgs::state> sub("state", &messageCb );
 
-
 void setup()
 { 
+  //Wait for connection
+  while(!nh.connected()) {nh.spinOnce();}
+    
+  
   //PWM
   pinMode(10, OUTPUT);
   pinMode(11, OUTPUT);
@@ -79,10 +83,12 @@ void setup()
   pinMode(12, OUTPUT);
   pinMode(13, OUTPUT);
   
+  nh.getHardware()->setBaud(57600);
   nh.initNode();
 
-  nh.advertise(p);
   nh.subscribe(sub);
+  nh.advertise(p);
+  int last_milli = millis();
 }
 
 //We average the analog reading to elminate some of the noise
@@ -96,12 +102,15 @@ long adc_timer;
 
 void loop()
 {
-  arduinoIn_msg.adc0 = averageAnalog(0);
-  arduinoIn_msg.adc1 = averageAnalog(1);
-  arduinoIn_msg.adc2 = averageAnalog(2);
-  arduinoIn_msg.adc3 = averageAnalog(3);
-  arduinoIn_msg.adc4 = averageAnalog(4);
-  arduinoIn_msg.adc5 = averageAnalog(5);
+  
+  arduinoIn_msg.adc0 = analogRead(0);
+  arduinoIn_msg.adc1 = analogRead(1);
+  arduinoIn_msg.adc2 = analogRead(2);
+  arduinoIn_msg.adc3 = analogRead(3);
+  arduinoIn_msg.adc4 = analogRead(4);
+  arduinoIn_msg.adc5 = analogRead(5);
+ 
+  
   
   //Digital IN
   arduinoIn_msg.D2 = digitalRead(2);
@@ -109,9 +118,13 @@ void loop()
   arduinoIn_msg.D4 = digitalRead(4);
   arduinoIn_msg.D7 = digitalRead(7);
   arduinoIn_msg.D8 = digitalRead(8);
-    
-  p.publish(&arduinoIn_msg);
-
+ 
+  //timer so serial doesn't get overloaded
+  if( millis() - previousMillis > 10){
+    previousMillis = millis();
+    p.publish(&arduinoIn_msg);
+  }
+  
   nh.spinOnce();
 }
 
