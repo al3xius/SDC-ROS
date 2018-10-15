@@ -1,22 +1,4 @@
 Header header
 
-uint16 adc0
-uint16 adc1
-uint16 adc2
-uint16 adc3
-uint16 adc4
-uint16 adc5
-bool D0
-bool D1
-bool D2
-bool D3
-bool D4
-bool D5
-bool D6
-bool D7
-bool D8
-bool D9
-bool D10
-bool D11
-bool D12
-bool D13
+uint16[15] analog
+bool[53] digital

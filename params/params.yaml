@@ -1,5 +1,7 @@
 arduino:
-  pins:
+  port: /dev/ttyUSB0
+  kind: uno
+  pin:
     battery: adc0
     gasPedal: adc1
     stop: D2
@@ -11,6 +13,12 @@ arduino:
     speedControlerR: D11
     forwardControl: D12
     forwardControl: D13
+    indicatorInL: D14
+    indicatorInR: D15
+    indicatorL: D16
+    indicatorR: D17
+    lightIn: D18
+    light: D19
   
 
 battery:
@@ -27,4 +35,9 @@ lane:
   highend: 150
 
 usb_cam:
-  video_device: /dev/video1
+  video_device: /dev/video0
+  image_width: 640
+  image_height: 480
+  pixel_format: yuyv
+  camera_frame_id: usb_cam
+  io_method: mmap

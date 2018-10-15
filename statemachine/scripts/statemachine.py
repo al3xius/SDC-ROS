@@ -35,25 +35,48 @@ def limitValue(value, min, max):
 
 class StateMachine():
 
+
+	def toggleLight(self, input):
+		if input and self._prevLightIn:
+			self.light = not self.light
+			self._prevLightIn = False
+		elif not input:
+			self._prevLightIn = True
+
 	def arduCallback(self, arduinoIn):
 		# Battery Voltage -> Percent
-		voltage = interp(getattr(arduinoIn, self.batteryPin), [0, 1015], [0, 5]) * self.batteryFactor
+		voltage = interp(arduinoIn.analog[self.batteryPin], [0, 1015], [0, 5]) * self.batteryFactor
 		self.percent = limitValue((voltage - self.batteryD)/self.batteryK, 0, 100)
 
 		# get gaspeddal
-		self.gasPedal = limitValue(interp(getattr(arduinoIn, self.gasPedalPin), [0, 1015], [0, 100]), 0, 100)
+		self.gasPedal = limitValue(interp(arduinoIn.analog[self.gasPedalPin], [0, 1015], [0, 100]), 0, 100)
 		
 		# get direction
-		if not getattr(arduinoIn, self.forwardInPin) and not getattr(arduinoIn, self.gasPedalSwitchPin) and getattr(arduinoIn, self.backwardInPin):
+		if not arduinoIn.digital[self.forwardInPin] and not arduinoIn.digital[self.gasPedalSwitchPin] and arduinoIn.digital[self.backwardInPin]:
 			self.manEnableMotor = True
 			self.manDirection = 1
-		elif not getattr(arduinoIn, self.backwardInPin) and not getattr(arduinoIn, self.gasPedalSwitchPin) and getattr(arduinoIn, self.forwardInPin):
+		elif not arduinoIn.digital[self.backwardInPin] and not arduinoIn.digital[self.gasPedalSwitchPin] and arduinoIn.digital[self.forwardInPin]:
 			self.manEnableMotor = True
 			self.manDirection = -1
 		else:
 			self.manEnableMotor = False
 			self.manDirection = 0
+ 
+		# toggle light
+		# TODO entprellung?
+		self.toggleLight(not arduinoIn.digital[self.lightInPin])
 
+		# set indicator
+		#TODO Arduino Code
+		if not arduinoIn.digital[self.indicatorInLPin]:
+			self.manIndicate= "Left"
+		elif not arduinoIn.digital[self.indicatorInRPin]:
+			self.manIndicate = "Right"
+		else:
+			self.manIndicate = "None"
+
+
+		"""
 		# keyswitch -> lock car if not turned on
 		# reset to previous mode
 		keySwitch = getattr(arduinoIn, self.keySwitchPin)
@@ -70,14 +93,16 @@ class StateMachine():
 				self.pervMode = "manual"
 			
 			self.mode = self.pervMode
+		"""
 
 
 		self.publishState()
 
 	def joyCallback(self, Joy):
-		#reset to previous mode
+
+		# set mode to remote
 		if Joy.buttons[5] and not self._remote:
-			self.pervMode = self.mode
+			self.pervMode = self.mode # reset to previous mode
 
 		if Joy.buttons[5]:
 			self._remote = True
@@ -90,6 +115,8 @@ class StateMachine():
 			
 			self.mode = self.pervMode
 		
+		# TODO select button, check if no interferance of between aruino and joy
+		self.toggleLight(Joy.buttons[8])
 
 		self.joyThrottle = interp(Joy.axes[1], [-1, 1], [-100, 100])
 		self.joySteeringAngle = interp(Joy.axes[0], [-1, 1], [-100, 100])
@@ -104,8 +131,9 @@ class StateMachine():
 			self.throttle = self.gasPedal
 			self.enableMotor = self.manEnableMotor
 			self.direction = self.manDirection
+			self.indicate = self.manIndicate
 
-		elif self.mode == "cruse" and not getattr(arduinoIn, self.stopPin):
+		elif self.mode == "cruse" and not arduinoIn.digital[self.stopPin]:
 			# TODO Get data from cruse control node
 			self.throttle = 0
 			self.enableMotor = False
@@ -125,12 +153,18 @@ class StateMachine():
 			self.enableSteering = True
 			self.steeringAngle = self.joySteeringAngle
 
+			# Indicate that the vehicle is controlled remotely
+			self.indicate = "Both"
+		
+		#TODO implement locked mode
 		elif self.mode == "locked":
 			self.enableSteering = False
 			self.steeringAngle = 0
 			self.enableMotor = False
 			self.throttle = 0
 			self.direction = 0
+			self.light = False
+			self.indicate = "None"
 
 		else:
 			self.enableSteering = False
@@ -138,6 +172,8 @@ class StateMachine():
 			self.enableMotor = False
 			self.throttle = 0
 			self.direction = 0
+			self.light = False
+			self.indicate = "None"
 
 
 		# publish curent state
@@ -150,19 +186,26 @@ class StateMachine():
 		self.state.enableSteering = self.enableSteering
 		self.state.enableMotor = self.enableMotor
 		self.state.direction = self.direction
+		self.state.light = self.light
+		self.state.indicate = self.indicate
 
 		self.pub.publish(self.state)
 
 	def __init__(self):
 		# get params
 		# Pins
-		self.batteryPin = rospy.get_param("/arduino/pin/battery")
-		self.gasPedalPin = rospy.get_param("/arduino/pin/gasPedal")
-		self.forwardInPin = rospy.get_param("/arduino/pin/forwardIn")
-		self.backwardInPin = rospy.get_param("/arduino/pin/backwardIn")
-		self.gasPedalSwitchPin = rospy.get_param("/arduino/pin/gasPedalSwitch")
-		self.stopPin = rospy.get_param("/arduino/pin/stop")
-		self.keySwitchPin = rospy.get_param("/arduino/pin/keySwitch")
+		self.batteryPin = int(rospy.get_param("/arduino/pin/battery")[3:])
+		self.gasPedalPin = int(rospy.get_param("/arduino/pin/gasPedal")[3:])
+		self.forwardInPin = int(rospy.get_param("/arduino/pin/forwardIn")[1:])
+		self.backwardInPin = int(rospy.get_param("/arduino/pin/backwardIn")[1:])
+		self.gasPedalSwitchPin = int(rospy.get_param("/arduino/pin/gasPedalSwitch")[1:])
+		self.stopPin = int(rospy.get_param("/arduino/pin/stop")[1:])
+		self.keySwitchPin = int(rospy.get_param("/arduino/pin/keySwitch")[1:])
+
+		# Lights
+		self.indicatorInLPin = int(rospy.get_param("/arduino/pin/indicatorInL")[1:])
+		self.indicatorInRPin = int(rospy.get_param("/arduino/pin/indicatorInR")[1:])
+		self.lightInPin = int(rospy.get_param("/arduino/pin/lightIn")[1:])
 
 		# Battery
 		self.batteryK = float(rospy.get_param("/battery/k"))
@@ -171,12 +214,14 @@ class StateMachine():
 
 		#init
 		self.mode = "manual"
+		self.indicate = "None"
 		self.pervMode = self.mode
 		self._remote = False
 		self._key = False
+		self._prevLightIn = True
+		self.light = False
 
 		self.state = state()
-
 
 		#subscribe
 		self.sub1 = rospy.Subscriber('arduino/in', arduinoIn, self.arduCallback)

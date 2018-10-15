@@ -11,15 +11,30 @@
 #include <ros.h>
 #include <sdc_msgs/arduinoIn.h>
 #include <sdc_msgs/state.h>
+#include <std_msgs/String.h>
 
 ros::NodeHandle nh;
+//Wait for connection
+//while(!nh.connected()) {nh.spinOnce();}
+
 
 //Publisher
 sdc_msgs::arduinoIn arduinoIn_msg;
 sdc_msgs::state starte_msg;
+String indicate = "";
+
 ros::Publisher p("/arduino/in", &arduinoIn_msg);
 
 unsigned long previousMillis = 0;
+unsigned long indicateMillis = 0;
+
+int pullUpPins[] = {2, 3, 4, 7, 8, 14, 15, 18};
+int outputPins[] = {10, 11, 13, 16, 17, 19};
+
+const int is_mega = LOW;
+
+int indicatorState = LOW;
+
 
 //Subscriber
 void messageCb( const sdc_msgs::state& data){
@@ -56,7 +71,19 @@ void messageCb( const sdc_msgs::state& data){
     digitalWrite(12, HIGH);
     digitalWrite(13, HIGH);
   }
-  
+
+  indicate = data.indicate;
+
+  if (is_mega){
+    //light
+    if (data.light){
+      digitalWrite(19, HIGH);
+    }
+    else{
+      digitalWrite(19, LOW);
+    }
+
+  }
   //TODO: Steering
 }
 
@@ -64,25 +91,21 @@ ros::Subscriber<sdc_msgs::state> sub("state", &messageCb );
 
 void setup()
 { 
-  //Wait for connection
-  while(!nh.connected()) {nh.spinOnce();}
-    
+  //Pullup IN
+  for (int i = 0; i < sizeof(pullUpPins); i++){
+    if(pullUpPins[i] <= 13 || is_mega == 'mega'){
+      pinMode(pullUpPins[i], INPUT_PULLUP);
+    }
+  }
+
+  //Output
+  for (int i = 0; i < sizeof(outputPins); i++){
+    if(outputPins[i] <= 13 || is_mega == 'mega'){
+      pinMode(outputPins[i], OUTPUT);
+    }
+  }
   
-  //PWM
-  pinMode(10, OUTPUT);
-  pinMode(11, OUTPUT);
-  
-  //Pullup
-  pinMode(2, INPUT_PULLUP);
-  pinMode(3, INPUT_PULLUP);
-  pinMode(4, INPUT_PULLUP);
-  pinMode(7, INPUT_PULLUP);
-  pinMode(8, INPUT_PULLUP);
-  
-  //Digital OUT
-  pinMode(12, OUTPUT);
-  pinMode(13, OUTPUT);
-  
+
   nh.getHardware()->setBaud(57600);
   nh.initNode();
 
@@ -102,27 +125,53 @@ long adc_timer;
 
 void loop()
 {
+  unsigned long currentMillis = millis();
   
-  arduinoIn_msg.adc0 = analogRead(0);
-  arduinoIn_msg.adc1 = analogRead(1);
-  arduinoIn_msg.adc2 = analogRead(2);
-  arduinoIn_msg.adc3 = analogRead(3);
-  arduinoIn_msg.adc4 = analogRead(4);
-  arduinoIn_msg.adc5 = analogRead(5);
- 
-  
-  
+  //Analog IN
+  for(int i = 0; i < 5; i++){
+    arduinoIn_msg.analog[i] = analogRead(i);
+  }
+
   //Digital IN
-  arduinoIn_msg.D2 = digitalRead(2);
-  arduinoIn_msg.D3 = digitalRead(3);
-  arduinoIn_msg.D4 = digitalRead(4);
-  arduinoIn_msg.D7 = digitalRead(7);
-  arduinoIn_msg.D8 = digitalRead(8);
- 
+  for (int i = 0; i < sizeof(pullUpPins); i++){
+    if((pullUpPins[i] <= 13 || is_mega)){
+      arduinoIn_msg.digital[pullUpPins[i]] = digitalRead(pullUpPins[i]);
+    }
+  }
+  
+  
+  if (is_mega){
+    if (indicate == "Left"){
+      digitalWrite(16, indicatorState);
+    }
+    else if (indicate == "Right"){
+      digitalWrite(17, indicatorState);
+  
+    }
+    else if (indicate == "Both"){
+      digitalWrite(16, indicatorState);
+      digitalWrite(17, indicatorState);
+    }
+    else{
+      digitalWrite(16, LOW);
+      digitalWrite(17, LOW);
+    }
+    arduinoIn_msg.digital[50] = indicatorState;
+  }
+  
   //timer so serial doesn't get overloaded
-  if( millis() - previousMillis > 10){
+  if(currentMillis - previousMillis > 20){
     previousMillis = millis();
     p.publish(&arduinoIn_msg);
+  }
+ 
+  //indicator
+  if(currentMillis - indicateMillis > 500){
+    indicateMillis = millis();
+    if (indicatorState == LOW)
+      indicatorState = HIGH;
+    else
+      indicatorState = LOW;
   }
   
   nh.spinOnce();
