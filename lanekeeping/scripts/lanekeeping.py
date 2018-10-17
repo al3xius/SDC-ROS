@@ -8,11 +8,12 @@ import StillLaneDetection as laneDetection
 import numpy as np
 from sensor_msgs.msg import Image
 from std_msgs.msg import String
+from sdc_msgs.srv import laneMask
 
 # Variables
 circeRadius = 5
 bridge = CvBridge()
-pub = rospy.Publisher('/lane/combinedImage', Image, queue_size=1)
+#pub = rospy.Publisher('/lane/combinedImage', Image, queue_size=1)
 pub2 = rospy.Publisher('/lane/result', String, queue_size=1)
 
 
@@ -72,11 +73,12 @@ def callback(data):
 		result = "no Lines"
 
 	combinedImage = cv2.addWeighted(image, 0.5, mask, 0.5, 0)
-	pub.publish(bridge.cv2_to_imgmsg(combinedImage, encoding="rgb8"))
+	#pub.publish(bridge.cv2_to_imgmsg(combinedImage, encoding="rgb8"))
 	pub2.publish(result)
 
-	
 
+def returnMask():	
+	return bridge.cv2_to_imgmsg(combinedImage, encoding="rgb8")
 
 
 
@@ -84,6 +86,7 @@ def simpleLaneKeeping():
 	# Subscriber
 	rospy.init_node('lane', anonymous=False)
 	sub = rospy.Subscriber('/usb_cam/image_raw', Image, callback)
+	service = rospy.Service("/lane/", laneMask, returnMask)
 
 	rospy.spin()
 

@@ -2,12 +2,21 @@ sudo apt-get install ros-kinetic-joy
 sudo apt-get install ros-kinetic-usb-cam
 sudo apt-get install python-pip
 sudo apt-get install ros-kinetic-rosserial-arduino ros-kinetic-rosserial
+sudo apt-get install ros-kinetic-cv-bridge ros-kinetic-cv-camera
+sudo apt-get install ros-kinetic-usb_cam ros-kinetic-openni2-launch
+
 sudo pip install opencv-contrib-python
 sudo pip install scipy
 sudo pip install ipdb
+sudo pip install tensorflow
 
 sudo add-apt-repository ppa:kivy-team/kivy
 sudo apt-get update
 sudo apt-get install python-kivy
 sudo apt-get install python3-kivy
 
+sudo apt-get install python-pip python-dev python-virtualenv
+virtualenv --system-site-packages ~/tensorflow
+source ~/tensorflow/bin/activate
+easy_install -U pip
+pip install --upgrade tensorflow

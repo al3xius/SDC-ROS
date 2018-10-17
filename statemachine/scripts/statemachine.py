@@ -37,6 +37,8 @@ class StateMachine():
 
 
 	def toggleLight(self, input):
+    	"""toggles light by pressing button in car or in joy"""
+
 		if input and self._prevLightIn:
 			self.light = not self.light
 			self._prevLightIn = False
@@ -44,6 +46,8 @@ class StateMachine():
 			self._prevLightIn = True
 
 	def arduCallback(self, arduinoIn):
+    	"""processes Arduino callback"""
+
 		# Battery Voltage -> Percent
 		voltage = interp(arduinoIn.analog[self.batteryPin], [0, 1015], [0, 5]) * self.batteryFactor
 		self.percent = limitValue((voltage - self.batteryD)/self.batteryK, 0, 100)
@@ -67,7 +71,6 @@ class StateMachine():
 		self.toggleLight(not arduinoIn.digital[self.lightInPin])
 
 		# set indicator
-		#TODO Arduino Code
 		if not arduinoIn.digital[self.indicatorInLPin]:
 			self.manIndicate= "Left"
 		elif not arduinoIn.digital[self.indicatorInRPin]:
@@ -99,10 +102,18 @@ class StateMachine():
 		self.publishState()
 
 	def joyCallback(self, Joy):
+    	"""processes Joystick callback
+			button assigment:
+			leftStick: steering | throttle
+			r1: enable remote control
+			start: toggle light
+
+		"""
 
 		# set mode to remote
 		if Joy.buttons[5] and not self._remote:
 			self.pervMode = self.mode # reset to previous mode
+
 
 		if Joy.buttons[5]:
 			self._remote = True
@@ -115,7 +126,6 @@ class StateMachine():
 			
 			self.mode = self.pervMode
 		
-		# TODO select button, check if no interferance of between aruino and joy
 		self.toggleLight(Joy.buttons[8])
 
 		self.joyThrottle = interp(Joy.axes[1], [-1, 1], [-100, 100])
@@ -123,8 +133,9 @@ class StateMachine():
 		self.publishState()
 
 
-	def publishState(self):
 
+	def publishState(self):
+		
 		if self.mode == "manual":
 			self.enableSteering = False
 			self.steeringAngle = 0
@@ -133,15 +144,16 @@ class StateMachine():
 			self.direction = self.manDirection
 			self.indicate = self.manIndicate
 
-		elif self.mode == "cruse" and not arduinoIn.digital[self.stopPin]:
-			# TODO Get data from cruse control node
+		elif self.mode == "cruise" and not arduinoIn.digital[self.stopPin]:
+			# TODO Get data from cruise control node
 			self.throttle = 0
 			self.enableMotor = False
 			self.steeringAngle = 0
 			self.enableSteering = False
 
 		elif self.mode == "remote":
-			self.throttle = abs(self.joyThrottle)
+			self.throttle = abs(self.joyThrottle) # make values positive
+			# set direction
 			if self.joyThrottle < 0:
 				self.direction = -1
 			elif self.joyThrottle > 0:
@@ -223,11 +235,11 @@ class StateMachine():
 
 		self.state = state()
 
-		#subscribe
-		self.sub1 = rospy.Subscriber('arduino/in', arduinoIn, self.arduCallback)
-		self.sub2 = rospy.Subscriber('joy', Joy, self.joyCallback)
+		#subscriber
+		self.sub1 = rospy.Subscriber('/arduino/in', arduinoIn, self.arduCallback)
+		self.sub2 = rospy.Subscriber('/joy', Joy, self.joyCallback)
 
-		#publish
+		#publisher
 		self.pub = rospy.Publisher("/state", state, queue_size=1)
 
 		rospy.spin()
@@ -235,6 +247,7 @@ class StateMachine():
 
 
 if __name__ == '__main__':
+    # create statemachine node
 	rospy.init_node('stateMachine', anonymous=False)
 	try:
 		machine = StateMachine()
