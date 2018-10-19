@@ -13,13 +13,16 @@ from sdc_msgs.srv import laneMask
 # Variables
 circeRadius = 5
 bridge = CvBridge()
-#pub = rospy.Publisher('/lane/combinedImage', Image, queue_size=1)
+pub = rospy.Publisher('/lane/combinedImage', Image, queue_size=1)
 pub2 = rospy.Publisher('/lane/result', String, queue_size=1)
 
 
 # get image
 def callback(data):
+	# converte to correct format
 	image = bridge.imgmsg_to_cv2(data, desired_encoding="bgr8")
+
+	"""
 	height, width, channels = image.shape
 	mask = np.zeros_like(image)
 
@@ -72,8 +75,10 @@ def callback(data):
 	except:
 		result = "no Lines"
 
-	combinedImage = cv2.addWeighted(image, 0.5, mask, 0.5, 0)
-	#pub.publish(bridge.cv2_to_imgmsg(combinedImage, encoding="rgb8"))
+	"""
+	#combinedImage = cv2.addWeighted(image, 0.5, mask, 0.5, 0)
+	combindeImage = process_frame(image)
+	pub.publish(bridge.cv2_to_imgmsg(combinedImage, encoding="rgb8"))
 	pub2.publish(result)
 
 
@@ -84,11 +89,16 @@ def returnMask():
 
 def simpleLaneKeeping():
 	# Subscriber
-	rospy.init_node('lane', anonymous=False)
 	sub = rospy.Subscriber('/usb_cam/image_raw', Image, callback)
 	service = rospy.Service("/lane/", laneMask, returnMask)
 
 	rospy.spin()
 
+
 if __name__ == '__main__':
-	simpleLaneKeeping() 
+    # create statemachine node
+	rospy.init_node('laneKeeping', anonymous=False)
+	try:
+		simpleLaneKeeping() 
+	except rospy.ROSInterruptException:  
+		pass

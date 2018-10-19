@@ -30,8 +30,8 @@ lane:
   heightmultiplier: 9
   cropmultiplier: 2
   bottommultiplier: 9
-  lowend: 50
-  highend: 150
+  low_threshold: 50
+  high_threshold: 150
 
 usb_cam:
   video_device: /dev/video0
