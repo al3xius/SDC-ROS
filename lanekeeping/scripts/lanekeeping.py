@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Imports
-#import cv2
+import cv2
 import rospy
 from cv_bridge import CvBridge
 import StillLaneDetection as laneDetection
