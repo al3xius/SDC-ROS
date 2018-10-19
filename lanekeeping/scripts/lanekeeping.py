@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Imports
-import cv2
+#import cv2
 import rospy
 from cv_bridge import CvBridge
 import StillLaneDetection as laneDetection
@@ -22,7 +22,7 @@ def callback(data):
 	# converte to correct format
 	image = bridge.imgmsg_to_cv2(data, desired_encoding="bgr8")
 
-	"""
+	
 	height, width, channels = image.shape
 	mask = np.zeros_like(image)
 
@@ -75,9 +75,9 @@ def callback(data):
 	except:
 		result = "no Lines"
 
-	"""
-	#combinedImage = cv2.addWeighted(image, 0.5, mask, 0.5, 0)
-	combindeImage = process_frame(image)
+	
+	combinedImage = cv2.addWeighted(image, 0.5, mask, 0.5, 0)
+	#combinedImage = laneDetection.process_frame(image)
 	pub.publish(bridge.cv2_to_imgmsg(combinedImage, encoding="rgb8"))
 	pub2.publish(result)
 
