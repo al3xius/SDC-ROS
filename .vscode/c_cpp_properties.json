@@ -1,0 +1,20 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/alex/catkin_ws/devel/include",
+        "/opt/ros/kinetic/include",
+        "/home/alex/catkin_ws/src/arduino/rosserial/rosserial_server/include",
+        "/home/alex/catkin_ws/src/arduino/rosserial/rosserial_test/include",
+        "/home/alex/catkin_ws/src/sdc_msgs/include",
+        "/home/alex/catkin_ws/src/vision_msgs/include",
+        "/usr/include"
+      ],
+      "name": "Linux"
+    }
+  ]
+}

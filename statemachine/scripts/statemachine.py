@@ -34,10 +34,9 @@ def limitValue(value, min, max):
 
 
 class StateMachine():
-
-
+    
 	def toggleLight(self, input):
-    	"""toggles light by pressing button in car or in joy"""
+		"""toggles light by pressing button in car or in joy"""
 
 		if input and self._prevLightIn:
 			self.light = not self.light
@@ -46,7 +45,7 @@ class StateMachine():
 			self._prevLightIn = True
 
 	def arduCallback(self, arduinoIn):
-    	"""processes Arduino callback"""
+		"""processes Arduino callback"""
 
 		# Battery Voltage -> Percent
 		voltage = interp(arduinoIn.analog[self.batteryPin], [0, 1015], [0, 5]) * self.batteryFactor
@@ -102,7 +101,7 @@ class StateMachine():
 		self.publishState()
 
 	def joyCallback(self, Joy):
-    	"""processes Joystick callback
+		"""processes Joystick callback
 			button assigment:
 			leftStick: steering | throttle
 			r1: enable remote control
@@ -243,7 +242,6 @@ class StateMachine():
 		self.pub = rospy.Publisher("/state", state, queue_size=1)
 
 		rospy.spin()
-
 
 
 if __name__ == '__main__':

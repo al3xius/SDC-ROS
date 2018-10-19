@@ -4,6 +4,7 @@ string mode
 int32 batteryCharge
 int32 gasPedal
 int32 velocity
+int32 targetVelocity
 int32 throttle
 bool enableMotor
 int8 direction
