@@ -7,19 +7,19 @@ from cv_bridge import CvBridge
 import StillLaneDetection as laneDetection
 import numpy as np
 from sensor_msgs.msg import Image
-from std_msgs.msg import String
+from std_msgs.msg import Int32
 from sdc_msgs.srv import laneMask
 
 # Variables
 circeRadius = 5
 bridge = CvBridge()
 pub = rospy.Publisher('/lane/combinedImage', Image, queue_size=1)
-pub2 = rospy.Publisher('/lane/result', String, queue_size=1)
+pub2 = rospy.Publisher('/lane/result', Int32, queue_size=1)
 
 
 # get image
 def callback(data):
-	# converte to correct format
+	# convert to correct format
 	image = bridge.imgmsg_to_cv2(data, desired_encoding="bgr8")
 
 	
@@ -45,7 +45,8 @@ def callback(data):
 	except:
 		result = "no Lines"
 
-	cv2.circle(mask, (int(width/2), int(height/2)), circeRadius, [0, 255, 0], 5)
+	# draw center circle
+	cv2.circle(mask, (int(width/2), int(height-200)), circeRadius, [0, 255, 0], 5)
 
 	try:
 		# Get Smallest and Biggest Values of List
@@ -65,19 +66,21 @@ def callback(data):
 		l_dist = center - maxLeft
 		r_dist = minRight - center
 
+		laneCenter = maxLeft - (maxLeft - minRight)/2 
+
+		offset = center - laneCenter
+
+		# draw lane centre
+		cv2.circle(mask, (laneCenter, yDist), circeRadius, [255, 255, 0], 2)
 	
-		if l_dist > r_dist:
-			result = "Left"
-		elif r_dist > l_dist:
-			result = "Right"
-		else:
-			result = "Straight"
+
+		result = offset
 	except:
-		result = "no Lines"
+		result = 0
 
 	
 	combinedImage = cv2.addWeighted(image, 0.5, mask, 0.5, 0)
-	#combinedImage = laneDetection.process_frame(image)
+	
 	pub.publish(bridge.cv2_to_imgmsg(combinedImage, encoding="rgb8"))
 	pub2.publish(result)
 

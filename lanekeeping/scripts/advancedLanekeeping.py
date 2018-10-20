@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 
-
-
 import numpy as np
 import cv2
+from cv_bridge import CvBridge
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import glob
@@ -16,7 +15,10 @@ from sensor_msgs.msg import Image
 class LaneDedector():
 
     def __init__(self):
+        self.bridge = CvBridge()
+
         # calibrate camera
+        print("calibpoints")
         self.imgpoints, self.objpoints = self.collect_callibration_points() # calculate callibration points
 
         # subscriber
@@ -81,7 +83,7 @@ class LaneDedector():
         return mag_binary
 
     def dir_threshold(self, image, sobel_kernel=3, thresh=(0, np.pi/2)):
-        gray = cv2.cvtColor(img, cv2.COLOR_RGB2GRAY)
+        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
         sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=sobel_kernel)
         sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=sobel_kernel)
         abs_sobelx = np.absolute(sobelx)
@@ -315,12 +317,15 @@ class LaneDedector():
         return result
 
     def imgCallback(self, image):
-        # undistort image
-        self.undistorted, self.mtx, self.dist_coefficients = self.cal_undistort(image)
+        image = self.bridge.imgmsg_to_cv2(image, desired_encoding="bgr8")
 
+        # undistort image
+        #self.undistorted, self.mtx, self.dist_coefficients = self.cal_undistort(image)
+        self.undistorted = image
+        
         # gradient thresholds
         self.combined = self.apply_thresholds(self.undistorted)
-
+        
         # color thresholds
         self.s_binary = self.apply_color_threshold(self.undistorted)
 
@@ -331,6 +336,7 @@ class LaneDedector():
         self.binary_warped, self.Minv = self.warp(self.combined_binary)
         self.histogram = self.get_histogram(self.binary_warped)
 
+        
         #slide window
         self.ploty, self.left_fit, self.right_fit = self.slide_window(self.binary_warped, self.histogram)
 
@@ -345,8 +351,11 @@ class LaneDedector():
 
         # draw image
         self.result = self.draw_lane_lines(self.undistorted, self.binary_warped, self.Minv, self.draw_info)
-
+        
+        # measure curvature
+        #self.pub.publish(self.bridge.cv2_to_imgmsg(self.combined, encoding="rgb8"))
         self.pub.publish(self.result)
+        
 
 
 
