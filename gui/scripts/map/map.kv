@@ -1,0 +1,18 @@
+<MenuButton@Button>:
+    text_size: self.size
+    font_size: '20sp'
+    size_hint: .3, .15
+    halign: 'center'
+    valign: 'middle'
+    markup: True
+
+<ScreenCCD>:
+    BoxLayout:
+        cols: 3
+        orientation: 'horizontal'
+        padding: 0
+        spacing: 0
+
+        MenuButton:
+            text: 'MAIN SCREEN'
+            on_press: root.manager.current = 'MNS'

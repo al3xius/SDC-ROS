@@ -6,10 +6,12 @@ from kivy.uix.boxlayout import BoxLayout
 
 # Car Image - Screen
 def drawCar():
+
     layout = BoxLayout()
     carImage = Image(source='assets/car.png')
     layout.add_widget(carImage)
     return layout
+
 
 class MyApp(App):
 

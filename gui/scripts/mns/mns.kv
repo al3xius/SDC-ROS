@@ -9,11 +9,31 @@
     markup: True
 
 <ScreenMNS>:
+    BoxLayout:
+        cols: 1
+
+        Label:
+            halign: 'center'
+            valign: 'top'
+            text: 'User Terminal'
+            text_size: self.size
+            font_size: '40sp'
+
+    AnchorLayout:
+        anchor_x: 'center'
+
+        Button:
+            size_hint: .2, .2
+            halign: 'center'
+            valign: 'middle'
+            text: 'Cruise Control'
+            text_size: self.size
+            font_size: '20sp'
 
     BoxLayout:
-        cols: 3
+        cols: 4
         orientation: 'horizontal'
-        padding: 0
+        padding: 15
         spacing: 15
 
         MenuButton:
@@ -25,3 +45,6 @@
         MenuButton:
             text: 'CAMERA VIEW'
             on_release: root.manager.current = 'CAV'
+        MenuButton:
+            text: 'MAP'
+            on_release: root.manager.current = 'MAP'
