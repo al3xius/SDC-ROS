@@ -6,13 +6,12 @@
     valign: 'middle'
     markup: True
 
-<ScreenCCD>:
+<ScreenMAP>:
     BoxLayout:
-        cols: 3
+        cols: 1
+
+    BoxLayout:
+        cols: 1
         orientation: 'horizontal'
         padding: 0
         spacing: 0
-
-        MenuButton:
-            text: 'MAIN SCREEN'
-            on_press: root.manager.current = 'MNS'

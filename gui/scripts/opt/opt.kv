@@ -15,4 +15,6 @@
 
         MenuButton:
             text: 'MAIN SCREEN'
-            on_press: root.manager.current = 'MNS'
+            on_press:
+                root.manager.transition.direction = 'right'
+                root.manager.current = 'MNS'
