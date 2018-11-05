@@ -91,7 +91,7 @@ sm.add_widget(ScreenMAP(name='MAP'))
 class MyApp(App):
 
     def build(self):
-        self.title = 'CONTROL PANEL | v 0.1'
+        self.title = 'CONTROL PANEL | v 0.2'
         #self.icon = 'assets/car.png'
         return sm
 
