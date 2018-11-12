@@ -1,4 +1,4 @@
-import os
+import os, os.path
 import glob
 from kivy.app import App
 from kivy.lang import Builder
@@ -18,16 +18,17 @@ from kivy.garden.mapview import MapView
 import shutil
 #TODO: sortieren / kommentieren / auslagern
 
+KV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ui'))
 
-#Menu Buttons
+#Menu Buttons !!!Bitte immer relativen Pfad angben!!!
 Builder.load_file("mns.kv")
-Builder.load_file("/home/davidzechm/catkin_ws/src/gui/scripts/opt/opt.kv")
-Builder.load_file("/home/davidzechm/catkin_ws/src/gui/scripts/ccd/ccd.kv")
+Builder.load_file("../opt/opt.kv")
+Builder.load_file("../ccd/ccd.kv")
 
 # Set Window size and other Variables
 #TODO: 16:9 & touch mit display und rpi testen
-win_x = 950
-win_y = 700
+win_x = 1024
+win_y = 600
 Window.size = (win_x, win_y)
 zoomLevel = 18
 cur_lat = 47.224282
@@ -35,7 +36,7 @@ cur_lon = 15.6233008
 
 # Screen Manager
 sm = ScreenManager()
-
+Window.fullscreen = True
 
 class ScreenMAP(Screen):
     def on_enter(self):
