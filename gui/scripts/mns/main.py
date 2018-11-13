@@ -22,7 +22,7 @@ from sensor_msgs.msg import NavSatFix
 
 #TODO: sortieren / kommentieren / auslagern
 
-KV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ui'))
+#KV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ui'))
 
 #Menu Buttons !!!Bitte immer relativen Pfad angben!!!
 Builder.load_file("mns.kv")
