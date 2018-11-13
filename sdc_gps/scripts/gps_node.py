@@ -55,13 +55,13 @@ gps.send_command(b'PMTK220,1000')
 #gps.send_command(b'PMTK220,500')
 
 # Main loop runs forever printing the location, etc. every second.
-last_print = time.monotonic()
 
 def gps_talker():
     pub = rospy.Publisher('gps', NavSatFix, queue_size=10)
     rospy.init_node('gps', anonymous=True)
     msg = NavSatFix()
     seq = 0
+    last_print = time.monotonic()
 
     
     while not rospy.is_shutdown():
