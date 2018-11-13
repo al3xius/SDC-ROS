@@ -13,6 +13,7 @@ sudo pip install ipdb
 sudo pip install tensorflow
 sudo pip install simple-pid
 pip3 install --user rospkg catkin_pkg simple-pid
+sudo pip3 install adafruit-circuitpython-gps
 
 sudo add-apt-repository ppa:kivy-team/kivy
 sudo apt-get update
