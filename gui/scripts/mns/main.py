@@ -8,6 +8,7 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.slider import Slider
 from kivy.uix.camera import Camera
+from kivy.core.image import Image
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import ObjectProperty
@@ -31,10 +32,11 @@ Builder.load_file("../ccd/ccd.kv")
 
 # Set Window size and other Variables
 #TODO: 16:9 & touch mit display und rpi testen
-win_x = 1024
-win_y = 600
+win_x = 640
+win_y = 480
 Window.size = (win_x, win_y)
 zoomLevel = 18
+#Weiz
 cur_lat = 47.224282
 cur_lon = 15.6233008
 cam = None
@@ -44,12 +46,15 @@ sm = ScreenManager()
 Window.fullscreen = True
 
 def gpsCallback(msg):
-    if msg.status:
+    if msg.status > 0:
         cur_lat = msg.latitude
         cur_lon = msg.longitude
 
 def laneCallback(msg):
-    cam = msg
+    lane_img = msg
+
+def camCallback(msg):
+    cam_img = msg
 
 class ScreenMAP(Screen):
     def on_enter(self):
@@ -104,6 +109,7 @@ class ScreenCAV(Screen):
             play=False, index=0, resolution=(win_x, win_y), allow_stretch=True, keep_ratio=False)
             #TODO: Overlays
         cam.play = True"""
+        cam = Image(source="26a7511794_18_142445_170178.png").texture
 
         # Back to Menu Button
         def changeScreen(self):
@@ -159,4 +165,5 @@ if __name__ == '__main__':
     #subscriber
     gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
     lane_sub = rospy.Subscriber('/lane/combinedImage', Image, laneCallbac)
+    cam_sub = rospy.Subscriber('/usb_cam/image_raw', Image, camCallbac)
     MyApp().run()
