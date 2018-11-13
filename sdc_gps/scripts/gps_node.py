@@ -3,25 +3,14 @@
 # Simple GPS module demonstration.
 # Will wait for a fix and print a message every second with the current location
 # and other details.
+# parts of code from https://learn.adafruit.com/adafruit-ultimate-gps/circuitpython-parsing
 import time, serial, rospy
 from sensor_msgs.msg import NavSatFix
 
-#import board
-#import busio
 
 import adafruit_gps
 
 
-# Define RX and TX pins for the board's serial port connected to the GPS.
-# These are the defaults you should use for the GPS FeatherWing.
-# For other boards set RX = GPS module TX, and TX = GPS module RX pins.
-#RX = 10
-#TX = 8
-
-# Create a serial connection for the GPS connection using default speed and
-# a slightly higher timeout (GPS modules typically update once a second).
-#uart = busio.UART(TX, RX, baudrate=9600, timeout=3000)
-#serialData = serial.Serial("/dev/ttyACM0", 9600)
 
 
 # for a computer, use the pyserial library for uart access
@@ -79,6 +68,8 @@ def gps_talker():
             if not gps.has_fix:
                 # Try again if we don't have a fix yet.
                 msg.status.status = int(0)
+                #publish
+                pub.publish(msg)
                 continue
             else:
                 msg.status.status = int(1)
@@ -97,6 +88,8 @@ def gps_talker():
                 print('# satellites: {}'.format(gps.satellites))"""
             if gps.altitude_m is not None:
                 msg.altitude = float(gps.altitude_m)
+
+            #TODO: velocity
             """if gps.track_angle_deg is not None:
                 print('Speed: {} knots'.format(gps.speed_knots))
             if gps.track_angle_deg is not None:

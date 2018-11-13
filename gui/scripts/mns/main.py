@@ -19,20 +19,14 @@ import shutil
 
 #ROS imports
 from sensor_msgs.msg import NavSatFix
-
 #TODO: sortieren / kommentieren / auslagern
-
 #KV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ui'))
-
 #Menu Buttons !!!Bitte immer relativen Pfad angben!!!
 Builder.load_file("mns.kv")
 Builder.load_file("../opt/opt.kv")
 Builder.load_file("../ccd/ccd.kv")
-
 #subscriber
 gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
-
-
 # Set Window size and other Variables
 #TODO: 16:9 & touch mit display und rpi testen
 win_x = 1024
