@@ -164,6 +164,6 @@ class MyApp(App):
 if __name__ == '__main__':
     #subscriber
     gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
-    lane_sub = rospy.Subscriber('/lane/combinedImage', Image, laneCallbac)
-    cam_sub = rospy.Subscriber('/usb_cam/image_raw', Image, camCallbac)
+    lane_sub = rospy.Subscriber('/lane/combinedImage', Image, laneCallback)
+    cam_sub = rospy.Subscriber('/usb_cam/image_raw', Image, camCallback)
     MyApp().run()
