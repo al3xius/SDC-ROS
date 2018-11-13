@@ -1,4 +1,4 @@
-import os, os.path
+import os, os.path, rospy
 import glob
 from kivy.app import App
 from kivy.lang import Builder
@@ -16,6 +16,10 @@ from kivy.core.window import Window
 from kivy.uix.screenmanager import SlideTransition
 from kivy.garden.mapview import MapView
 import shutil
+
+#ROS imports
+from sensor_msgs.msg import NavSatFix
+
 #TODO: sortieren / kommentieren / auslagern
 
 KV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ui'))
@@ -24,6 +28,10 @@ KV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ui'))
 Builder.load_file("mns.kv")
 Builder.load_file("../opt/opt.kv")
 Builder.load_file("../ccd/ccd.kv")
+
+#subscriber
+gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
+
 
 # Set Window size and other Variables
 #TODO: 16:9 & touch mit display und rpi testen
@@ -37,6 +45,10 @@ cur_lon = 15.6233008
 # Screen Manager
 sm = ScreenManager()
 Window.fullscreen = True
+
+def gpsCallback(msg):
+    cur_lat = msg.latitude
+    cur_lon = msg.longitude
 
 class ScreenMAP(Screen):
     def on_enter(self):
