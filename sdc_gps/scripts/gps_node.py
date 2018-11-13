@@ -73,7 +73,7 @@ def gps_talker():
             last_print = current
 
             msg.header.seq = seq
-            msg.header.stamp = gps.timestamp_utc
+            msg.header.stamp = rospy.Time.now()
             msg.header.frame_id = 'world'
 
             if not gps.has_fix:
