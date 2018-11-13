@@ -1,5 +1,5 @@
 <launch>
-    <rosparam file="~/catkin_ws/src/params/params.yaml" command="load" ns="/" />
+    <rosparam file="/home/ubuntu/catkin_ws/src/params/params.yaml" command="load" ns="/" />
     <node pkg="rosserial_arduino" name="arduino" type="serial_node.py"/>
     <node pkg="joy" name="joy" type="joy_node"/>
     <node pkg="statemachine" name="stateMachine" type="statemachine.py"/>

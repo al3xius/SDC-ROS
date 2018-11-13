@@ -86,8 +86,10 @@ def gps_talker():
             # and might not be present.  Check if they're None before trying to use!
             """if gps.satellites is not None:
                 print('# satellites: {}'.format(gps.satellites))"""
-            if gps.altitude_m is not None:
-                msg.altitude = float(gps.altitude_m)
+
+            #!!!!!!using altitude as velocity!!!!!
+            if gps.gps.speed_knots is not None:
+                msg.altitude = float(gps.speed_knots)*1.852
 
             #TODO: velocity
             """if gps.track_angle_deg is not None:
