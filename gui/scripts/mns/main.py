@@ -20,6 +20,8 @@ import shutil
 
 #ROS imports
 from sensor_msgs.msg import NavSatFix
+from sensor_msgs.msg import Image
+
 #TODO: sortieren / kommentieren / auslagern
 #KV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ui'))
 #Menu Buttons !!!Bitte immer relativen Pfad angben!!!
@@ -35,14 +37,19 @@ Window.size = (win_x, win_y)
 zoomLevel = 18
 cur_lat = 47.224282
 cur_lon = 15.6233008
+cam = None
 
 # Screen Manager
 sm = ScreenManager()
 Window.fullscreen = True
 
 def gpsCallback(msg):
-    cur_lat = msg.latitude
-    cur_lon = msg.longitude
+    if msg.status:
+        cur_lat = msg.latitude
+        cur_lon = msg.longitude
+
+def laneCallback(msg):
+    cam = msg
 
 class ScreenMAP(Screen):
     def on_enter(self):
@@ -91,11 +98,12 @@ class ScreenCCD(Screen):
 
 class ScreenCAV(Screen):
     def on_enter(self):
+        """"
         #Get Camera image
         cam = Camera(
             play=False, index=0, resolution=(win_x, win_y), allow_stretch=True, keep_ratio=False)
             #TODO: Overlays
-        cam.play = True
+        cam.play = True"""
 
         # Back to Menu Button
         def changeScreen(self):
@@ -150,4 +158,5 @@ class MyApp(App):
 if __name__ == '__main__':
     #subscriber
     gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
+    lane_sub = rospy.Subscriber('/lane/combinedImage', Image, laneCallbac)
     MyApp().run()
