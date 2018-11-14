@@ -12,12 +12,14 @@ sudo pip install scipy
 sudo pip install ipdb
 sudo pip install tensorflow
 sudo pip install simple-pid
+sudo pip install futures requests
 pip3 install --user rospkg catkin_pkg simple-pid
 
 sudo add-apt-repository ppa:kivy-team/kivy
 sudo apt-get update
 sudo apt-get install python-kivy
 sudo apt-get install python3-kivy
+sudo garden install mapview
 
 sudo apt-get install python-pip python-dev python-virtualenv
 virtualenv --system-site-packages ~/tensorflow

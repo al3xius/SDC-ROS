@@ -1,6 +1,9 @@
 import os
 import glob
+import datetime
+import shutil
 from kivy.app import App
+from kivy.core.window import Window
 from kivy.lang import Builder
 from kivy.uix.widget import Widget
 from kivy.uix.button import Button
@@ -15,7 +18,6 @@ from kivy.graphics.context_instructions import Color
 from kivy.core.window import Window
 from kivy.uix.screenmanager import SlideTransition
 from kivy.garden.mapview import MapView
-import shutil
 #TODO: sortieren / kommentieren / auslagern
 
 
@@ -26,12 +28,13 @@ Builder.load_file("/home/davidzechm/catkin_ws/src/gui/scripts/ccd/ccd.kv")
 
 # Set Window size and other Variables
 #TODO: 16:9 & touch mit display und rpi testen
-win_x = 950
-win_y = 700
+win_x = 1024
+win_y = 600
 Window.size = (win_x, win_y)
 zoomLevel = 18
 cur_lat = 47.224282
 cur_lon = 15.6233008
+cur_speed = 12
 
 # Screen Manager
 sm = ScreenManager()
@@ -122,7 +125,27 @@ class ScreenCAV(Screen):
 
 
 class ScreenMNS(Screen):
-    pass
+    def on_enter(self):
+        # Get Current Time and Date
+        curTime = datetime.datetime.now()
+
+        timeString = curTime.strftime("%H:%M")
+        timeLbl = Label(
+            text='[color=111111] %s [/color]' % timeString, pos=(win_x/2-70, win_y/2-40), font_size='30dp', markup=True)
+        self.add_widget(timeLbl)
+
+        dateString = curTime.strftime("%d, %b.")
+        dateLbl = Label(text='[color=111111] %s [/color]' %
+                        dateString, font_size='22dp', pos=(win_x/2-70, win_y/2-65), markup=True)
+        self.add_widget(dateLbl)
+
+        # Show Speed
+        speedLbl = Label(
+            text="[color=111111] %d [size=30]km/h[/size] [/color]" % cur_speed,
+                         pos_hint={'top': 1.1}, font_size="80dp", markup=True)
+        self.add_widget(speedLbl)
+
+        # Battery
 
 
 sm.add_widget(ScreenMNS(name='MNS'))
@@ -137,6 +160,7 @@ class MyApp(App):
 
     def build(self):
         self.title = 'CONTROL PANEL | v 0.2'
+        Window.clearcolor = (1, 1, 1, 1)
         #self.icon = 'assets/car.png'
         return sm
 
