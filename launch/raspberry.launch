@@ -1,0 +1,10 @@
+<launch>
+    <rosparam file="/home/ubuntu/catkin_ws/src/params/params.yaml" command="load" ns="/" />
+    <node pkg="rosserial_arduino" name="arduino" type="serial_node.py"/>
+    <node pkg="joy" name="joy" type="joy_node"/>
+    <node pkg="statemachine" name="stateMachine" type="statemachine.py"/>
+    <node pkg="usb_cam" name="usb_cam" type="usb_cam_node"/>
+    <node pkg="lanekeeping" name="lanekeeping" type="lanekeeping.py"/>
+    <node pkg="sdc_gps" name="gps" type="gps_node.py"/>
+    <node pkg="gui" name="gui" type="main.py"/>
+</launch>

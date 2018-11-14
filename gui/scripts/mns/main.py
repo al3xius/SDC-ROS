@@ -1,4 +1,7 @@
+#!/usr/bin/env python
 import os
+import os.path
+import rospy
 import glob
 import datetime
 import shutil
@@ -10,6 +13,7 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.slider import Slider
 from kivy.uix.camera import Camera
+from kivy.core.image import Image
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import ObjectProperty
@@ -18,26 +22,46 @@ from kivy.graphics.context_instructions import Color
 from kivy.core.window import Window
 from kivy.uix.screenmanager import SlideTransition
 from kivy.garden.mapview import MapView
+
+#ROS imports
+from sensor_msgs.msg import NavSatFix
+from sensor_msgs.msg import Image
+
 #TODO: sortieren / kommentieren / auslagern
-
-
-#Menu Buttons
+#KV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ui'))
+#Menu Buttons !!!Bitte immer relativen Pfad angben!!!
 Builder.load_file("mns.kv")
-Builder.load_file("/home/davidzechm/catkin_ws/src/gui/scripts/opt/opt.kv")
-Builder.load_file("/home/davidzechm/catkin_ws/src/gui/scripts/ccd/ccd.kv")
+Builder.load_file("../opt/opt.kv")
+Builder.load_file("../ccd/ccd.kv")
 
 # Set Window size and other Variables
 #TODO: 16:9 & touch mit display und rpi testen
-win_x = 1024
-win_y = 600
+win_x = 640
+win_y = 480
 Window.size = (win_x, win_y)
 zoomLevel = 18
+#Weiz
 cur_lat = 47.224282
 cur_lon = 15.6233008
-cur_speed = 12
+cam = None
 
 # Screen Manager
 sm = ScreenManager()
+Window.fullscreen = True
+
+
+def gpsCallback(msg):
+    if msg.status > 0:
+        cur_lat = msg.latitude
+        cur_lon = msg.longitude
+
+
+def laneCallback(msg):
+    lane_img = msg
+
+
+def camCallback(msg):
+    cam_img = msg
 
 
 class ScreenMAP(Screen):
@@ -87,11 +111,13 @@ class ScreenCCD(Screen):
 
 class ScreenCAV(Screen):
     def on_enter(self):
+        """"
         #Get Camera image
         cam = Camera(
             play=False, index=0, resolution=(win_x, win_y), allow_stretch=True, keep_ratio=False)
             #TODO: Overlays
-        cam.play = True
+        cam.play = True"""
+        cam = Image(source="26a7511794_18_142445_170178.png").texture
 
         # Back to Menu Button
         def changeScreen(self):
@@ -165,4 +191,8 @@ class MyApp(App):
         return sm
 
 if __name__ == '__main__':
+    #subscriber
+    gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
+    lane_sub = rospy.Subscriber('/lane/combinedImage', Image, laneCallback)
+    cam_sub = rospy.Subscriber('/usb_cam/image_raw', Image, camCallback)
     MyApp().run()
