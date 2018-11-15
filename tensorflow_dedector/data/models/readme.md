@@ -1,1 +1,0 @@
-Place your models in this folder
