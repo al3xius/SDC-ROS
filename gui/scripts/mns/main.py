@@ -122,8 +122,7 @@ class ScreenCAV(Screen):
             play=False, index=0, resolution=(win_x, win_y), allow_stretch=True, keep_ratio=False)
             #TODO: Overlays
         cam.play = True"""
-        cam = Image(source="26a7511794_18_142445_170178.png").texture
-
+        
         # Back to Menu Button
         def changeScreen(self):
             sm.transition = SlideTransition(direction='right')
@@ -190,14 +189,19 @@ sm.add_widget(ScreenMAP(name='MAP'))
 class MyApp(App):
 
     def build(self):
-        self.title = 'CONTROL PANEL | v 0.2'
+        self.title = 'CONTROL PANEL | ' + rospy.get_param("/gui/version")
         Window.clearcolor = (1, 1, 1, 1)
         #self.icon = 'assets/car.png'
         return sm
 
 if __name__ == '__main__':
-    #subscriber
+    #subscribe
+    rospy.init_node('gui', anonymous=False)
+    rospy.loginfo("GUI: Node started.")
     gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
     lane_sub = rospy.Subscriber('/lane/combinedImage', Image, laneCallback)
     cam_sub = rospy.Subscriber('/usb_cam/image_raw', Image, camCallback)
-    MyApp().run()
+    try:
+        MyApp().run()
+    except rospy.ROSInterruptException:  
+		pass

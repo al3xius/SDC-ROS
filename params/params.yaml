@@ -55,6 +55,7 @@ throttle:
   d: 0.5
 
 gui:
+  version: v 0.2
   winX: 640
   winY: 480
   fullscreen: False
