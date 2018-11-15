@@ -68,6 +68,9 @@ def laneCallback(msg):
 def camCallback(msg):
     cam_img = msg
 
+def objCallback(msg):
+    obj_img = msg
+
 
 class ScreenMAP(Screen):
     def on_enter(self):
@@ -201,6 +204,8 @@ if __name__ == '__main__':
     gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
     lane_sub = rospy.Subscriber('/lane/combinedImage', Image, laneCallback)
     cam_sub = rospy.Subscriber('/usb_cam/image_raw', Image, camCallback)
+    obj_sub = rospy.Subscriber('/objectDedector/overlayImage', Image, objCallback)
+
     try:
         MyApp().run()
     except rospy.ROSInterruptException:  
