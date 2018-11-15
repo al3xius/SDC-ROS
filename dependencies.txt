@@ -1,3 +1,6 @@
+sudo add-apt-repository ppa:kivy-team/kivy
+sudo apt-get update
+
 sudo apt-get install ros-kinetic-joy
 sudo apt-get install ros-kinetic-usb-cam
 sudo apt-get install python-pip
@@ -6,6 +9,8 @@ sudo apt-get install ros-kinetic-cv-bridge ros-kinetic-cv-camera
 sudo apt-get install ros-kinetic-usb_cam ros-kinetic-openni2-launch
 sudo apt-get install ros-kinetic-rplidar-ros 
 sudo apt-get install python3-yaml
+sudo apt-get install python-kivy
+sudo apt-get install python3-kivy
 
 sudo pip install opencv-contrib-python
 sudo pip install scipy
@@ -13,14 +18,12 @@ sudo pip install ipdb
 sudo pip install tensorflow
 sudo pip install simple-pid
 sudo pip install futures requests
+pip install kivy-garden
 pip3 install --user rospkg catkin_pkg simple-pid
 sudo pip3 install adafruit-circuitpython-gps
 
-sudo add-apt-repository ppa:kivy-team/kivy
-sudo apt-get update
-sudo apt-get install python-kivy
-sudo apt-get install python3-kivy
 sudo garden install mapview
+
 
 sudo apt-get install python-pip python-dev python-virtualenv
 virtualenv --system-site-packages ~/tensorflow

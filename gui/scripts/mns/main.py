@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import os
 import os.path
 import rospy
@@ -36,24 +37,28 @@ Builder.load_file("../ccd/ccd.kv")
 
 # Set Window size and other Variables
 #TODO: 16:9 & touch mit display und rpi testen
-win_x = 640
-win_y = 480
+win_x = int(rospy.get_param("/gui/winX"))
+win_y = int(rospy.get_param("/gui/winY"))
+
 Window.size = (win_x, win_y)
 zoomLevel = 18
+
 #Weiz
 cur_lat = 47.224282
 cur_lon = 15.6233008
+cur_speed = 0
 cam = None
 
 # Screen Manager
 sm = ScreenManager()
-Window.fullscreen = True
+Window.fullscreen = rospy.get_param("/gui/fullscreen")
 
 
 def gpsCallback(msg):
     if msg.status > 0:
         cur_lat = msg.latitude
         cur_lon = msg.longitude
+        cur_speed = msg.altitude
 
 
 def laneCallback(msg):

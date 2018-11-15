@@ -1,1 +1,1 @@
-roslaunch ~/catkin_ws/src/launch/raspberry.launch
+roslaunch ~/catkin_ws/src/launch/pc.launch

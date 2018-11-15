@@ -247,6 +247,7 @@ class StateMachine():
 if __name__ == '__main__':
     # create statemachine node
 	rospy.init_node('stateMachine', anonymous=False)
+	rospy.loginfo("State Machine: Node started.")
 	try:
 		machine = StateMachine()
 	except rospy.ROSInterruptException:  
