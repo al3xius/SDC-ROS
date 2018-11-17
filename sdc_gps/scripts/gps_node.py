@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 # Simple GPS module demonstration.
 # Will wait for a fix and print a message every second with the current location
@@ -46,6 +46,7 @@ gps.send_command(b'PMTK220,1000')
 # Main loop runs forever printing the location, etc. every second.
 
 def gps_talker():
+    rospy.loginfo("GPS: Node started.")
     pub = rospy.Publisher('gps', NavSatFix, queue_size=10)
     rospy.init_node('gps', anonymous=True)
     msg = NavSatFix()
@@ -64,6 +65,13 @@ def gps_talker():
             msg.header.seq = seq
             msg.header.stamp = rospy.Time.now()
             msg.header.frame_id = 'world'
+            if prev_has_fix != gps.has_fix:
+                if gps.has_fix:
+                    rospy.loginfo("GPS: has fix")
+                else:
+                    rospy.loginfo("GPS: lost fix")
+
+            prev_has_fix = gps.has_fix
 
             if not gps.has_fix:
                 # Try again if we don't have a fix yet.
@@ -107,6 +115,7 @@ def gps_talker():
 
 if __name__ == '__main__':
     try:
+        rospy.init_node('gps', anonymous=False)
         gps_talker()
     except rospy.ROSInterruptException:
         pass
