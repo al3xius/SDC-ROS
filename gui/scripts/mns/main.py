@@ -14,6 +14,7 @@ from kivy.uix.label import Label
 from kivy.uix.slider import Slider
 from kivy.uix.camera import Camera
 from kivy.core.image import Image
+from twisted.internet import task
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.properties import ObjectProperty
@@ -29,25 +30,23 @@ from sensor_msgs.msg import Image
 
 #TODO: sortieren / kommentieren / auslagern
 #KV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ui'))
-#Menu Buttons !!!Bitte immer relativen Pfad angben!!!
-Builder.load_file("mns.kv")
-Builder.load_file("../opt/opt.kv")
-Builder.load_file("../ccd/ccd.kv")
 
 # Set Window size and other Variables
 #TODO: 16:9 & touch mit display und rpi testen
 win_x = 640
 win_y = 480
 Window.size = (win_x, win_y)
-zoomLevel = 18
-#Weiz
+# MAP:
+# Koordinaten (Weiz)
 cur_lat = 47.224282
 cur_lon = 15.6233008
-cam = None
+zoomLevel = 18
+# CAR DATA:
+curr_speed = 12
 
 # Screen Manager
 sm = ScreenManager()
-Window.fullscreen = True
+#Window.fullscreen = True
 
 
 def gpsCallback(msg):
@@ -88,21 +87,16 @@ class ScreenMAP(Screen):
 
 
 class ScreenOPT(Screen):
-    """
-    # Delete Map Cache
-    def deleteCache(self):
-        files = glob.glob(
-            '/home/davidzechm/catkin_ws/src/gui/scripts/cache/*')
-        i = 0
-        for f in files:
-            try:
-                os.remove(f)
-                i = i+1
-                print("Deleting File: " + str(i))
-            except IOError:
-                print("Error")
-    """
-    pass
+    def on_enter(self):
+
+        # Back to Menu Button
+        def changeScreen(self):
+            sm.transition = SlideTransition(direction='right')
+            sm.current = "MNS"
+
+        backBtn = Button(text="[b]BACK[/b]", font_size="20sp", pos=(0,
+                         0), size_hint=(.2, .1), background_color=(1, 1, 1, 0.45), markup=True)
+        backBtn.bind(on_press=changeScreen)
 
 
 class ScreenCCD(Screen):
@@ -111,14 +105,6 @@ class ScreenCCD(Screen):
 
 class ScreenCAV(Screen):
     def on_enter(self):
-        """"
-        #Get Camera image
-        cam = Camera(
-            play=False, index=0, resolution=(win_x, win_y), allow_stretch=True, keep_ratio=False)
-            #TODO: Overlays
-        cam.play = True"""
-        cam = Image(source="26a7511794_18_142445_170178.png").texture
-
         # Back to Menu Button
         def changeScreen(self):
             sm.transition = SlideTransition(direction='right')
@@ -134,17 +120,9 @@ class ScreenCAV(Screen):
                                                                  0), size_hint=(.2, .1), background_color=(1, 1, 1, 0.45), markup=True)
         overlayBtn.bind(on_press=changeScreen)
 
-        # Screenshot
-        screenBtn = Button(
-            text="[b]SCREENSHOT[/b]", font_size="20sp", pos=(400,
-                                                             0), size_hint=(.2, .1), background_color=(1, 1, 1, 0.45), markup=True)
-        screenBtn.bind(on_press=changeScreen)
-
         # Add to Screen
-        self.add_widget(cam)
         self.add_widget(backBtn)
         self.add_widget(overlayBtn)
-        self.add_widget(screenBtn)
 
     def on_leave(self):
         self.clear_widgets()
@@ -157,21 +135,102 @@ class ScreenMNS(Screen):
 
         timeString = curTime.strftime("%H:%M")
         timeLbl = Label(
-            text='[color=111111] %s [/color]' % timeString, pos=(win_x/2-70, win_y/2-40), font_size='30dp', markup=True)
-        self.add_widget(timeLbl)
+            text='[color=111111] %s [/color]' % timeString, pos=(win_x/2-70, win_y/2-20), font_size='30dp', markup=True)
 
         dateString = curTime.strftime("%d, %b.")
         dateLbl = Label(text='[color=111111] %s [/color]' %
-                        dateString, font_size='22dp', pos=(win_x/2-70, win_y/2-65), markup=True)
-        self.add_widget(dateLbl)
+                        dateString, font_size='20dp', pos=(win_x/2-70, win_y/2-45), markup=True)
 
         # Show Speed
         speedLbl = Label(
-            text="[color=111111] %d [size=30]km/h[/size] [/color]" % cur_speed,
+            text="[color=111111] %d [size=30]km/h[/size] [/color]" % curr_speed,
                          pos_hint={'top': 1.1}, font_size="80dp", markup=True)
-        self.add_widget(speedLbl)
 
-        # Battery
+        # DrivingMode:
+        scale = 60
+
+        def changeMode(mode):
+            actColor = "ffd700"
+            stdColor = "111111"
+            if mode == "p":
+                pColor = actColor
+                rColor = stdColor
+                nColor = stdColor
+                dColor = stdColor
+            elif mode == "r":
+                pColor = stdColor
+                rColor = actColor
+                nColor = stdColor
+                dColor = stdColor
+            elif mode == "n":
+                pColor = stdColor
+                rColor = stdColor
+                nColor = actColor
+                dColor = stdColor
+            elif mode == "d":
+                pColor = stdColor
+                rColor = stdColor
+                nColor = stdColor
+                dColor = actColor
+            else:
+                pColor = stdColor
+                rColor = stdColor
+                nColor = stdColor
+                dColor = stdColor
+
+            pLbl = Label(
+                text="[color=%s]P[/color]" % pColor, pos=(win_x/2-120, win_y/2-130), font_size='45dp', markup=True)
+            rLbl = Label(
+                text="[color=%s]R[/color]" % rColor, pos=(win_x/2-120, win_y/2-130-(scale)), font_size='45dp', markup=True)
+            nLbl = Label(
+                text="[color=%s]N[/color]" % nColor, pos=(win_x/2-120, win_y/2-130-(scale*2)), font_size='45dp', markup=True)
+            dLbl = Label(
+                text="[color=%s]D[/color]" % dColor, pos=(win_x/2-120, win_y/2-130-(scale*3)), font_size='45dp', markup=True)
+
+            self.add_widget(pLbl)
+            self.add_widget(rLbl)
+            self.add_widget(nLbl)
+            self.add_widget(dLbl)
+
+        changeMode("p")
+
+        # MenuButtons
+        def screenMap(self):
+            sm.transition = SlideTransition(direction='left')
+            sm.current = "MAP"
+
+        def screenOpt(self):
+            sm.transition = SlideTransition(direction='left')
+            sm.current = "OPT"
+
+        def screenCam(self):
+            sm.transition = SlideTransition(direction='left')
+            sm.current = "CAV"
+
+        mapBtn = Button(
+            text="[b]MAP[/b]", font_size="20sp", pos=(0,
+                                                      0), size_hint=(.3, .12), markup=True)
+        mapBtn.bind(on_press=screenMap)
+
+        camBtn = Button(
+            text="[b]CAM[/b]", font_size="20sp", pos=(win_x/2-(win_x*0.15),
+                                                      0), size_hint=(.3, .12), markup=True)
+        camBtn.bind(on_press=screenCam)
+
+        setBtn = Button(
+            text="[b]SETTINGS[/b]", font_size="20sp", pos=(win_x-(win_x*0.3),
+                                                           0), size_hint=(.3, .12), markup=True)
+        setBtn.bind(on_press=screenOpt)
+
+        self.add_widget(dateLbl)
+        self.add_widget(timeLbl)
+        self.add_widget(speedLbl)
+        self.add_widget(mapBtn)
+        self.add_widget(camBtn)
+        self.add_widget(setBtn)
+
+    def on_leave(self):
+        self.clear_widgets()
 
 
 sm.add_widget(ScreenMNS(name='MNS'))
