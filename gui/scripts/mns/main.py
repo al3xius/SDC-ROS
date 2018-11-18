@@ -13,7 +13,7 @@ from kivy.uix.button import Button
 from kivy.uix.label import Label
 from kivy.uix.slider import Slider
 from kivy.uix.camera import Camera
-from kivy.core.image import Image
+from kivy.uix.image import Image
 from twisted.internet import task
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.screenmanager import ScreenManager, Screen
@@ -26,7 +26,7 @@ from kivy.garden.mapview import MapView
 
 #ROS imports
 from sensor_msgs.msg import NavSatFix
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image as ROSImage
 
 #TODO: sortieren / kommentieren / auslagern
 #KV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ui'))
@@ -115,10 +115,21 @@ class ScreenCAV(Screen):
         backBtn.bind(on_press=changeScreen)
 
         # Overlay
+        def toggleOverlay(self):
+            on = 0
+            if on == 0:
+                overlayImg = Image(
+                    source="../assets/data/autobahn.jpg", width=win_x, height=win_y)
+                self.add_widget(overlayImg)
+                on = 1
+            else:
+                self.clear_widgets()
+                on = 0
+
         overlayBtn = Button(
-            text="[b]TOGGLE OVERLAY[/b]", font_size="20sp", pos=(200,
-                                                                 0), size_hint=(.2, .1), background_color=(1, 1, 1, 0.45), markup=True)
-        overlayBtn.bind(on_press=changeScreen)
+            text="[b]OVERLAY[/b]", font_size="20sp", pos=(200,
+                                                          0), size_hint=(.2, .1), background_color=(1, 1, 1, 0.45), markup=True)
+        overlayBtn.bind(on_press=toggleOverlay)
 
         # Add to Screen
         self.add_widget(backBtn)
@@ -143,8 +154,8 @@ class ScreenMNS(Screen):
 
         # Show Speed
         speedLbl = Label(
-            text="[color=111111] %d [size=30]km/h[/size] [/color]" % curr_speed,
-                         pos_hint={'top': 1.1}, font_size="80dp", markup=True)
+            text="[color=111111][b]%d[/b][/color]" % curr_speed,
+                         pos_hint={'top': 1.1}, font_size="90dp", markup=True)
 
         # DrivingMode:
         scale = 60
@@ -192,7 +203,7 @@ class ScreenMNS(Screen):
             self.add_widget(nLbl)
             self.add_widget(dLbl)
 
-        changeMode("p")
+        changeMode("d")
 
         # MenuButtons
         def screenMap(self):
@@ -221,6 +232,26 @@ class ScreenMNS(Screen):
             text="[b]SETTINGS[/b]", font_size="20sp", pos=(win_x-(win_x*0.3),
                                                            0), size_hint=(.3, .12), markup=True)
         setBtn.bind(on_press=screenOpt)
+
+        # Lights
+        def switchLights(left, right, light):
+            #left = "left-arrow"
+            leftPath = 'scripts/assets/data/%s.png' % left
+            rightPath = 'scripts/assets/data/%s.png' % right
+            lightPath = 'scripts/assets/data/%s.png' % light
+
+            leftImg = Image(
+                source=leftPath, size_hint=(.07, .07), pos=(win_x/2-100, win_y/2-100))
+            rightImg = Image(
+                source=rightPath, size_hint=(.07, .07), pos=(win_x/2+60, win_y/2-100))
+            lightImg = Image(
+                source=lightPath, size_hint=(.07, .07), pos=(win_x/2-20, win_y/2-100))
+
+            self.add_widget(leftImg)
+            self.add_widget(rightImg)
+            self.add_widget(lightImg)
+
+        switchLights("left-arrow", "right-arrow", "car-light-act")
 
         self.add_widget(dateLbl)
         self.add_widget(timeLbl)
@@ -252,6 +283,6 @@ class MyApp(App):
 if __name__ == '__main__':
     #subscriber
     gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
-    lane_sub = rospy.Subscriber('/lane/combinedImage', Image, laneCallback)
-    cam_sub = rospy.Subscriber('/usb_cam/image_raw', Image, camCallback)
+    lane_sub = rospy.Subscriber('/lane/combinedImage', ROSImage, laneCallback)
+    cam_sub = rospy.Subscriber('/usb_cam/image_raw', ROSImage, camCallback)
     MyApp().run()
