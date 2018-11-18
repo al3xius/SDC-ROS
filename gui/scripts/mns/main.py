@@ -63,6 +63,10 @@ def camCallback(msg):
     cam_img = msg
 
 
+def objCallback(msg):
+    obj_img = msg
+
+
 class ScreenMAP(Screen):
     def on_enter(self):
         # Map with Zoom and Coordinates
@@ -282,7 +286,25 @@ class MyApp(App):
 
 if __name__ == '__main__':
     #subscriber
+<<<<<< < HEAD
     gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
     lane_sub = rospy.Subscriber('/lane/combinedImage', ROSImage, laneCallback)
     cam_sub = rospy.Subscriber('/usb_cam/image_raw', ROSImage, camCallback)
     MyApp().run()
+== == == =
+    rospy.init_node('gui', anonymous=False)
+    rospy.loginfo("GUI: Node started.")
+    gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
+    lane_sub = rospy.Subscriber('/lane/combinedImage', ROSImage, laneCallback)
+    cam_sub = rospy.Subscriber('/usb_cam/image_raw', ROSImage, camCallback)
+    obj_sub = rospy.Subscriber(
+        '/objectDedector/overlayImage', ROSImage, objCallback)
+    try:
+        MyApp().run()
+    except rospy.ROSInterruptException:
+        #TODO: correct closing
+        App.get_running_app().stop()
+        import sys
+        sys.exit()
+
+>>>>>> > e720053911574f5f0c7325d407d8651b0c3faee0
