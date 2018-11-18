@@ -282,7 +282,12 @@ class MyApp(App):
 
 if __name__ == '__main__':
     #subscriber
+    rospy.init_node('gui', anonymous=False)
+    rospy.loginfo("GUI: Node started.")
     gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
     lane_sub = rospy.Subscriber('/lane/combinedImage', ROSImage, laneCallback)
     cam_sub = rospy.Subscriber('/usb_cam/image_raw', ROSImage, camCallback)
-    MyApp().run()
+    try:
+        MyApp().run()
+    except rospy.ROSInterruptException:  
+        pass
