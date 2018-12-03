@@ -1,0 +1,15 @@
+<launch>
+    <rosparam file="/home/ubuntu/catkin_ws/src/params/params.yaml" command="load" ns="/"/>
+    <node pkg="usb_cam" name="usb_cam" type="usb_cam_node"/>
+    <node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"/>
+    <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="screen">
+        <param name="serial_port"         type="string" value="/dev/ttyUSB0"/>
+        <param name="serial_baudrate"     type="int"    value="115200"/><!--A1/A2 -->
+        <!--param name="serial_baudrate"     type="int"    value="256000"--><!--A3 -->
+        <param name="frame_id"            type="string" value="laser"/>
+        <param name="inverted"            type="bool"   value="false"/>
+        <param name="angle_compensate"    type="bool"   value="true"/>
+    </node>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rplidar_ros)/rviz/rplidar.rviz" />
+    <node pkg="object_distance" name="object_distance" type="distance_node.py"/>
+</launch>

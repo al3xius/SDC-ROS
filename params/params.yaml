@@ -40,6 +40,7 @@ usb_cam:
   pixel_format: yuyv
   camera_frame_id: usb_cam
   io_method: mmap
+  image_width_angle: 45 
 
 lidar:
   port: /dev/ttUSB1
