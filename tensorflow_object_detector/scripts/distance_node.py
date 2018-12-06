@@ -11,7 +11,7 @@ class DistanceNode:
 
         rospy.Subscriber("/scan", LaserScan, self.lidar_calback)
         rospy.Subscriber("/objectDedector/objects", Detection2DArray, self.obj_callback)
-        self.distance_pub = rospy.Publisher("/distance/objects", Detection3DArray, queue_size=1)
+        self.distance_pub = rospy.Publisher("/objectDedector/3Dobjects", Detection3DArray, queue_size=1)
         
         self.cam_width = float(rospy.get_param("/usb_cam/image_width"))
         self.flip_image = bool(rospy.get_param("/usb_cam/flip_image", default="True"))
