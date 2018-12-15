@@ -1,6 +1,11 @@
 <launch>
     <rosparam file="/home/ubuntu/catkin_ws/src/params/params.yaml" command="load" ns="/"/>
-    <node pkg="rosserial_python" name="arduino" type="serial_node.py"/>
+    <node pkg="rosserial_python" name="arduino_main" type="serial_node.py">
+	<param name="port" value="/dev/ttyUSB1"/>
+    </node>
+    <node pkg="rosserial_python" name="arduino_servo" type="serial_node.py">
+	<param name="port" value="/dev/ttyUSB0"/>
+    </node>
     <node pkg="joy" name="joy" type="joy_node"/>
     <node pkg="statemachine" name="stateMachine" type="statemachine.py"/>
     <node pkg="usb_cam" name="usb_cam" type="usb_cam_node"/>

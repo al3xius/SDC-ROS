@@ -62,11 +62,14 @@ class DistanceNode:
         if angle < 0:
             angle = 360 - abs(angle)
 
+        angle_min = angle - 10
         if angle_min < 0:
             angle_min = 360 - abs(angle_min)
 
+        angle_max = angle + 10
         if angle_max < 0:
             angle_max = 360 - abs(angle_max)
+
         
         angle = radians(angle)
         angle_min = radians(angle_min)
@@ -74,7 +77,7 @@ class DistanceNode:
         try:
             index_min = int(angle_min / float(self.lastScan.angle_increment))
             index_max = int(angle_max / float(self.lastScan.angle_increment))
-            distance = self.lastScan.ranges[int(angle / float(self.lastScan.angle_increment))]
+            distance = min(self.lastScan.ranges[index_min:index_max])
             return distance
         except ZeroDivisionError as e:
             rospy.logerr("Can't get distance value! Error: {}".format(e))
