@@ -1,0 +1,10 @@
+<launch>                                                                        
+  <node pkg="image_publisher" type="image_publisher" name="image_publisher"
+        args="/home/ubuntu/Downloads/download.png" >
+    <param name="flip_horizontal" value="false" />
+    <param name="flip_vertical" value="false" />
+    <param name="frame_id" value="my_camera" />
+    <param name="publish_rate" value="1" />
+    <remap from="/image_publisher/image_raw" to="/usb_cam/image_raw"/>
+  </node>
+</launch>
