@@ -28,15 +28,15 @@ ros::Publisher p("/arduino/in", &arduinoIn_msg);
 unsigned long previousMillis = 0;
 unsigned long indicateMillis = 0;
 
-int pullUpPins[] = {2, 3, 4, 7, 8, 14, 15, 18};
-int outputPins[] = {10, 11, 13, 16, 17, 19};
+int pullUpPins[] = {19, 22, 23, 24, 25, 26, 27};
+int outputPins[] = {3, 4, 9, 10, 12, 16, 17, 18};
 
 const int is_mega = LOW;
 
 int indicatorState = LOW;
 
 //Speedometer
-#define speedometerPin = A1;
+const int speedometerPin = A2;
 const int circumference = 1000; //in mm
 int maxSpeedCounter = 100;//min time (in ms) of one rotation (for debouncing)
 int speedCounter;
@@ -47,7 +47,28 @@ float speedKMH = 0.00;
 
 //Subscriber
 void messageCb( const sdc_msgs::state& data){
+
+  //-----------motor controller-----------
+
+
+  digitalWrite(12, data.enableMotor);
   
+  //direction
+  if (data.direction > 0 && data.enableMotor){
+    //forward
+    digitalWrite(10, LOW); //forward pin
+    digitalWrite(9, HIGH); //backward pin
+  }
+  else if(data.direction < 0 && data.enableMotor){
+    //backward
+    digitalWrite(10, HIGH);
+    digitalWrite(9, LOW);
+  }
+  else{
+    digitalWrite(10, HIGH);
+    digitalWrite(9, HIGH);
+  }
+
   //throttle
   int throttle = 0;
   if (data.enableMotor){
@@ -63,37 +84,18 @@ void messageCb( const sdc_msgs::state& data){
   }
     
   int duty = map(throttle, 0, 100, 0, 255);
-  analogWrite(10, duty);
-  analogWrite(11, duty);
+  analogWrite(3, duty);
+  analogWrite(4, duty);
   
 
-  //direction
-  if (data.direction > 0 && data.enableMotor){
-    digitalWrite(12, LOW);
-    digitalWrite(13, HIGH);
-  }
-  else if(data.direction < 0 && data.enableMotor){
-    digitalWrite(12, HIGH);
-    digitalWrite(13, LOW);
-  }
-  else{
-    digitalWrite(12, HIGH);
-    digitalWrite(13, HIGH);
-  }
+  //----------------END-------------------
+
+  //---------------LIGHTS-----------------
 
   indicate = data.indicate;
+  digitalWrite(18, data.light);
 
-  if (is_mega){
-    //light
-    if (data.light){
-      digitalWrite(19, HIGH);
-    }
-    else{
-      digitalWrite(19, LOW);
-    }
-
-  }
-  //TODO: Steering
+  //----------------END-------------------
 }
 
 ros::Subscriber<sdc_msgs::state> sub("state", &messageCb );
@@ -102,23 +104,19 @@ void setup()
 { 
   //Pullup IN
   for (int i = 0; i < sizeof(pullUpPins); i++){
-    if(pullUpPins[i] <= 13 || is_mega == 'mega'){
-      pinMode(pullUpPins[i], INPUT_PULLUP);
-    }
+    pinMode(pullUpPins[i], INPUT_PULLUP);
   }
   //Pinput 
   pinMode(speedometerPin, INPUT);
 
   //Output
   for (int i = 0; i < sizeof(outputPins); i++){
-    if(outputPins[i] <= 13 || is_mega == 'mega'){
-      pinMode(outputPins[i], OUTPUT);
-    }
+    pinMode(outputPins[i], OUTPUT);
   }
   
   //speedometer
-  speedCounter = maxspeedCounter;
-
+  speedCounter = maxSpeedCounter;
+  /*
   //Source: https://www.instructables.com/id/Arduino-Bike-Speedometer/
   // TIMER SETUP- the timer interrupt allows preceise timed measurements of the reed switch
   //for mor info about configuration of arduino timers see http://arduino.cc/playground/Code/Timer1
@@ -138,7 +136,7 @@ void setup()
   TIMSK1 |= (1 << OCIE1A);
   
   sei();//allow interrupts
-  //END TIMER SETUP
+  //END TIMER SETUP*/
 
   nh.getHardware()->setBaud(57600);
   nh.initNode();
@@ -174,25 +172,25 @@ void loop()
   }
   
   
-  if (is_mega){
-    if (indicate == "Left"){
-      digitalWrite(16, indicatorState);
-    }
-    else if (indicate == "Right"){
-      digitalWrite(17, indicatorState);
-  
-    }
-    else if (indicate == "Both"){
-      digitalWrite(16, indicatorState);
-      digitalWrite(17, indicatorState);
-    }
-    else{
-      digitalWrite(16, LOW);
-      digitalWrite(17, LOW);
-    }
-    arduinoIn_msg.digital[50] = indicatorState;
+  if (indicate == "Left"){
+    digitalWrite(16, indicatorState);
+    digitalWrite(17, LOW);
   }
-  
+  else if (indicate == "Right"){
+    digitalWrite(16, LOW);
+    digitalWrite(17, indicatorState);
+
+  }
+  else if (indicate == "Both"){
+    digitalWrite(16, indicatorState);
+    digitalWrite(17, indicatorState);
+  }
+  else{
+    digitalWrite(16, LOW);
+    digitalWrite(17, LOW);
+  }
+  arduinoIn_msg.digital[50] = indicatorState;
+
  
   //indicator
   if(currentMillis - indicateMillis > 500){
@@ -204,6 +202,7 @@ void loop()
   }
 
   //speedomerter
+  /*
   ISR(TIMER1_COMPA_vect) {//Interrupt at freq of 1kHz to measure reed switch
     speedVal = digitalRead(speedometerPin);//get val of A0
     if (speedVal){//if reed switch is closed
@@ -229,8 +228,8 @@ void loop()
     else{
       timer += 1;//increment timer
     } 
-  }
-  arduinoIn_msg.analog[2] = speedKMH;
+  }*/
+  arduinoIn_msg.analog[6] = speedKMH;
 
   //timer so serial doesn't get overloaded
   if(currentMillis - previousMillis > 20){

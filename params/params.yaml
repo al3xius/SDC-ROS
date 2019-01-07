@@ -1,24 +1,24 @@
 arduino:
   port: /dev/ttyUSB0
-  kind: mega
   pin:
     battery: adc0
     gasPedal: adc1
-    stop: D2
-    gasPedalSwitch: D3
-    keySwitch: D4
-    forwardIn: D7
-    backwardIn: D8
-    speedControlerL: D10
-    speedControlerR: D11
-    forwardControl: D12
-    forwardControl: D13
-    indicatorInL: D14
-    indicatorInR: D15
+    speed: adc6
+    gasPedalSwitch: D19
+    keySwitch: D22
+    forwardIn: D26
+    backwardIn: D27
+    speedControlerL: D4
+    speedControlerR: D3
+    returnControl: D9
+    forwardControl: D10
+    indicatorInL: D42 #not connected
+    indicatorInR: D41 #not connected
     indicatorL: D16
     indicatorR: D17
-    lightIn: D18
-    light: D19
+    lightIn: D40 #not connected
+    stop: D39
+    light: D25
   
 battery:
   voltage: 12
