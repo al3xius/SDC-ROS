@@ -116,7 +116,7 @@ void setup()
   
   //speedometer
   speedCounter = maxSpeedCounter;
-  /*
+  
   //Source: https://www.instructables.com/id/Arduino-Bike-Speedometer/
   // TIMER SETUP- the timer interrupt allows preceise timed measurements of the reed switch
   //for mor info about configuration of arduino timers see http://arduino.cc/playground/Code/Timer1
@@ -136,7 +136,7 @@ void setup()
   TIMSK1 |= (1 << OCIE1A);
   
   sei();//allow interrupts
-  //END TIMER SETUP*/
+  //END TIMER SETUP
 
   nh.getHardware()->setBaud(57600);
   nh.initNode();
@@ -154,6 +154,33 @@ int averageAnalog(int pin){
 }
 
 long adc_timer;
+//speedomerter 
+ISR(TIMER1_COMPA_vect) {//Interrupt at freq of 1kHz to measure reed switch
+  speedVal = digitalRead(speedometerPin);//get val of A3
+  if (speedVal){//if reed switch is closed
+    if (speedCounter == 0){//min time between pulses has passed
+      speedKMH = (3600*float(circumference))/float(timer);//calculate km per hour
+      timer = 0;//reset timer
+      speedCounter = maxSpeedCounter;//reset speedCounter
+    }
+    else{
+      if (speedCounter > 0){//don't let speedCounter go negative
+        speedCounter -= 1;//decrement speedCounter
+      }
+    }
+  }
+  else{//if reed switch is open
+    if (speedCounter > 0){//don't let speedCounter go negative
+      speedCounter -= 1;//decrement speedCounter
+    }
+  }
+  if (timer > 2000){
+    speedKMH = 0;//if no new pulses from reed switch- tire is still, set mph to 0
+  }
+  else{
+    timer += 1;//increment timer
+  } 
+}
 
 void loop()
 {
@@ -201,34 +228,6 @@ void loop()
       indicatorState = LOW;
   }
 
-  //speedomerter
-  /*
-  ISR(TIMER1_COMPA_vect) {//Interrupt at freq of 1kHz to measure reed switch
-    speedVal = digitalRead(speedometerPin);//get val of A0
-    if (speedVal){//if reed switch is closed
-      if (speedCounter == 0){//min time between pulses has passed
-        speedKMH = (3600*float(circumference))/float(timer);//calculate km per hour
-        timer = 0;//reset timer
-        speedCounter = maxSpeedCounter;//reset speedCounter
-      }
-      else{
-        if (speedCounter > 0){//don't let speedCounter go negative
-          speedCounter -= 1;//decrement speedCounter
-        }
-      }
-    }
-    else{//if reed switch is open
-      if (speedCounter > 0){//don't let speedCounter go negative
-        speedCounter -= 1;//decrement speedCounter
-      }
-    }
-    if (timer > 2000){
-      speedKMH = 0;//if no new pulses from reed switch- tire is still, set mph to 0
-    }
-    else{
-      timer += 1;//increment timer
-    } 
-  }*/
   arduinoIn_msg.analog[6] = speedKMH;
 
   //timer so serial doesn't get overloaded
@@ -239,4 +238,3 @@ void loop()
   
   nh.spinOnce();
 }
-
