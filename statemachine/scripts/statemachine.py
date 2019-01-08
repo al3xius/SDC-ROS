@@ -51,6 +51,9 @@ class StateMachine():
 		voltage = interp(arduinoIn.analog[self.batteryPin], [0, 1015], [0, 5]) * self.batteryFactor
 		self.percent = limitValue((voltage - self.batteryD)/self.batteryK, 0, 100)
 
+		# get Speed
+		self.state.velocity = arduinoIn.analog["adc6"]
+
 		# get gaspeddal
 		self.gasPedal = limitValue(interp(arduinoIn.analog[self.gasPedalPin], [0, 1015], [0, 100]), 0, 100)
 		
@@ -66,19 +69,22 @@ class StateMachine():
 			self.manDirection = 0
  
 		# toggle light
-		# TODO entprellung?
-		self.toggleLight(not arduinoIn.digital[self.lightInPin])
+		# only GUI/remote
+		# self.toggleLight(not arduinoIn.digital[self.lightInPin])
 
 		# set indicator
+		# only GUI/remote
+		"""
 		if not arduinoIn.digital[self.indicatorInLPin]:
 			self.manIndicate= "Left"
 		elif not arduinoIn.digital[self.indicatorInRPin]:
 			self.manIndicate = "Right"
 		else:
 			self.manIndicate = "None"
-
+		"""
 
 		"""
+		# TODO:
 		# keyswitch -> lock car if not turned on
 		# reset to previous mode
 		keySwitch = getattr(arduinoIn, self.keySwitchPin)
@@ -97,7 +103,6 @@ class StateMachine():
 			self.mode = self.pervMode
 		"""
 
-
 		self.publishState()
 
 	def joyCallback(self, Joy):
@@ -113,14 +118,13 @@ class StateMachine():
 		if Joy.buttons[5] and not self._remote:
 			self.pervMode = self.mode # reset to previous mode
 
-
 		if Joy.buttons[5]:
 			self._remote = True
 			self.mode = "remote"
 		else:
 			self._remote = False
 			# safety: prevent gettings stuck in a loop
-			if self.pervMode == "remote":
+			if self.pervMode == "remote" or self.pervMode == "cruise":
 				self.pervMode = "manual"
 			
 			self.mode = self.pervMode
@@ -130,7 +134,6 @@ class StateMachine():
 		self.joyThrottle = interp(Joy.axes[1], [-1, 1], [-100, 100])
 		self.joySteeringAngle = interp(Joy.axes[0], [-1, 1], [-100, 100])
 		self.publishState()
-
 
 
 	def publishState(self):
@@ -154,13 +157,15 @@ class StateMachine():
 			self.throttle = abs(self.joyThrottle) # make values positive
 			# set direction
 			if self.joyThrottle < 0:
+				self.enableMotor = True
 				self.direction = -1
 			elif self.joyThrottle > 0:
+				self.enableMotor = True
 				self.direction = 1
 			else:
+				self.enableMotor = False
 				self.direction = 0
-
-			self.enableMotor = True
+			
 			self.enableSteering = True
 			self.steeringAngle = self.joySteeringAngle
 
@@ -192,7 +197,6 @@ class StateMachine():
 		self.state.mode = self.mode
 		self.state.batteryCharge = self.percent
 		self.state.gasPedal = self.gasPedal
-		self.state.velocity = 0 #TODO get velocity from gps
 		self.state.steeringAngle = limitValue(self.steeringAngle, -100, 100)
 		self.state.enableSteering = self.enableSteering
 		self.state.enableMotor = self.enableMotor
@@ -233,6 +237,8 @@ class StateMachine():
 		self.light = False
 
 		self.state = state()
+		self.arduInit = arduinoIn()
+		self.arduCallback(self.arduInit)
 
 		#subscriber
 		self.sub1 = rospy.Subscriber('/arduino/in', arduinoIn, self.arduCallback)
