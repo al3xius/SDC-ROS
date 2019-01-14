@@ -6,7 +6,7 @@ import rospy
 import message_filters
 from numpy import interp
 # Messages
-from rosserial_arduino.msg import Adc
+# from rosserial_arduino.msg import Adc #unused
 from std_msgs.msg import Int16
 from sdc_msgs.msg import state, arduinoIn
 from sensor_msgs.msg import Joy
@@ -52,7 +52,7 @@ class StateMachine():
 		self.percent = limitValue((voltage - self.batteryD)/self.batteryK, 0, 100)
 
 		# get Speed
-		self.state.velocity = arduinoIn.analog["adc6"]
+		self.state.velocity = arduinoIn.analog[6]
 
 		# get gaspeddal
 		self.gasPedal = limitValue(interp(arduinoIn.analog[self.gasPedalPin], [0, 1015], [0, 100]), 0, 100)
@@ -69,39 +69,19 @@ class StateMachine():
 			self.manDirection = 0
  
 		# toggle light
-		# only GUI/remote
-		# self.toggleLight(not arduinoIn.digital[self.lightInPin])
+		self.toggleLight(not arduinoIn.digital[self.lightInPin])
 
 		# set indicator
-		# only GUI/remote
-		"""
 		if not arduinoIn.digital[self.indicatorInLPin]:
 			self.manIndicate= "Left"
 		elif not arduinoIn.digital[self.indicatorInRPin]:
 			self.manIndicate = "Right"
 		else:
 			self.manIndicate = "None"
-		"""
+		
 
-		"""
-		# TODO:
-		# keyswitch -> lock car if not turned on
-		# reset to previous mode
-		keySwitch = getattr(arduinoIn, self.keySwitchPin)
-		if keySwitch and not self._key:
-			self.pervMode = self.mode
+		self.key = arduinoIn.digital[self.keySwitchPin]
 
-		if keySwitch:
-			self._key = True
-			self.mode = "locked"
-		else:
-			self._key = False
-			# safety: prevent gettings stuck in a loop
-			if self.pervMode == "locked":
-				self.pervMode = "manual"
-			
-			self.mode = self.pervMode
-		"""
 
 		self.publishState()
 
@@ -135,8 +115,22 @@ class StateMachine():
 		self.joySteeringAngle = interp(Joy.axes[0], [-1, 1], [-100, 100])
 		self.publishState()
 
+	def cruiseCallback(self, state):
+		self.cruiseState = state
+
 
 	def publishState(self):
+		"""if self.key:
+			self.mode = "locked"
+			if not self._key:
+				self.pervMode = self.mode
+				rospy.loginfo("Car Locked!")
+			self._key = True
+		else:
+			self.mode = self.pervMode
+			rospy.loginfo("Car Unlocked!")
+			rospy.loginfo("CNow in state: {}".format(self.mode))
+			self._key = False"""
 		
 		if self.mode == "manual":
 			self.enableSteering = False
@@ -146,12 +140,12 @@ class StateMachine():
 			self.direction = self.manDirection
 			self.indicate = self.manIndicate
 
-		elif self.mode == "cruise" and not arduinoIn.digital[self.stopPin]:
-			# TODO Get data from cruise control node
-			self.throttle = 0
-			self.enableMotor = False
-			self.steeringAngle = 0
-			self.enableSteering = False
+		elif self.mode == "cruise":
+			self.throttle = self.cruiseState.throttle
+			self.enableMotor = True
+			self.direction = 1
+			self.steeringAngle = self.cruiseState.steeringAngle
+			self.enableSteering = True
 
 		elif self.mode == "remote":
 			self.throttle = abs(self.joyThrottle) # make values positive
@@ -206,7 +200,7 @@ class StateMachine():
 
 		self.pub.publish(self.state)
 
-	def __init__(self):
+	def updateParams(self):
 		# get params
 		# Pins
 		self.batteryPin = int(rospy.get_param("/arduino/pin/battery")[3:])
@@ -227,36 +221,43 @@ class StateMachine():
 		self.batteryD = float(rospy.get_param("/battery/d"))
 		self.batteryFactor = float(rospy.get_param("/battery/factor"))
 
+
+	def __init__(self):
+		rospy.init_node('stateMachine', anonymous=False)
+		rospy.loginfo("Starting State Machine.")
+
+		self.updateParams()
+
 		#init
 		self.mode = "manual"
 		self.indicate = "None"
 		self.pervMode = self.mode
 		self._remote = False
+		self.key = False
 		self._key = False
 		self._prevLightIn = True
 		self.light = False
 
 		self.state = state()
+		self.cruiseState = state()
 		self.arduInit = arduinoIn()
-		self.arduCallback(self.arduInit)
 
 		#subscriber
 		self.sub1 = rospy.Subscriber('/arduino/in', arduinoIn, self.arduCallback)
 		self.sub2 = rospy.Subscriber('/joy', Joy, self.joyCallback)
+		self.sub3 = rospy.Subscriber('/cruise/state', state, self.cruiseCallback)
 
 		#publisher
-		self.pub = rospy.Publisher("/state", state, queue_size=1)
+		self.pub = rospy.Publisher("/state/unchecked", state, queue_size=1)
+
+		self.arduCallback(self.arduInit)
 
 		rospy.spin()
 
 
+
 if __name__ == '__main__':
-    # create statemachine node
-	rospy.init_node('stateMachine', anonymous=False)
-	rospy.loginfo("State Machine: Node started.")
 	try:
 		machine = StateMachine()
 	except rospy.ROSInterruptException:  
-		pass
-
-                   
+		rospy.logerr("State Machine: Node stoped.")

@@ -4,7 +4,7 @@ arduino:
     battery: adc0
     gasPedal: adc1
     speed: adc6
-    gasPedalSwitch: D19
+    gasPedalSwitch: D18
     keySwitch: D22
     forwardIn: D26
     backwardIn: D27
@@ -12,13 +12,12 @@ arduino:
     speedControlerR: D3
     returnControl: D9
     forwardControl: D10
-    indicatorInL: D42 #not connected
-    indicatorInR: D41 #not connected
+    indicatorInL: D23
+    indicatorInR: D24
     indicatorL: D16
     indicatorR: D17
-    lightIn: D40 #not connected
-    stop: D39
-    light: D25
+    lightIn: D25
+    stop: D39 #not connected
   
 battery:
   voltage: 12
@@ -61,3 +60,6 @@ gui:
   winX: 640
   winY: 480
   fullscreen: False
+
+normVelocity: 10
+normBreakingDistance: 2 # distance at normVelocity in m

@@ -28,8 +28,8 @@ ros::Publisher p("/arduino/in", &arduinoIn_msg);
 unsigned long previousMillis = 0;
 unsigned long indicateMillis = 0;
 
-int pullUpPins[] = {19, 22, 23, 24, 25, 26, 27};
-int outputPins[] = {3, 4, 9, 10, 12, 16, 17, 18};
+int pullUpPins[] = {18, 22, 23, 24, 25, 26, 27};
+int outputPins[] = {3, 4, 9, 10, 12, 16, 17, 19};
 
 const int is_mega = LOW;
 
@@ -93,7 +93,7 @@ void messageCb( const sdc_msgs::state& data){
   //---------------LIGHTS-----------------
 
   indicate = data.indicate;
-  digitalWrite(18, data.light);
+  digitalWrite(19, data.light);
 
   //----------------END-------------------
 }
@@ -193,9 +193,7 @@ void loop()
 
   //Digital IN
   for (int i = 0; i < sizeof(pullUpPins); i++){
-    if((pullUpPins[i] <= 13 || is_mega)){
-      arduinoIn_msg.digital[pullUpPins[i]] = digitalRead(pullUpPins[i]);
-    }
+    arduinoIn_msg.digital[pullUpPins[i]] = digitalRead(pullUpPins[i]);
   }
   
   
