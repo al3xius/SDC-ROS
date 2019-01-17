@@ -12,6 +12,15 @@ class SafetyNode:
         pass
 
     def laserCallback(self, msg):
+        if min(msg) < self.stopingDistance*0.9:
+            self.state.state = "stopping"
+            self.state.enableSteering = True
+			self.state.steeringAngle = msg.steeringAngle #TODO: Steer away
+			self.state.enableMotor = False
+			self.state.throttle = 0
+			self.state.direction = 0
+			self.state.light = msg.light
+			self.state.indicate = "Both"
         pass
 
     def publish(self):
@@ -21,6 +30,7 @@ class SafetyNode:
     def __init__(self):
         rospy.init_node("safety_node")
         rospy.loginfo("Starting SafetyNode.")
+    
 
         self.stopingDistance = None
         normBreakingDistance = rospy.get_param("/normBreakingDistance", default="10")

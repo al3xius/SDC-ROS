@@ -25,6 +25,10 @@ battery:
   k: 0.013
   d: 11.7
 
+gaspedal:
+  min: 43
+  max: 88
+
 lane:
   heightmultiplier: 9
   cropmultiplier: 2

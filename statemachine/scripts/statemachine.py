@@ -55,7 +55,9 @@ class StateMachine():
 		self.state.velocity = arduinoIn.analog[6]
 
 		# get gaspeddal
-		self.gasPedal = limitValue(interp(arduinoIn.analog[self.gasPedalPin], [0, 1015], [0, 100]), 0, 100)
+		# TODO: calibrate gaspedal
+		#self.gasPedal = limitValue(interp(arduinoIn.analog[self.gasPedalPin], [self.gasPedalMin, self.gasPedalMax], [0, 100]), 0, 100)
+		self.gasPedal = limitValue(arduinoIn.analog[self.gasPedalPin], 0, 100)
 		
 		# get direction
 		if not arduinoIn.digital[self.forwardInPin] and not arduinoIn.digital[self.gasPedalSwitchPin] and arduinoIn.digital[self.backwardInPin]:
@@ -120,17 +122,12 @@ class StateMachine():
 
 
 	def publishState(self):
-		"""if self.key:
-			self.mode = "locked"
-			if not self._key:
-				self.pervMode = self.mode
-				rospy.loginfo("Car Locked!")
+		if not self.key and not self._key:
+			self.mode = "manual"
 			self._key = True
-		else:
-			self.mode = self.pervMode
-			rospy.loginfo("Car Unlocked!")
-			rospy.loginfo("CNow in state: {}".format(self.mode))
-			self._key = False"""
+		elif self.key:
+			self.mode = "locked"
+			self._key = False
 		
 		if self.mode == "manual":
 			self.enableSteering = False
@@ -220,6 +217,10 @@ class StateMachine():
 		self.batteryK = float(rospy.get_param("/battery/k"))
 		self.batteryD = float(rospy.get_param("/battery/d"))
 		self.batteryFactor = float(rospy.get_param("/battery/factor"))
+
+		# Gaspedal
+		self.gasPedalMin = int(rospy.get_param("/gaspedal/min"))
+		self.gasPedalMax = int(rospy.get_param("/gaspedal/max"))
 
 
 	def __init__(self):
