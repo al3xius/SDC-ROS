@@ -11,6 +11,6 @@
     <node pkg="safety" name="safetyNode" type="safety.py"/>
     <!--<node pkg="usb_cam" name="usb_cam" type="usb_cam_node"/>
      <node pkg="lanekeeping" name="lanekeeping" type="lanekeeping.py"/> 
-    <node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"/>
-    <node pkg="gui" name="gui" type="main.py"/>-->
+    <node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"/>-->
+    <node pkg="gui" name="gui" type="main.py"/>
 </launch>

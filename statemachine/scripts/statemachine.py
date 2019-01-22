@@ -11,7 +11,6 @@ from std_msgs.msg import Int16
 from sdc_msgs.msg import state, arduinoIn
 from sensor_msgs.msg import Joy
 
-
 def limitValue(value, min, max):
     """Limits value to a min or max value
     
@@ -243,13 +242,17 @@ class StateMachine():
 		self.cruiseState = state()
 		self.arduInit = arduinoIn()
 
-		#subscriber
+		# subscriber
 		self.sub1 = rospy.Subscriber('/arduino/in', arduinoIn, self.arduCallback)
 		self.sub2 = rospy.Subscriber('/joy', Joy, self.joyCallback)
 		self.sub3 = rospy.Subscriber('/cruise/state', state, self.cruiseCallback)
 
-		#publisher
+		# publisher
 		self.pub = rospy.Publisher("/state/unchecked", state, queue_size=1)
+
+
+		# service
+		param_serv = rospy.Service('updateParams', statemachine.srv.updateParams, self.updateParams)
 
 		self.arduCallback(self.arduInit)
 
