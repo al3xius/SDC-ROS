@@ -28,7 +28,6 @@ from kivy.garden.mapview import MapView
 from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import Image as ROSImage
 
-#TODO: sortieren / kommentieren / auslagern
 #KV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ui'))
 
 # Set Window size and other Variables
@@ -42,7 +41,7 @@ cur_lat = 47.224282
 cur_lon = 15.6233008
 zoomLevel = 18
 # CAR DATA:
-curr_speed = 12
+curr_speed = 8
 
 # Screen Manager
 sm = ScreenManager()
@@ -93,6 +92,17 @@ class ScreenMAP(Screen):
 class ScreenOPT(Screen):
     def on_enter(self):
 
+        # Get Current Time and Date
+        curTime = datetime.datetime.now()
+
+        timeString = curTime.strftime("%H:%M")
+        timeLbl = Label(
+            text='[color=111111] %s [/color]' % timeString, pos=(win_x/2-70, win_y/2-20), font_size='30dp', markup=True)
+
+        dateString = curTime.strftime("%d, %b.")
+        dateLbl = Label(text='[color=111111] %s [/color]' %
+                        dateString, font_size='20dp', pos=(win_x/2-70, win_y/2-45), markup=True)
+
         # Back to Menu Button
         def changeScreen(self):
             sm.transition = SlideTransition(direction='right')
@@ -101,6 +111,17 @@ class ScreenOPT(Screen):
         backBtn = Button(text="[b]BACK[/b]", font_size="20sp", pos=(0,
                          0), size_hint=(.2, .1), background_color=(1, 1, 1, 0.45), markup=True)
         backBtn.bind(on_press=changeScreen)
+
+        headingLbl = Label(text="[color=111111][b]SETTINGS[/b][/color]", pos_hint={"top":
+                           1.4}, font_size="45dp", markup=True)
+
+        self.add_widget(backBtn)
+        self.add_widget(headingLbl)
+        self.add_widget(timeLbl)
+        self.add_widget(dateLbl)
+
+    def on_leave(self):
+        self.clear_widgets()
 
 
 class ScreenCCD(Screen):
@@ -160,6 +181,9 @@ class ScreenMNS(Screen):
         speedLbl = Label(
             text="[color=111111][b]%d[/b][/color]" % curr_speed,
                          pos_hint={'top': 1.1}, font_size="90dp", markup=True)
+
+        einheitLbl = Label(text="[color=111111][b]km/h[/b][/color]", pos_hint={'top':
+                           0.97}, font_size="30dp", markup=True)
 
         # DrivingMode:
         scale = 60
@@ -258,6 +282,7 @@ class ScreenMNS(Screen):
         switchLights("left-arrow", "right-arrow", "car-light-act")
 
         self.add_widget(dateLbl)
+        self.add_widget(einheitLbl)
         self.add_widget(timeLbl)
         self.add_widget(speedLbl)
         self.add_widget(mapBtn)
@@ -286,12 +311,10 @@ class MyApp(App):
 
 if __name__ == '__main__':
     #subscriber
-<<<<<< < HEAD
     gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
     lane_sub = rospy.Subscriber('/lane/combinedImage', ROSImage, laneCallback)
     cam_sub = rospy.Subscriber('/usb_cam/image_raw', ROSImage, camCallback)
     MyApp().run()
-== == == =
     rospy.init_node('gui', anonymous=False)
     rospy.loginfo("GUI: Node started.")
     gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
@@ -306,5 +329,3 @@ if __name__ == '__main__':
         App.get_running_app().stop()
         import sys
         sys.exit()
-
->>>>>> > e720053911574f5f0c7325d407d8651b0c3faee0
