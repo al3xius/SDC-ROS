@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 import rospy 
 from math import radians
-from sensor_msgs.msg import LaserScan
+from sensor_msgs.msg import LaserScan, Image
 from vision_msgs.msg import Detection2D, Detection2DArray, Detection3DArray, Detection3D
+import numpy as np
+from cv_bridge import CvBridge, CvBridgeError
+import cv2
 
 class DistanceNode:
     def __init__(self):
@@ -20,10 +23,16 @@ class DistanceNode:
         #self.focalLenght = (0.5 * cam_width) / math.tan(0.5 * cam_fov)
 
         self.angleFactor = cam_fov/self.cam_width
-        print(self.angleFactor)
         
         self.lastScan = LaserScan()
         self.lastObj = Detection2DArray()
+        self.lastPub = Detection3DArray()
+
+        if True:
+            rospy.Subscriber("/objectDedector/overlayImage", Image, self.img_callback)
+            self.img_pub = rospy.Publisher("/objectDedector/overlayImage3D", Image, queue_size=1)
+            self.bridge = CvBridge()
+            self.font = cv2.FONT_HERSHEY_SIMPLEX
         
     def lidar_calback(self, msg):
         self.lastScan = msg
@@ -32,19 +41,58 @@ class DistanceNode:
         self.lastObj = msg
         self.calcDistance()
 
+    def img_callback(self, msg):
+        try:
+            cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+        except CvBridgeError as e:
+            print(e)
+
+        image=cv2.cvtColor(cv_image,cv2.COLOR_BGR2RGB)
+        mask = np.zeros_like(image)
+
+
+        objCount = 0
+        pos = []
+        distance = []
+        for obj in self.lastPub.detections:
+            center_x = obj.bbox.center.position.x
+            center_y = obj.bbox.center.position.y
+            size_x = obj.bbox.size.x
+            size_y = obj.bbox.size.y
+            pos.append((int(center_x+size_x/2), int(center_y-size_y/2)))
+            distance.append(round(obj.bbox.center.position.z, 2))
+            objCount += 1
+
+        for i in range(objCount):
+            cv2.putText(mask, str(distance[i])+"m", pos[i],self.font, 1, (0,255,0),2, cv2.LINE_AA, False)
+        
+        combinedImage = cv2.addWeighted(image, 1, mask, 1, 0)
+
+        img=cv2.cvtColor(combinedImage, cv2.COLOR_BGR2RGB)
+        image_out = Image()
+        try:
+            image_out = self.bridge.cv2_to_imgmsg(img,"bgr8")
+        except CvBridgeError as e:
+            print(e)
+        self.img_pub.publish(image_out)
 
     def calcDistance(self):
         self.newObjArray = Detection3DArray()
-        newObj = Detection3D()
+        
         for obj in self.lastObj.detections:
+            newObj = Detection3D()
             newObj.bbox.center.position.x = obj.bbox.center.x
             newObj.bbox.center.position.y = obj.bbox.center.y
+            newObj.bbox.size.x = obj.bbox.size_x
+            newObj.bbox.size.y = obj.bbox.size_y
+
             angle, angle_min, angle_max = self.calcAngle(obj.bbox.center.x, obj.bbox.size_x)
             newObj.bbox.center.orientation.w = angle
             distance = self.getDistance(angle, angle_min, angle_max)
             newObj.bbox.center.position.z = distance
             self.newObjArray.detections.append(newObj)
 
+        self.lastPub = self.newObjArray
         self.distance_pub.publish(self.newObjArray)
 
     def calcAngle(self, x, width):
@@ -69,8 +117,6 @@ class DistanceNode:
         #angle_max = angle + 10
         if angle_max < 0:
             angle_max = 360 - abs(angle_max)
-
-        print(angle_min, angle_max)
         
         angle = radians(angle)
         angle_min = radians(angle_min)

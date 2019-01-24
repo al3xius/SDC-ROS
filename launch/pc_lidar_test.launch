@@ -10,5 +10,5 @@
         <param name="angle_compensate"    type="bool"   value="true"/>
     </node>
     <!--<node name="rviz" pkg="rviz" type="rviz" args="-d $(find rplidar_ros)/rviz/rplidar.rviz" />-->
-    <node pkg="object_distance" name="object_distance" type="distance_node.py"/>
+    <node pkg="tensorflow_object_detector" name="object_distance" type="distance_node.py"/>
 </launch>
