@@ -57,7 +57,6 @@ def gpsCallback(msg):
         cur_lat = msg.latitude
         cur_lon = msg.longitude
 
-
 def laneCallback(msg):
     lane_img = msg
 
@@ -175,6 +174,17 @@ class ScreenCAV(Screen):
 
 class ScreenMNS(Screen):
     def on_enter(self):
+        
+        def decSpeed(self):
+            print("current speed: " + str(curr_speed))
+            speed = curr_speed
+            speed -= 1
+            curr_speed = speed
+            print(curr_speed)d
+
+        def incSpeed(self):
+            curr_speed = curr_speed + 1
+
         # Get Current Time and Date
         curTime = datetime.datetime.now()
 
@@ -187,6 +197,12 @@ class ScreenMNS(Screen):
                         dateString, font_size='20dp', pos=(win_x/2-70, win_y/2-45), markup=True)
 
         # Show Speed
+        speedMinus = Button(text="[color=111111][b]-[/b][/color]", pos=(160, 220) ,size_hint=(.15, .2) ,font_size="100dp", markup=True, background_color=(0, 0, 0, 0))
+        speedMinus.bind(on_press=decSpeed)
+
+        speedPlus = Button(text="[color=111111][b]+[/b][/color]", pos=(260, 220) ,size_hint=(.15, .2), font_size="100dp", markup=True, background_color=(0,0,0,0))
+        speedPlus.bind(on_press=incSpeed)
+
         speedLbl = Label(
             text="[color=111111][b]%d[/b][/color]" % curr_speed,
                          pos_hint={'top': 1.1}, font_size="90dp", markup=True)
@@ -294,6 +310,8 @@ class ScreenMNS(Screen):
         self.add_widget(einheitLbl)
         self.add_widget(timeLbl)
         self.add_widget(speedLbl)
+        self.add_widget(speedMinus)
+        self.add_widget(speedPlus)
         self.add_widget(mapBtn)
         self.add_widget(camBtn)
         self.add_widget(setBtn)

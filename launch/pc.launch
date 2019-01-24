@@ -1,5 +1,5 @@
 <launch>
-    <rosparam file="/home/ubuntu/catkin_ws/src/params/params.yaml" command="load" ns="/"/>
+    <rosparam file="/home/davidzechm/catkin_ws/src/params/params.yaml" command="load" ns="/"/>
     <!-- <node pkg="rosserial_python" name="arduino_servo" type="serial_node.py">
 	<param name="port" value="/dev/ttyUSB1"/>
     </node>-->
