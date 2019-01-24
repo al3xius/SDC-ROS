@@ -51,6 +51,7 @@ sm = ScreenManager()
 #Window.fullscreen = True
 
 
+# ROS functions
 def gpsCallback(msg):
     if msg.status > 0:
         cur_lat = msg.latitude
