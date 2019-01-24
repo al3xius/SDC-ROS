@@ -1,30 +1,33 @@
 arduino:
   port: /dev/ttyUSB0
-  kind: mega
   pin:
     battery: adc0
     gasPedal: adc1
-    stop: D2
-    gasPedalSwitch: D3
-    keySwitch: D4
-    forwardIn: D7
-    backwardIn: D8
-    speedControlerL: D10
-    speedControlerR: D11
-    forwardControl: D12
-    forwardControl: D13
-    indicatorInL: D14
-    indicatorInR: D15
+    speed: adc6
+    gasPedalSwitch: D18
+    keySwitch: D22
+    forwardIn: D26
+    backwardIn: D27
+    speedControlerL: D4
+    speedControlerR: D3
+    returnControl: D9
+    forwardControl: D10
+    indicatorInL: D23
+    indicatorInR: D24
     indicatorL: D16
     indicatorR: D17
-    lightIn: D18
-    light: D19
+    lightIn: D25
+    stop: D39 #not connected
   
 battery:
   voltage: 12
   factor: 3.428
   k: 0.013
   d: 11.7
+
+gaspedal:
+  min: 43
+  max: 88
 
 lane:
   heightmultiplier: 9
@@ -61,3 +64,6 @@ gui:
   winX: 640
   winY: 480
   fullscreen: False
+
+normVelocity: 10
+normBreakingDistance: 2 # distance at normVelocity in m

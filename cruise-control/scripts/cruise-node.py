@@ -65,7 +65,8 @@ class ControlNode():
 if __name__ == '__main__':
     # create statemachine node
 	rospy.init_node('cruiseControl', anonymous=False)
+    rospy.loginfo("Cruise Control: Node started.")
 	try:
 		node = ControlNode()
 	except rospy.ROSInterruptException:  
-		pass
+		rospy.logerr("Cruise Control: Node stoped.")

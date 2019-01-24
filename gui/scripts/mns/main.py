@@ -27,6 +27,9 @@ from kivy.garden.mapview import MapView
 #ROS imports
 from sensor_msgs.msg import NavSatFix
 from sensor_msgs.msg import Image as ROSImage
+from sdc_msgs.msg import state
+from rosgraph_msgs.msg import Log
+
 
 #KV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ui'))
 
@@ -57,13 +60,18 @@ def gpsCallback(msg):
 def laneCallback(msg):
     lane_img = msg
 
-
 def camCallback(msg):
     cam_img = msg
 
 
 def objCallback(msg):
     obj_img = msg
+
+def logCallback(msg):
+    log = msg
+
+def stateCallback(msg):
+    state = msg
 
 
 class ScreenMAP(Screen):
@@ -317,11 +325,21 @@ if __name__ == '__main__':
     MyApp().run()
     rospy.init_node('gui', anonymous=False)
     rospy.loginfo("GUI: Node started.")
+
     gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
     lane_sub = rospy.Subscriber('/lane/combinedImage', ROSImage, laneCallback)
     cam_sub = rospy.Subscriber('/usb_cam/image_raw', ROSImage, camCallback)
-    obj_sub = rospy.Subscriber(
-        '/objectDedector/overlayImage', ROSImage, objCallback)
+    obj_sub = rospy.Subscriber('/objectDedector/overlayImage', ROSImage, objCallback)
+    state_sub = rospy.Subscriber("/state", state, stateCallback)
+    
+    rosout_sub = rospy.Subscriber("/rosout_agg", Log, logCallback)
+
+    state_pub = rospy.Publisher("/gui/state", state, queue_size=1)
+        
+
+    MyApp().run()
+
+    
     try:
         MyApp().run()
     except rospy.ROSInterruptException:

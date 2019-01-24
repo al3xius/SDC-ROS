@@ -6,11 +6,10 @@ import rospy
 import message_filters
 from numpy import interp
 # Messages
-from rosserial_arduino.msg import Adc
+# from rosserial_arduino.msg import Adc #unused
 from std_msgs.msg import Int16
 from sdc_msgs.msg import state, arduinoIn
 from sensor_msgs.msg import Joy
-
 
 def limitValue(value, min, max):
     """Limits value to a min or max value
@@ -51,8 +50,13 @@ class StateMachine():
 		voltage = interp(arduinoIn.analog[self.batteryPin], [0, 1015], [0, 5]) * self.batteryFactor
 		self.percent = limitValue((voltage - self.batteryD)/self.batteryK, 0, 100)
 
+		# get Speed
+		self.state.velocity = arduinoIn.analog[6]
+
 		# get gaspeddal
-		self.gasPedal = limitValue(interp(arduinoIn.analog[self.gasPedalPin], [0, 1015], [0, 100]), 0, 100)
+		# TODO: calibrate gaspedal
+		#self.gasPedal = limitValue(interp(arduinoIn.analog[self.gasPedalPin], [self.gasPedalMin, self.gasPedalMax], [0, 100]), 0, 100)
+		self.gasPedal = limitValue(arduinoIn.analog[self.gasPedalPin], 0, 100)
 		
 		# get direction
 		if not arduinoIn.digital[self.forwardInPin] and not arduinoIn.digital[self.gasPedalSwitchPin] and arduinoIn.digital[self.backwardInPin]:
@@ -66,7 +70,6 @@ class StateMachine():
 			self.manDirection = 0
  
 		# toggle light
-		# TODO entprellung?
 		self.toggleLight(not arduinoIn.digital[self.lightInPin])
 
 		# set indicator
@@ -76,26 +79,9 @@ class StateMachine():
 			self.manIndicate = "Right"
 		else:
 			self.manIndicate = "None"
+		
 
-
-		"""
-		# keyswitch -> lock car if not turned on
-		# reset to previous mode
-		keySwitch = getattr(arduinoIn, self.keySwitchPin)
-		if keySwitch and not self._key:
-			self.pervMode = self.mode
-
-		if keySwitch:
-			self._key = True
-			self.mode = "locked"
-		else:
-			self._key = False
-			# safety: prevent gettings stuck in a loop
-			if self.pervMode == "locked":
-				self.pervMode = "manual"
-			
-			self.mode = self.pervMode
-		"""
+		self.key = arduinoIn.digital[self.keySwitchPin]
 
 
 		self.publishState()
@@ -113,14 +99,13 @@ class StateMachine():
 		if Joy.buttons[5] and not self._remote:
 			self.pervMode = self.mode # reset to previous mode
 
-
 		if Joy.buttons[5]:
 			self._remote = True
 			self.mode = "remote"
 		else:
 			self._remote = False
 			# safety: prevent gettings stuck in a loop
-			if self.pervMode == "remote":
+			if self.pervMode == "remote" or self.pervMode == "cruise":
 				self.pervMode = "manual"
 			
 			self.mode = self.pervMode
@@ -131,9 +116,17 @@ class StateMachine():
 		self.joySteeringAngle = interp(Joy.axes[0], [-1, 1], [-100, 100])
 		self.publishState()
 
+	def cruiseCallback(self, state):
+		self.cruiseState = state
 
 
 	def publishState(self):
+		if not self.key and not self._key:
+			self.mode = "manual"
+			self._key = True
+		elif self.key:
+			self.mode = "locked"
+			self._key = False
 		
 		if self.mode == "manual":
 			self.enableSteering = False
@@ -143,24 +136,26 @@ class StateMachine():
 			self.direction = self.manDirection
 			self.indicate = self.manIndicate
 
-		elif self.mode == "cruise" and not arduinoIn.digital[self.stopPin]:
-			# TODO Get data from cruise control node
-			self.throttle = 0
-			self.enableMotor = False
-			self.steeringAngle = 0
-			self.enableSteering = False
+		elif self.mode == "cruise":
+			self.throttle = self.cruiseState.throttle
+			self.enableMotor = True
+			self.direction = 1
+			self.steeringAngle = self.cruiseState.steeringAngle
+			self.enableSteering = True
 
 		elif self.mode == "remote":
 			self.throttle = abs(self.joyThrottle) # make values positive
 			# set direction
 			if self.joyThrottle < 0:
+				self.enableMotor = True
 				self.direction = -1
 			elif self.joyThrottle > 0:
+				self.enableMotor = True
 				self.direction = 1
 			else:
+				self.enableMotor = False
 				self.direction = 0
-
-			self.enableMotor = True
+			
 			self.enableSteering = True
 			self.steeringAngle = self.joySteeringAngle
 
@@ -192,7 +187,6 @@ class StateMachine():
 		self.state.mode = self.mode
 		self.state.batteryCharge = self.percent
 		self.state.gasPedal = self.gasPedal
-		self.state.velocity = 0 #TODO get velocity from gps
 		self.state.steeringAngle = limitValue(self.steeringAngle, -100, 100)
 		self.state.enableSteering = self.enableSteering
 		self.state.enableMotor = self.enableMotor
@@ -202,7 +196,7 @@ class StateMachine():
 
 		self.pub.publish(self.state)
 
-	def __init__(self):
+	def updateParams(self):
 		# get params
 		# Pins
 		self.batteryPin = int(rospy.get_param("/arduino/pin/battery")[3:])
@@ -223,34 +217,51 @@ class StateMachine():
 		self.batteryD = float(rospy.get_param("/battery/d"))
 		self.batteryFactor = float(rospy.get_param("/battery/factor"))
 
+		# Gaspedal
+		self.gasPedalMin = int(rospy.get_param("/gaspedal/min"))
+		self.gasPedalMax = int(rospy.get_param("/gaspedal/max"))
+
+
+	def __init__(self):
+		rospy.init_node('stateMachine', anonymous=False)
+		rospy.loginfo("Starting State Machine.")
+
+		self.updateParams()
+
 		#init
 		self.mode = "manual"
 		self.indicate = "None"
 		self.pervMode = self.mode
 		self._remote = False
+		self.key = False
 		self._key = False
 		self._prevLightIn = True
 		self.light = False
 
 		self.state = state()
+		self.cruiseState = state()
+		self.arduInit = arduinoIn()
 
-		#subscriber
+		# subscriber
 		self.sub1 = rospy.Subscriber('/arduino/in', arduinoIn, self.arduCallback)
 		self.sub2 = rospy.Subscriber('/joy', Joy, self.joyCallback)
+		self.sub3 = rospy.Subscriber('/cruise/state', state, self.cruiseCallback)
 
-		#publisher
-		self.pub = rospy.Publisher("/state", state, queue_size=1)
+		# publisher
+		self.pub = rospy.Publisher("/state/unchecked", state, queue_size=1)
+
+
+		# service
+		param_serv = rospy.Service('updateParams', statemachine.srv.updateParams, self.updateParams)
+
+		self.arduCallback(self.arduInit)
 
 		rospy.spin()
 
 
+
 if __name__ == '__main__':
-    # create statemachine node
-	rospy.init_node('stateMachine', anonymous=False)
-	rospy.loginfo("State Machine: Node started.")
 	try:
 		machine = StateMachine()
 	except rospy.ROSInterruptException:  
-		pass
-
-                   
+		rospy.logerr("State Machine: Node stoped.")
