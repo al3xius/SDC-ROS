@@ -12,16 +12,31 @@ class SafetyNode:
         pass
 
     def laserCallback(self, msg):
-        if min(msg) < self.stopingDistance*0.9:
-            self.state.state = "stopping"
+        angle_min = radians(self.emergencyBreakAngle + self.state.steeringAngel)
+        angle_max = radians(360 - (self.emergencyBreakAngle + self.state.steeringAngel)
+
+        index_0 = int(radians(0)/ float(self.lastScan.angle_increment))
+        index_360 = int(radians(360)/ float(self.lastScan.angle_increment))
+        index_min = int(angle_min / float(self.lastScan.angle_increment))
+        index_max = int(angle_max / float(self.lastScan.angle_increment))
+
+        min_n = min(self.lastScan.ranges[index_max:index_360])
+        min_p = min(self.lastScan.ranges[index_0:index_min])
+
+        emergencyDistance = min((min_n, min_p))
+
+        if emergencyDistance < self.stopingDistance*0.9:
+            self.state.state = "emergencyBreak"
             self.state.enableSteering = True
-			self.state.steeringAngle = msg.steeringAngle #TODO: Steer away
+			self.state.steeringAngle = 0 #TODO: Steer away
 			self.state.enableMotor = False
 			self.state.throttle = 0
 			self.state.direction = 0
-			self.state.light = msg.light
+			#self.state.light = msg.light
 			self.state.indicate = "Both"
         pass
+
+        self.publish()
 
     def publish(self):
         self.state_pub.publish(self.state)
@@ -33,10 +48,12 @@ class SafetyNode:
     
 
         self.stopingDistance = None
-        normBreakingDistance = rospy.get_param("/normBreakingDistance", default="10")
-        normVelocity = rospy.get_param("/normVelocity", default="10")
+        normBreakingDistance = rospy.get_param("/safety/normBreakingDistance", default="10")
+        normVelocity = rospy.get_param("/safety/normVelocity", default="10")
+        self.emergencyBreakAngle = rospy.get_param("/safety/emergencyBreakAngle", default="10")
         
-        self.breakingFactor = normBreakingDistance/normVelocity*normVelocity
+        
+        self.breakingFactor = normBreakingDistance/(normVelocity*normVelocity)
 
 
         rospy.Subscriber("/state/unchecked", state, self.stateCallback)

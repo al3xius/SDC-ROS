@@ -65,5 +65,7 @@ gui:
   winY: 480
   fullscreen: False
 
-normVelocity: 10
-normBreakingDistance: 2 # distance at normVelocity in m
+safety:
+  normVelocity: 10
+  normBreakingDistance: 2 # distance at normVelocity in m
+  emergencyBreakAngle: 10 # +- angle form 0
