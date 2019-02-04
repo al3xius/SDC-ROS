@@ -34,9 +34,8 @@ from rosgraph_msgs.msg import Log
 #KV_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), 'ui'))
 
 # Set Window size and other Variables
-#TODO: 16:9 & touch mit display und rpi testen
-win_x = 640
-win_y = 480
+win_x = 1024
+win_y = 600
 Window.size = (win_x, win_y)
 # MAP:
 # Koordinaten (Weiz)
@@ -48,7 +47,7 @@ curr_speed = 8
 
 # Screen Manager
 sm = ScreenManager()
-#Window.fullscreen = True
+Window.fullscreen = True
 
 
 # ROS functions
@@ -177,10 +176,6 @@ class ScreenMNS(Screen):
         
         def decSpeed(self):
             print("current speed: " + str(curr_speed))
-            speed = curr_speed
-            speed -= 1
-            curr_speed = speed
-            print(curr_speed)d
 
         def incSpeed(self):
             curr_speed = curr_speed + 1
@@ -197,10 +192,10 @@ class ScreenMNS(Screen):
                         dateString, font_size='20dp', pos=(win_x/2-70, win_y/2-45), markup=True)
 
         # Show Speed
-        speedMinus = Button(text="[color=111111][b]-[/b][/color]", pos=(160, 220) ,size_hint=(.15, .2) ,font_size="100dp", markup=True, background_color=(0, 0, 0, 0))
+        speedMinus = Button(text="[color=111111][b]-[/b][/color]", pos=(330, 280) ,size_hint=(.15, .2) ,font_size="100dp", markup=True, background_color=(0, 0, 0, 0))
         speedMinus.bind(on_press=decSpeed)
 
-        speedPlus = Button(text="[color=111111][b]+[/b][/color]", pos=(260, 220) ,size_hint=(.15, .2), font_size="100dp", markup=True, background_color=(0,0,0,0))
+        speedPlus = Button(text="[color=111111][b]+[/b][/color]", pos=(550, 280) ,size_hint=(.15, .2), font_size="80dp", markup=True, background_color=(0,0,0,0))
         speedPlus.bind(on_press=incSpeed)
 
         speedLbl = Label(
@@ -289,12 +284,12 @@ class ScreenMNS(Screen):
         # Lights
         def switchLights(left, right, light):
             #left = "left-arrow"
-            leftPath = 'scripts/assets/data/%s.png' % left
-            rightPath = 'scripts/assets/data/%s.png' % right
-            lightPath = 'scripts/assets/data/%s.png' % light
+            leftPath = '../assets/data/%s.png' % left
+            rightPath = '../assets/data/%s.png' % right
+            lightPath = '../assets/data/%s.png' % light
 
             leftImg = Image(
-                source=leftPath, size_hint=(.07, .07), pos=(win_x/2-100, win_y/2-100))
+                source=leftPath, size_hint=(.07, .07), pos=(win_x/2-120, win_y/2-100))
             rightImg = Image(
                 source=rightPath, size_hint=(.07, .07), pos=(win_x/2+60, win_y/2-100))
             lightImg = Image(
