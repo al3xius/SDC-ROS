@@ -119,6 +119,9 @@ class StateMachine():
 	def cruiseCallback(self, state):
 		self.cruiseState = state
 
+	def guiCallback(self, state):
+    	self.guiState = state
+
 
 	def publishState(self):
 		if not self.key and not self._key:
@@ -138,6 +141,7 @@ class StateMachine():
 
 		elif self.mode == "cruise":
 			self.throttle = self.cruiseState.throttle
+			self.targetVelocity = self.guiState.targetVelocity
 			self.enableMotor = True
 			self.direction = 1
 			self.steeringAngle = self.cruiseState.steeringAngle
@@ -240,12 +244,14 @@ class StateMachine():
 
 		self.state = state()
 		self.cruiseState = state()
+		self.guiState = state()
 		self.arduInit = arduinoIn()
 
 		# subscriber
 		self.sub1 = rospy.Subscriber('/arduino/in', arduinoIn, self.arduCallback)
 		self.sub2 = rospy.Subscriber('/joy', Joy, self.joyCallback)
 		self.sub3 = rospy.Subscriber('/cruise/state', state, self.cruiseCallback)
+		self.sub4 = rospy.Subscriber('/gui/state', state, self.guiCallback)
 
 		# publisher
 		self.pub = rospy.Publisher("/state/unchecked", state, queue_size=1)

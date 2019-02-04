@@ -47,7 +47,7 @@ curr_speed = 8
 
 # Screen Manager
 sm = ScreenManager()
-Window.fullscreen = True
+#Window.fullscreen = True
 
 
 # ROS functions
