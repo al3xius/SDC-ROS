@@ -252,7 +252,7 @@ class StateMachine():
 
 
 		# service
-		param_serv = rospy.Service('updateParams', statemachine.srv.updateParams, self.updateParams)
+		#param_serv = rospy.Service('updateParams', statemachine.srv.updateParams, self.updateParams)
 
 		self.arduCallback(self.arduInit)
 
