@@ -141,7 +141,6 @@ class StateMachine():
 
 		elif self.mode == "cruise":
 			self.throttle = self.cruiseState.throttle
-			self.targetVelocity = self.guiState.targetVelocity
 			self.enableMotor = True
 			self.direction = 1
 			self.steeringAngle = self.cruiseState.steeringAngle
@@ -197,6 +196,7 @@ class StateMachine():
 		self.state.direction = self.direction
 		self.state.light = self.light
 		self.state.indicate = self.indicate
+		self.state.targetVelocity = limitValue(self.guiState.targetVelocity, 0, 10)
 
 		self.pub.publish(self.state)
 
