@@ -120,7 +120,7 @@ class StateMachine():
 		self.cruiseState = state
 
 	def guiCallback(self, state):
-    	self.guiState = state
+    		self.guiState = state
 
 
 	def publishState(self):
