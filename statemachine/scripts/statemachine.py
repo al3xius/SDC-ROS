@@ -121,6 +121,7 @@ class StateMachine():
 
 	def guiCallback(self, state):
     		self.guiState = state
+			toggleLight(state.light)
 
 
 	def publishState(self):
