@@ -55,8 +55,8 @@ class StateMachine():
 
 		# get gaspeddal
 		# TODO: calibrate gaspedal
-		#self.gasPedal = limitValue(interp(arduinoIn.analog[self.gasPedalPin], [self.gasPedalMin, self.gasPedalMax], [0, 100]), 0, 100)
-		self.gasPedal = limitValue(arduinoIn.analog[self.gasPedalPin], 0, 100)
+		self.gasPedal = limitValue(interp(arduinoIn.analog[self.gasPedalPin], [self.gasPedalMin, self.gasPedalMax], [0, 100]), 0, 100)
+		#self.gasPedal = limitValue(arduinoIn.analog[self.gasPedalPin], 0, 100)
 		
 		# get direction
 		if not arduinoIn.digital[self.forwardInPin] and not arduinoIn.digital[self.gasPedalSwitchPin] and arduinoIn.digital[self.backwardInPin]:
@@ -119,18 +119,18 @@ class StateMachine():
 	def cruiseCallback(self, state):
 		self.cruiseState = state
 
-	def guiCallback(self, state):
-    		self.guiState = state
-			toggleLight(state.light)
+	"""def guiCallback(self, state):
+    	self.guiState = state
+		toggleLight(state.light)"""
 
 
 	def publishState(self):
-		if not self.key and not self._key:
+		"""if not self.key and not self._key:
 			self.mode = "manual"
 			self._key = True
 		elif self.key:
 			self.mode = "locked"
-			self._key = False
+			self._key = False"""
 		
 		if self.mode == "manual":
 			self.enableSteering = False
@@ -252,7 +252,7 @@ class StateMachine():
 		self.sub1 = rospy.Subscriber('/arduino/in', arduinoIn, self.arduCallback)
 		self.sub2 = rospy.Subscriber('/joy', Joy, self.joyCallback)
 		self.sub3 = rospy.Subscriber('/cruise/state', state, self.cruiseCallback)
-		self.sub4 = rospy.Subscriber('/gui/state', state, self.guiCallback)
+		#self.sub4 = rospy.Subscriber('/gui/state', state, self.guiCallback)
 
 		# publisher
 		self.pub = rospy.Publisher("/state/unchecked", state, queue_size=1)

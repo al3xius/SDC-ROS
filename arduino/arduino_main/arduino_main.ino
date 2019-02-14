@@ -1,8 +1,3 @@
-
-/* 
- * rosserial ADC Example
- */
-
 #if (ARDUINO >= 100)
  #include <Arduino.h>
 #else
@@ -14,9 +9,6 @@
 #include <std_msgs/String.h>
 
 ros::NodeHandle nh;
-//Wait for connection
-//while(!nh.connected()) {nh.spinOnce();}
-
 
 //Publisher
 sdc_msgs::arduinoIn arduinoIn_msg;
