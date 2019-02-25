@@ -50,18 +50,17 @@ long curPos = 0;
 int goalPos = 0;
 int moveSteps = 0;
 const int minPos = -360; 
-const int maxPos = 360;  
+const int maxPos = 360; 
+const int zeroPos = 0; 
  
 sdc_msgs::state state_msg;
 std_msgs::Int32 pos;
-String mode = "";
 
 //Subscriber
 void messageCb( const sdc_msgs::state& data){
   //steering
-  mode = data.mode;
   getPos();
-  if (mode == "remote" || data.mode == "cruise") {
+  if (data.mode == "remote" || data.mode == "cruise") {
     stepper.enable();
     goalPos = map(data.steeringAngle, -100, 100, minPos, maxPos);
     moveSteps = goalPos - curPos;
@@ -70,7 +69,6 @@ void messageCb( const sdc_msgs::state& data){
   else{
     stepper.disable();
   }
-    
 }
 
 void getPos(){
@@ -111,7 +109,7 @@ void getPos(){
 
   //TODO: crc check
   if(posValid){
-    curPos = result + turns * 1023;
+    curPos = result + turns * 1023 - zeroPos;
   }
   else{
     curPos = curPos;
