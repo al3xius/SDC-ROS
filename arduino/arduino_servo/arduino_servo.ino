@@ -56,6 +56,9 @@ const int zeroPos = 0;
 sdc_msgs::state state_msg;
 std_msgs::Int32 pos;
 
+
+
+
 //Subscriber
 void messageCb( const sdc_msgs::state& data){
   //steering

@@ -2,7 +2,7 @@
 """TODO: 	+ calibrate BatteryVoltage
 """
 
-import rospy
+import rospy, math
 import message_filters
 from numpy import interp
 # Messages
@@ -112,7 +112,10 @@ class StateMachine():
 		
 		self.toggleLight(Joy.buttons[8])
 
-		self.joyThrottle = interp(Joy.axes[1], [-1, 1], [-100, 100])
+		throttle = Joy.axes[1]**2
+
+		self.joyThrottle = interp(throttle, [-1, 1], [-100, 100])
+
 		self.joySteeringAngle = interp(Joy.axes[0], [-1, 1], [-100, 100])
 		self.publishState()
 

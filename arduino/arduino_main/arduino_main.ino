@@ -21,7 +21,7 @@ unsigned long previousMillis = 0;
 unsigned long indicateMillis = 0;
 
 int pullUpPins[] = {18, 22, 23, 24, 25, 26, 27};
-int outputPins[] = {3, 4, 9, 10, 12, 16, 17, 19};
+int outputPins[] = {2, 4, 9, 10, 12, 16, 17, 19};
 
 const int is_mega = LOW;
 
@@ -76,7 +76,7 @@ void messageCb( const sdc_msgs::state& data){
   }
     
   int duty = map(throttle, 0, 100, 0, 255);
-  analogWrite(3, duty);
+  analogWrite(2, duty);
   analogWrite(4, duty);
   
 
