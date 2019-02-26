@@ -35,7 +35,7 @@ def limitValue(value, min, max):
 class StateMachine():
     
 	def toggleLight(self, input):
-		"""toggles light by pressing button in car or in joy"""
+		"""toggles light by pressing button in car or on joy"""
 
 		if input and self._prevLightIn:
 			self.light = not self.light
@@ -54,9 +54,7 @@ class StateMachine():
 		self.state.velocity = arduinoIn.analog[6]
 
 		# get gaspeddal
-		# TODO: calibrate gaspedal
 		self.gasPedal = limitValue(interp(arduinoIn.analog[self.gasPedalPin], [self.gasPedalMin, self.gasPedalMax], [0, 100]), 0, 100)
-		#self.gasPedal = limitValue(arduinoIn.analog[self.gasPedalPin], 0, 100)
 		
 		# get direction
 		if not arduinoIn.digital[self.forwardInPin] and not arduinoIn.digital[self.gasPedalSwitchPin] and arduinoIn.digital[self.backwardInPin]:
@@ -69,19 +67,20 @@ class StateMachine():
 			self.manEnableMotor = False
 			self.manDirection = 0
  
-		# toggle light
-		self.toggleLight(not arduinoIn.digital[self.lightInPin])
+		# toggle light, NC
+		# self.toggleLight(not arduinoIn.digital[self.lightInPin])
 
 		# set indicator
+		"""NC
 		if not arduinoIn.digital[self.indicatorInLPin]:
 			self.manIndicate= "Left"
 		elif not arduinoIn.digital[self.indicatorInRPin]:
 			self.manIndicate = "Right"
 		else:
-			self.manIndicate = "None"
+			self.manIndicate = "None""""
 		
 
-		self.key = arduinoIn.digital[self.keySwitchPin]
+		#self.key = arduinoIn.digital[self.keySwitchPin] #NC
 
 
 		self.publishState()

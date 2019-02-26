@@ -20,9 +20,9 @@ ros::NodeHandle nh;
 #define MICROSTEPS 1
 
 //pin def
-const int DIR = 4;
-const int STEP = 2;
-const int ENABLE = 5;
+const int DIR = 5;
+const int STEP = 3;
+const int ENABLE = 6;
 
 BasicStepperDriver stepper(MOTOR_STEPS, DIR, STEP, ENABLE);
 
@@ -54,7 +54,7 @@ const int maxPos = 360;
 const int zeroPos = 0; 
  
 sdc_msgs::state state_msg;
-std_msgs::Int32 pos;
+sdc_msgs::state state_out;
 
 
 
@@ -67,8 +67,8 @@ void messageCb( const sdc_msgs::state& data){
     stepper.enable();
     goalPos = map(data.steeringAngle, -100, 100, minPos, maxPos);
     moveSteps = goalPos - curPos;
-    curPos += moveSteps;
     stepper.rotate(moveSteps);
+    curPos += moveSteps;
   }
   else{
     stepper.disable();
@@ -121,7 +121,7 @@ void getPos(){
 }
 
 ros::Subscriber<sdc_msgs::state> sub("state", &messageCb);
-//ros::Publisher p("/arduino/servo", &pos);
+ros::Publisher p("/arduino/servo", &state_out);
 
 void setup()
 { 
@@ -134,12 +134,12 @@ void setup()
  
   stepper.begin(RPM, MICROSTEPS);
   stepper.disable();
-  digitalWrite(5,HIGH);
 
   SPI.begin();
   SPI.setDataMode(SPI_MODE2);
   SPI.setBitOrder(MSBFIRST);
   SPI.setClockDivider(SPI_CLOCK_DIV4);
+  pinMode(8, INPUT_PULLUP);
 }
 
 
@@ -148,10 +148,16 @@ void loop()
 {
   /*unsigned long currentMillis = millis();
   if(currentMillis - previousMillis > 20){
-    getPos();
-    pos.data = curPos;
+    //getPos();
+    state_out.steeringAngle = curPos;
+    if (digitalRead(8)){
+      state_out.mode = "alarm: motor";
+    }
+    else{
+      state_out.mode = "nominal";
+    }
     previousMillis = millis();
-    p.publish(&pos);
+    p.publish(&state_out);
   }*/
   
   nh.spinOnce();
