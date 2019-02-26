@@ -20,9 +20,9 @@ ros::NodeHandle nh;
 #define MICROSTEPS 1
 
 //pin def
-const int DIR = 8;
-const int STEP = 9;
-const int ENABLE = 11; //TODO: change pin
+const int DIR = 4;
+const int STEP = 2;
+const int ENABLE = 5;
 
 BasicStepperDriver stepper(MOTOR_STEPS, DIR, STEP, ENABLE);
 
@@ -62,11 +62,12 @@ std_msgs::Int32 pos;
 //Subscriber
 void messageCb( const sdc_msgs::state& data){
   //steering
-  getPos();
+  //getPos();
   if (data.mode == "remote" || data.mode == "cruise") {
     stepper.enable();
     goalPos = map(data.steeringAngle, -100, 100, minPos, maxPos);
     moveSteps = goalPos - curPos;
+    curPos += moveSteps;
     stepper.rotate(moveSteps);
   }
   else{
@@ -133,6 +134,7 @@ void setup()
  
   stepper.begin(RPM, MICROSTEPS);
   stepper.disable();
+  digitalWrite(5,HIGH);
 
   SPI.begin();
   SPI.setDataMode(SPI_MODE2);
