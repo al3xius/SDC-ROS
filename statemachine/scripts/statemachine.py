@@ -77,7 +77,8 @@ class StateMachine():
 		elif not arduinoIn.digital[self.indicatorInRPin]:
 			self.manIndicate = "Right"
 		else:
-			self.manIndicate = "None""""
+			self.manIndicate = "None"
+		"""
 		
 
 		#self.key = arduinoIn.digital[self.keySwitchPin] #NC
@@ -91,7 +92,7 @@ class StateMachine():
 			leftStick: steering | throttle
 			r1: enable remote control
 			start: toggle light
-
+			arrow up/down: change target speed
 		"""
 
 		# set mode to remote
@@ -108,7 +109,16 @@ class StateMachine():
 				self.pervMode = "manual"
 			
 			self.mode = self.pervMode
-		
+
+		#TODO: set correct button
+		if Joy.buttons[2] and Joy.buttons[2] != _prevBtnUp:
+    			self.targetVelocity += 1
+		elif Joy.buttons[3] and Joy.buttons[3] != _prevBtnDown:
+    			self.targetVelocity -= 1
+	
+		_prevBtnUp = Joy.buttons[2]
+		_prevBtnDown = Joy.buttons[3]
+
 		self.toggleLight(Joy.buttons[8])
 
 		throttle = Joy.axes[1]**2
@@ -123,6 +133,13 @@ class StateMachine():
 
 	"""def guiCallback(self, state):
     	self.guiState = state
+		limitValue(self.guiState.targetVelocity, 0, 10)
+		if self.guiState.targetVelocity > 1 and self.guiState.targetVelocity != self._prevTargetVel:
+    		self.targetVelocity += 1
+		elif self.guiState.targetVelocity < 1 and self.guiState.targetVelocity != self._prevTargetVel:
+			self.targetVelocity -= 1
+		
+		self._prevTargetVel = self.targetVelocity
 		toggleLight(state.light)"""
 
 
@@ -140,7 +157,7 @@ class StateMachine():
 			self.throttle = self.gasPedal
 			self.enableMotor = self.manEnableMotor
 			self.direction = self.manDirection
-			self.indicate = self.manIndicate
+			#self.indicate = self.manIndicate
 
 		elif self.mode == "cruise":
 			self.throttle = self.cruiseState.throttle
@@ -167,16 +184,6 @@ class StateMachine():
 
 			# Indicate that the vehicle is controlled remotely
 			self.indicate = "Both"
-		
-		#TODO implement locked mode
-		elif self.mode == "locked":
-			self.enableSteering = False
-			self.steeringAngle = 0
-			self.enableMotor = False
-			self.throttle = 0
-			self.direction = 0
-			self.light = False
-			self.indicate = "None"
 
 		else:
 			self.enableSteering = False
@@ -199,7 +206,7 @@ class StateMachine():
 		self.state.direction = self.direction
 		self.state.light = self.light
 		self.state.indicate = self.indicate
-		self.state.targetVelocity = limitValue(self.guiState.targetVelocity, 0, 10)
+		self.state.targetVelocity = limitValue(self.targetVelocity, 0, 10)
 
 		self.pub.publish(self.state)
 
@@ -244,6 +251,10 @@ class StateMachine():
 		self._key = False
 		self._prevLightIn = True
 		self.light = False
+		self.targetVelocity = 0
+		self._prevTargetVel = 0
+		self._prevBtnUp = False
+		self._prevBtnDown = False
 
 		self.state = state()
 		self.cruiseState = state()
