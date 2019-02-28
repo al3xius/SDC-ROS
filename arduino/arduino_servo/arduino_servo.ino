@@ -4,6 +4,9 @@
  #include <WProgram.h>
 #endif
 
+#include "BasicStepperDriver.h"
+#include "SPI.h"
+
 #include <ros.h>
 #include <std_msgs/Int32.h>
 #include <sdc_msgs/state.h>
@@ -11,8 +14,9 @@
 
 ros::NodeHandle nh;
 
-#include "BasicStepperDriver.h"
-#include "SPI.h"
+sdc_msgs::state state_msg;
+sdc_msgs::state state_out;
+
 
 // Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
 #define MOTOR_STEPS 200
@@ -29,7 +33,7 @@ BasicStepperDriver stepper(MOTOR_STEPS, DIR, STEP, ENABLE);
 unsigned long previousMillis = 0;
 
 
-//encoder
+//encoder vars
 int crc = 0;
 
 int zeroPoint = 0;
@@ -46,20 +50,15 @@ long crcCheck = 0;
 long curPos = 0;
 
 
-//dimentions in steps
+//rotary dimentions in steps
 int goalPos = 0;
 int moveSteps = 0;
 const int minPos = -360; 
 const int maxPos = 360; 
 const int zeroPos = 0; 
  
-sdc_msgs::state state_msg;
-sdc_msgs::state state_out;
 
-
-
-
-//Subscriber
+//Subscriber callBack
 void messageCb( const sdc_msgs::state& data){
   //steering
   //getPos();
@@ -76,14 +75,14 @@ void messageCb( const sdc_msgs::state& data){
 }
 
 void getPos(){
-  //TODO: Multi turn
+  //get curent positon  of encoder
   int zero1 = SPI.transfer(0x00); //zero
   int zero2 = SPI.transfer(0x08); //zero + default zero point
   zeroPoint = zero2 & 0B00000001; //1 = Factory Default
   
-  int flags = SPI.transfer(0x10); //Position Valid + Positon Syncronized
-  posSync = flags >> 6 & 0B00000001; //1 = trigggerd by SPI
-  posValid = flags >> 7; //1 = Valid
+  int flags = SPI.transfer(0x10);     //Position Valid + Positon Syncronized
+  posSync = flags >> 6 & 0B00000001;  //1 = trigggerd by SPI
+  posValid = flags >> 7;              //1 = Valid
 
   int pos1 = SPI.transfer(0x18);
   int pos2 = SPI.transfer(0x20);
@@ -92,12 +91,13 @@ void getPos(){
   actualCrc = crc & 0B01111111;
   staleData = crc >> 7;
 
+  /*
   crcCheck = zeroPoint;
   crcCheck = crcCheck * 256 + flags;
   crcCheck = crcCheck * 256 + pos1;
   crcCheck = crcCheck * 256 + pos2;
   crcCheck = crcCheck * 256 + crc;
-  crcCheck = crcCheck >> 7;
+  crcCheck = crcCheck >> 7;*/
   
   result = pos1;
   result = result * 256 + pos2;
@@ -135,6 +135,7 @@ void setup()
   stepper.begin(RPM, MICROSTEPS);
   stepper.disable();
 
+  //SPI
   SPI.begin();
   SPI.setDataMode(SPI_MODE2);
   SPI.setBitOrder(MSBFIRST);

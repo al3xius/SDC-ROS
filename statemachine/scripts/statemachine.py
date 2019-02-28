@@ -131,16 +131,15 @@ class StateMachine():
 	def cruiseCallback(self, state):
 		self.cruiseState = state
 
-	"""def guiCallback(self, state):
-    	self.guiState = state
-		limitValue(self.guiState.targetVelocity, 0, 10)
+	def guiCallback(self, state):
+    		self.guiState = state
 		if self.guiState.targetVelocity > 1 and self.guiState.targetVelocity != self._prevTargetVel:
-    		self.targetVelocity += 1
+    			self.targetVelocity += 1
 		elif self.guiState.targetVelocity < 1 and self.guiState.targetVelocity != self._prevTargetVel:
-			self.targetVelocity -= 1
-		
+    			self.targetVelocity -= 1
+					
 		self._prevTargetVel = self.targetVelocity
-		toggleLight(state.light)"""
+		toggleLight(state.light)
 
 
 	def publishState(self):
@@ -265,7 +264,7 @@ class StateMachine():
 		self.sub1 = rospy.Subscriber('/arduino/in', arduinoIn, self.arduCallback)
 		self.sub2 = rospy.Subscriber('/joy', Joy, self.joyCallback)
 		self.sub3 = rospy.Subscriber('/cruise/state', state, self.cruiseCallback)
-		#self.sub4 = rospy.Subscriber('/gui/state', state, self.guiCallback)
+		self.sub4 = rospy.Subscriber('/gui/state', state, self.guiCallback)
 
 		# publisher
 		self.pub = rospy.Publisher("/state/unchecked", state, queue_size=1)
