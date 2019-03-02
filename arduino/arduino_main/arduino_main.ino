@@ -1,8 +1,3 @@
-
-/* 
- * rosserial ADC Example
- */
-
 #if (ARDUINO >= 100)
  #include <Arduino.h>
 #else
@@ -13,67 +8,73 @@
 #include <sdc_msgs/state.h>
 #include <std_msgs/String.h>
 
+
+//---ROS---
 ros::NodeHandle nh;
-//Wait for connection
-//while(!nh.connected()) {nh.spinOnce();}
 
-
-//Publisher
 sdc_msgs::arduinoIn arduinoIn_msg;
 sdc_msgs::state starte_msg;
-String indicate = "";
 
+//publisher
 ros::Publisher p("/arduino/in", &arduinoIn_msg);
 
+//---END---
+
+
+
+//---VAR_DEF---
+String indicate = "";
 unsigned long previousMillis = 0;
 unsigned long indicateMillis = 0;
-
-int pullUpPins[] = {18, 22, 23, 24, 25, 26, 27};
-int outputPins[] = {3, 4, 9, 10, 12, 16, 17, 19};
-
-const int is_mega = LOW;
-
 int indicatorState = LOW;
+//---END---
 
-//Speedometer
+//---PIN_DEF---
+int pullUpPins[] = {18, 22, 23, 24, 25, 26, 27};
+int outputPins[] = {2, 4, 9, 10, 12, 16, 17, 19};
+//---END---
+
+
+//---SPEEDOMETER---
 const int speedometerPin = A2;
 const int circumference = 1000; //in mm
-int maxSpeedCounter = 100;//min time (in ms) of one rotation (for debouncing)
+int maxSpeedCounter = 100;      //min time (in ms) of one rotation (for debouncing)
 int speedCounter;
 int speedVal;
-long timer = 0;// time between one full rotation (in ms)
+long timer = 0;                 // time between one full rotation (in ms)
 float speedKMH = 0.00;
+//---END---
 
 
-//Subscriber
+//Subscriber callback
 void messageCb( const sdc_msgs::state& data){
 
   //-----------motor controller-----------
 
-
-  digitalWrite(12, data.enableMotor);
+  digitalWrite(12, data.enableMotor); //enable Motor
   
   //direction
   if (data.direction > 0 && data.enableMotor){
     //forward
-    digitalWrite(10, LOW); //forward pin
-    digitalWrite(9, HIGH); //backward pin
+    digitalWrite(10, LOW);  //forward pin
+    digitalWrite(9, HIGH);  //backward pin
   }
   else if(data.direction < 0 && data.enableMotor){
     //backward
-    digitalWrite(10, HIGH);
-    digitalWrite(9, LOW);
+    digitalWrite(10, HIGH); //forward pin
+    digitalWrite(9, LOW);   //backward pin
   }
   else{
-    digitalWrite(10, HIGH);
-    digitalWrite(9, HIGH);
+    //disabled
+    digitalWrite(10, HIGH); //forward pin
+    digitalWrite(9, HIGH);  //backward pin
   }
 
   //throttle
   int throttle = 0;
   if (data.enableMotor){
     if(data.direction < 0){
-      throttle = int(data.throttle/2);
+      throttle = int(data.throttle/2); //dicrease speed by half if reversing
     }
     else{
       throttle = data.throttle;
@@ -82,10 +83,10 @@ void messageCb( const sdc_msgs::state& data){
   else{
     throttle = 0;
   }
-    
+  
   int duty = map(throttle, 0, 100, 0, 255);
-  analogWrite(3, duty);
-  analogWrite(4, duty);
+  analogWrite(2, duty); //left
+  analogWrite(4, duty); //right
   
 
   //----------------END-------------------
@@ -102,6 +103,8 @@ ros::Subscriber<sdc_msgs::state> sub("state", &messageCb );
 
 void setup()
 { 
+
+  //---Set Pinmodes---
   //Pullup IN
   for (int i = 0; i < sizeof(pullUpPins); i++){
     pinMode(pullUpPins[i], INPUT_PULLUP);
@@ -113,8 +116,9 @@ void setup()
   for (int i = 0; i < sizeof(outputPins); i++){
     pinMode(outputPins[i], OUTPUT);
   }
-  
-  //speedometer
+  //---END---
+
+  //---SPEDOMETER---
   speedCounter = maxSpeedCounter;
   
   //Source: https://www.instructables.com/id/Arduino-Bike-Speedometer/
@@ -127,7 +131,7 @@ void setup()
   TCCR1B = 0;// same for TCCR1B
   TCNT1  = 0;
   // set timer count for 1khz increments
-  OCR1A = 1999;// = (1/1000) / ((1/(16*10^6))*8) - 1
+  OCR1A = 1999; // = (1/1000) / ((1/(16*10^6))*8) - 1
   // turn on CTC mode
   TCCR1B |= (1 << WGM12);
   // Set CS11 bit for 8 prescaler
@@ -135,18 +139,19 @@ void setup()
   // enable timer compare interrupt
   TIMSK1 |= (1 << OCIE1A);
   
-  sei();//allow interrupts
-  //END TIMER SETUP
+  sei();    //allow interrupts
+
+  //---END---
 
   nh.getHardware()->setBaud(57600);
   nh.initNode();
 
   nh.subscribe(sub);
   nh.advertise(p);
+
   int last_milli = millis();
 }
 
-//We average the analog reading to elminate some of the noise
 int averageAnalog(int pin){
   int v=0;
   for(int i=0; i<4; i++) v+= analogRead(pin);
@@ -196,7 +201,7 @@ void loop()
     arduinoIn_msg.digital[pullUpPins[i]] = digitalRead(pullUpPins[i]);
   }
   
-  
+  //---INDICATE---
   if (indicate == "Left"){
     digitalWrite(16, indicatorState);
     digitalWrite(17, LOW);
@@ -215,6 +220,7 @@ void loop()
     digitalWrite(17, LOW);
   }
   arduinoIn_msg.digital[50] = indicatorState;
+  //---END---
 
  
   //indicator
@@ -225,14 +231,13 @@ void loop()
     else
       indicatorState = LOW;
   }
-
   arduinoIn_msg.analog[6] = speedKMH;
 
-  //timer so serial doesn't get overloaded
+  //publish only every 20s so serial Port doesn't get overloaded
   if(currentMillis - previousMillis > 20){
     previousMillis = millis();
     p.publish(&arduinoIn_msg);
   }
   
-  nh.spinOnce();
+  nh.spinOnce(); //ROS
 }

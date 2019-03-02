@@ -2,7 +2,7 @@
 """TODO: 	+ calibrate BatteryVoltage
 """
 
-import rospy
+import rospy, math
 import message_filters
 from numpy import interp
 # Messages
@@ -35,7 +35,7 @@ def limitValue(value, min, max):
 class StateMachine():
     
 	def toggleLight(self, input):
-		"""toggles light by pressing button in car or in joy"""
+		"""toggles light by pressing button in car or on joy"""
 
 		if input and self._prevLightIn:
 			self.light = not self.light
@@ -54,9 +54,7 @@ class StateMachine():
 		self.state.velocity = arduinoIn.analog[6]
 
 		# get gaspeddal
-		# TODO: calibrate gaspedal
-		#self.gasPedal = limitValue(interp(arduinoIn.analog[self.gasPedalPin], [self.gasPedalMin, self.gasPedalMax], [0, 100]), 0, 100)
-		self.gasPedal = limitValue(arduinoIn.analog[self.gasPedalPin], 0, 100)
+		self.gasPedal = limitValue(interp(arduinoIn.analog[self.gasPedalPin], [self.gasPedalMin, self.gasPedalMax], [0, 100]), 0, 100)
 		
 		# get direction
 		if not arduinoIn.digital[self.forwardInPin] and not arduinoIn.digital[self.gasPedalSwitchPin] and arduinoIn.digital[self.backwardInPin]:
@@ -69,19 +67,21 @@ class StateMachine():
 			self.manEnableMotor = False
 			self.manDirection = 0
  
-		# toggle light
-		self.toggleLight(not arduinoIn.digital[self.lightInPin])
+		# toggle light, NC
+		# self.toggleLight(not arduinoIn.digital[self.lightInPin])
 
 		# set indicator
+		"""NC
 		if not arduinoIn.digital[self.indicatorInLPin]:
 			self.manIndicate= "Left"
 		elif not arduinoIn.digital[self.indicatorInRPin]:
 			self.manIndicate = "Right"
 		else:
 			self.manIndicate = "None"
+		"""
 		
 
-		self.key = arduinoIn.digital[self.keySwitchPin]
+		#self.key = arduinoIn.digital[self.keySwitchPin] #NC
 
 
 		self.publishState()
@@ -92,7 +92,7 @@ class StateMachine():
 			leftStick: steering | throttle
 			r1: enable remote control
 			start: toggle light
-
+			arrow up/down: change target speed
 		"""
 
 		# set mode to remote
@@ -109,24 +109,46 @@ class StateMachine():
 				self.pervMode = "manual"
 			
 			self.mode = self.pervMode
-		
+
+		#TODO: set correct button
+		if Joy.buttons[2] and Joy.buttons[2] != _prevBtnUp:
+    			self.targetVelocity += 1
+		elif Joy.buttons[3] and Joy.buttons[3] != _prevBtnDown:
+    			self.targetVelocity -= 1
+	
+		_prevBtnUp = Joy.buttons[2]
+		_prevBtnDown = Joy.buttons[3]
+
 		self.toggleLight(Joy.buttons[8])
 
-		self.joyThrottle = interp(Joy.axes[1], [-1, 1], [-100, 100])
+		throttle = Joy.axes[1]**2
+
+		self.joyThrottle = interp(throttle, [-1, 1], [-100, 100])
+
 		self.joySteeringAngle = interp(Joy.axes[0], [-1, 1], [-100, 100])
 		self.publishState()
 
 	def cruiseCallback(self, state):
 		self.cruiseState = state
 
+	def guiCallback(self, state):
+    		self.guiState = state
+		if self.guiState.targetVelocity > 1 and self.guiState.targetVelocity != self._prevTargetVel:
+    			self.targetVelocity += 1
+		elif self.guiState.targetVelocity < 1 and self.guiState.targetVelocity != self._prevTargetVel:
+    			self.targetVelocity -= 1
+					
+		self._prevTargetVel = self.targetVelocity
+		toggleLight(state.light)
+
 
 	def publishState(self):
-		if not self.key and not self._key:
+		"""if not self.key and not self._key:
 			self.mode = "manual"
 			self._key = True
 		elif self.key:
 			self.mode = "locked"
-			self._key = False
+			self._key = False"""
 		
 		if self.mode == "manual":
 			self.enableSteering = False
@@ -134,7 +156,7 @@ class StateMachine():
 			self.throttle = self.gasPedal
 			self.enableMotor = self.manEnableMotor
 			self.direction = self.manDirection
-			self.indicate = self.manIndicate
+			#self.indicate = self.manIndicate
 
 		elif self.mode == "cruise":
 			self.throttle = self.cruiseState.throttle
@@ -161,16 +183,6 @@ class StateMachine():
 
 			# Indicate that the vehicle is controlled remotely
 			self.indicate = "Both"
-		
-		#TODO implement locked mode
-		elif self.mode == "locked":
-			self.enableSteering = False
-			self.steeringAngle = 0
-			self.enableMotor = False
-			self.throttle = 0
-			self.direction = 0
-			self.light = False
-			self.indicate = "None"
 
 		else:
 			self.enableSteering = False
@@ -193,6 +205,7 @@ class StateMachine():
 		self.state.direction = self.direction
 		self.state.light = self.light
 		self.state.indicate = self.indicate
+		self.state.targetVelocity = limitValue(self.targetVelocity, 0, 10)
 
 		self.pub.publish(self.state)
 
@@ -237,22 +250,28 @@ class StateMachine():
 		self._key = False
 		self._prevLightIn = True
 		self.light = False
+		self.targetVelocity = 0
+		self._prevTargetVel = 0
+		self._prevBtnUp = False
+		self._prevBtnDown = False
 
 		self.state = state()
 		self.cruiseState = state()
+		self.guiState = state()
 		self.arduInit = arduinoIn()
 
 		# subscriber
 		self.sub1 = rospy.Subscriber('/arduino/in', arduinoIn, self.arduCallback)
 		self.sub2 = rospy.Subscriber('/joy', Joy, self.joyCallback)
 		self.sub3 = rospy.Subscriber('/cruise/state', state, self.cruiseCallback)
+		self.sub4 = rospy.Subscriber('/gui/state', state, self.guiCallback)
 
 		# publisher
 		self.pub = rospy.Publisher("/state/unchecked", state, queue_size=1)
 
 
 		# service
-		param_serv = rospy.Service('updateParams', statemachine.srv.updateParams, self.updateParams)
+		#param_serv = rospy.Service('updateParams', statemachine.srv.updateParams, self.updateParams)
 
 		self.arduCallback(self.arduInit)
 

@@ -1,16 +1,16 @@
 <launch>
-    <rosparam file="/home/davidzechm/catkin_ws/src/params/params.yaml" command="load" ns="/"/>
-    <!-- <node pkg="rosserial_python" name="arduino_servo" type="serial_node.py">
-	<param name="port" value="/dev/ttyUSB1"/>
-    </node>-->
+    <rosparam file="/home/ubuntu/catkin_ws/src/params/params.yaml" command="load" ns="/"/>
     <node pkg="rosserial_python" name="arduino_main" type="serial_node.py">
 	<param name="port" value="/dev/ttyUSB0"/>
+    </node>
+    <node pkg="rosserial_python" name="arduino_servo" type="serial_node.py">
+	<param name="port" value="/dev/ttyUSB1"/>
     </node>
     <node pkg="joy" name="joy" type="joy_node"/>
     <node pkg="statemachine" name="stateMachine" type="statemachine.py"/>
     <node pkg="safety" name="safetyNode" type="safety.py"/>
     <!--<node pkg="usb_cam" name="usb_cam" type="usb_cam_node"/>
      <node pkg="lanekeeping" name="lanekeeping" type="lanekeeping.py"/> 
-    <node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"/>-->
-    <node pkg="gui" name="gui" type="main.py"/>
+    <node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"/>
+    <node pkg="gui" name="gui" type="main.py"/>-->
 </launch>

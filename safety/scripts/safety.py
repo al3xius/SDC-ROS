@@ -13,7 +13,7 @@ class SafetyNode:
 
     def laserCallback(self, msg):
         angle_min = radians(self.emergencyBreakAngle + self.state.steeringAngel)
-        angle_max = radians(360 - (self.emergencyBreakAngle + self.state.steeringAngel)
+        angle_max = radians(360) - (self.emergencyBreakAngle + self.state.steeringAngel)
 
         index_0 = int(radians(0)/ float(self.lastScan.angle_increment))
         index_360 = int(radians(360)/ float(self.lastScan.angle_increment))
@@ -28,12 +28,12 @@ class SafetyNode:
         if emergencyDistance < self.stopingDistance*0.9:
             self.state.state = "emergencyBreak"
             self.state.enableSteering = True
-			self.state.steeringAngle = 0 #TODO: Steer away
-			self.state.enableMotor = False
-			self.state.throttle = 0
-			self.state.direction = 0
-			#self.state.light = msg.light
-			self.state.indicate = "Both"
+            self.state.steeringAngle = 0 #TODO: Steer away
+            self.state.enableMotor = False
+            self.state.throttle = 0
+            self.state.direction = 0
+            #self.state.light = msg.light
+            self.state.indicate = "Both"
         pass
 
         self.publish()

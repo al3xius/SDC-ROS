@@ -26,8 +26,8 @@ battery:
   d: 11.7
 
 gaspedal:
-  min: 43
-  max: 88
+  min: 472
+  max: 900
 
 lane:
   heightmultiplier: 9
