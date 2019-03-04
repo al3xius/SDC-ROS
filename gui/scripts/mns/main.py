@@ -176,7 +176,7 @@ class ScreenCAV(Screen):
             showObjects = not showObjects
 
         objButton = Button(
-            text="[b]LANE LINES[/b]", font_size="20sp", pos=(win_x/2,
+            text="[b]OBJECTS[/b]", font_size="20sp", pos=(win_x-(win_x*0.3),
                                                              0), size_hint=(.3, .12), markup=True)
         objButton.bind(on_press=toggleObjects)
 
@@ -202,6 +202,7 @@ class ScreenCAV(Screen):
         # Add to Screen
         self.add_widget(backBtn)
         self.add_widget(laneBtn)
+        self.add_widget(objButton)
 
     def on_enter(self):
         t = 1.0
