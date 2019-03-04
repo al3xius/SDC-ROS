@@ -111,21 +111,21 @@ class StateMachine():
 			self.mode = self.pervMode
 
 		#TODO: set correct button
-		if Joy.buttons[2] and Joy.buttons[2] != _prevBtnUp:
+		
+		if Joy.axes[5] > 0:
     			self.targetVelocity += 1
-		elif Joy.buttons[3] and Joy.buttons[3] != _prevBtnDown:
+		elif Joy.axes[5] < 0:
     			self.targetVelocity -= 1
-	
-		_prevBtnUp = Joy.buttons[2]
-		_prevBtnDown = Joy.buttons[3]
 
 		self.toggleLight(Joy.buttons[8])
 
 		throttle = Joy.axes[1]**2
+		if Joy.axes[1] < 0:
+    			throttle *= -1
 
 		self.joyThrottle = interp(throttle, [-1, 1], [-100, 100])
 
-		self.joySteeringAngle = interp(Joy.axes[0], [-1, 1], [-100, 100])
+		self.joySteeringAngle = interp(Joy.axes[0], [-1, 1], [100, -100])
 		self.publishState()
 
 	def cruiseCallback(self, state):
@@ -138,17 +138,11 @@ class StateMachine():
 		elif self.guiState.targetVelocity < 1 and self.guiState.targetVelocity != self._prevTargetVel:
     			self.targetVelocity -= 1
 					
-		self._prevTargetVel = self.targetVelocity
+		self._prevTargetVel = self.guiState.targetVelocity
 		toggleLight(state.light)
 
 
 	def publishState(self):
-		"""if not self.key and not self._key:
-			self.mode = "manual"
-			self._key = True
-		elif self.key:
-			self.mode = "locked"
-			self._key = False"""
 		
 		if self.mode == "manual":
 			self.enableSteering = False
@@ -157,6 +151,7 @@ class StateMachine():
 			self.enableMotor = self.manEnableMotor
 			self.direction = self.manDirection
 			#self.indicate = self.manIndicate
+			self.indicate = self.guiState.indicate
 
 		elif self.mode == "cruise":
 			self.throttle = self.cruiseState.throttle
@@ -164,9 +159,9 @@ class StateMachine():
 			self.direction = 1
 			self.steeringAngle = self.cruiseState.steeringAngle
 			self.enableSteering = True
+			self.indicate = self.guiState.indicate
 
 		elif self.mode == "remote":
-			self.throttle = abs(self.joyThrottle) # make values positive
 			# set direction
 			if self.joyThrottle < 0:
 				self.enableMotor = True
@@ -178,6 +173,7 @@ class StateMachine():
 				self.enableMotor = False
 				self.direction = 0
 			
+			self.throttle = abs(self.joyThrottle) # make values positive
 			self.enableSteering = True
 			self.steeringAngle = self.joySteeringAngle
 
@@ -205,7 +201,8 @@ class StateMachine():
 		self.state.direction = self.direction
 		self.state.light = self.light
 		self.state.indicate = self.indicate
-		self.state.targetVelocity = limitValue(self.targetVelocity, 0, 10)
+		self.targetVelocity = limitValue(self.targetVelocity, 0, 10)
+		self.state.targetVelocity = self.targetVelocity
 
 		self.pub.publish(self.state)
 
@@ -252,8 +249,6 @@ class StateMachine():
 		self.light = False
 		self.targetVelocity = 0
 		self._prevTargetVel = 0
-		self._prevBtnUp = False
-		self._prevBtnDown = False
 
 		self.state = state()
 		self.cruiseState = state()
