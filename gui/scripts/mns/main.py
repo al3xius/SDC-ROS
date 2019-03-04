@@ -188,7 +188,7 @@ class ScreenCAV(Screen):
 
         objButton = Button(
             text="[b]OBJECTS[/b]", font_size="20sp", pos=(win_x-(win_x*0.3),
-                                                             0), size_hint=(.3, .12), markup=True)
+                                                          0), size_hint=(.3, .12), markup=True)
         objButton.bind(on_press=toggleObjects)
 
         # Cam Feed
