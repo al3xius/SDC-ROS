@@ -171,7 +171,6 @@ class ScreenCAV(Screen):
         # display image from the texture
         self.texture = object_texture
 
-        """
         def toggleObjects(self):
             global showObjects
             showObjects = not showObjects
@@ -180,7 +179,6 @@ class ScreenCAV(Screen):
             text="[b]LANE LINES[/b]", font_size="20sp", pos=(win_x/2,
                                                              0), size_hint=(.3, .12), markup=True)
         objButton.bind(on_press=toggleObjects)
-        """
 
         # Cam Feed
         buf1 = cv2.flip(camImgRos, 0)
