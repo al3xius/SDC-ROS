@@ -66,6 +66,7 @@ lightOn = False
 # CAR DATA:
 state_car = state()
 state_car.velocity = 0
+cruiseOn = 0
 
 # Screen Manager
 sm = ScreenManager()
@@ -160,65 +161,71 @@ class ScreenCAV(Screen):
                          pos=(0, 0), size_hint=(.3, .12), markup=True)
         backBtn.bind(on_press=changeScreen)
 
-        # Lanes Lines
-        buf1 = cv2.flip(laneImgRos, 0)
-        buf = buf1.tostring()
-        lane_texture = Texture.create(
-            size=(laneImgRos.shape[1], laneImgRos.shape[0]), colorfmt='bgr')
-        lane_texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
-        # display image from the texture
-        self.texture = lane_texture
+        try:
+            # Lanes Lines
+            buf1 = cv2.flip(laneImgRos, 0)
+            buf = buf1.tostring()
+            lane_texture = Texture.create(
+                size=(laneImgRos.shape[1], laneImgRos.shape[0]), colorfmt='bgr')
+            lane_texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
+            # display image from the texture
+            self.texture = lane_texture
 
-        def toggleLanes(self):
-            global showLanes
-            showLanes = not showLanes
+            def toggleLanes(self):
+                global showLanes
+                showLanes = not showLanes
 
-        laneBtn = Button(
-            text="[b]LANE LINES[/b]", font_size="20sp", pos=(win_x/2-(win_x*0.15),
-                                                             0), size_hint=(.3, .12), markup=True)
-        laneBtn.bind(on_press=toggleLanes)
+            laneBtn = Button(
+                text="[b]LANE LINES[/b]", font_size="20sp", pos=(win_x/2-(win_x*0.15),
+                                                                 0), size_hint=(.3, .12), markup=True)
+            laneBtn.bind(on_press=toggleLanes)
 
-        # Objects
-        buf1 = cv2.flip(objImgRos, 0)
-        buf = buf1.tostring()
-        object_texture = Texture.create(
-            size=(objImgRos.shape[1], objImgRos.shape[0]), colorfmt='bgr')
-        object_texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
-        # display image from the texture
-        self.texture = object_texture
+            # Objects
+            buf1 = cv2.flip(objImgRos, 0)
+            buf = buf1.tostring()
+            object_texture = Texture.create(
+                size=(objImgRos.shape[1], objImgRos.shape[0]), colorfmt='bgr')
+            object_texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
+            # display image from the texture
+            self.texture = object_texture
 
-        def toggleObjects(self):
-            global showObjects
-            showObjects = not showObjects
+            def toggleObjects(self):
+                global showObjects
+                showObjects = not showObjects
 
-        objButton = Button(
-            text="[b]OBJECTS[/b]", font_size="20sp", pos=(win_x-(win_x*0.3),
-                                                          0), size_hint=(.3, .12), markup=True)
-        objButton.bind(on_press=toggleObjects)
+            objButton = Button(
+                text="[b]OBJECTS[/b]", font_size="20sp", pos=(win_x-(win_x*0.3),
+                                                              0), size_hint=(.3, .12), markup=True)
+            objButton.bind(on_press=toggleObjects)
 
-        # Cam Feed
-        buf1 = cv2.flip(camImgRos, 0)
-        buf = buf1.tostring()
-        image_texture = Texture.create(
-            size=(camImgRos.shape[1], camImgRos.shape[0]), colorfmt='bgr')
-        image_texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
-        # display image from the texture
-        self.texture = image_texture
+            # Cam Feed
+            buf1 = cv2.flip(camImgRos, 0)
+            buf = buf1.tostring()
+            image_texture = Texture.create(
+                size=(camImgRos.shape[1], camImgRos.shape[0]), colorfmt='bgr')
+            image_texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
+            # display image from the texture
+            self.texture = image_texture
 
-        with self.canvas:
-            Rectangle(texture=image_texture, pos=(0, 0), size=(win_x, win_y))
-            global showLanes
-            if showLanes:
+            with self.canvas:
                 Rectangle(
-                    texture=lane_texture, pos=(0, 0), size=(win_x, win_y))
-            if showObjects:
-                Rectangle(
-                    texture=object_texture, pos=(0, 0), size=(win_x, win_y))
+                    texture=image_texture, pos=(0, 0), size=(win_x, win_y))
+                global showLanes
+                if showLanes:
+                    Rectangle(
+                        texture=lane_texture, pos=(0, 0), size=(win_x, win_y))
+                if showObjects:
+                    Rectangle(
+                        texture=object_texture, pos=(0, 0), size=(win_x, win_y))
 
-        # Add to Screen
+            # Add to Screen
+            self.add_widget(laneBtn)
+            self.add_widget(objButton)
+
+        except:
+            pass
+
         self.add_widget(backBtn)
-        self.add_widget(laneBtn)
-        self.add_widget(objButton)
 
     def on_enter(self):
         t = 1.0
@@ -437,10 +444,16 @@ class ScreenMNS(Screen):
 
         # Toggle Cruise Control
         def toggleCruise(self):
-            cruise = 1
+            global cruiseOn, state_gui
+            cruiseOn = not cruiseOn
+            if cruiseOn:
+                state_gui.mode = "cruise"
+            else:
+                state_gui.mode = "manual"
 
-        cruiseBtn = Button(text="[b]CRUISE CONTROL[/b]", font_size="20sp",
-                           pos=(win_x/12, win_y/2), size_hint=(.25, .15), markup=True)
+        cruiseBtn = Button(
+            text="[b]CRUISE CONTROL[/b]", font_size="20sp", pos=(win_x-(win_x*0.3),
+                                                                 0), size_hint=(.3, .12), markup=True)
         cruiseBtn.bind(on_press=toggleCruise)
 
         self.add_widget(speedMinus)
