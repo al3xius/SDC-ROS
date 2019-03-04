@@ -27,7 +27,7 @@ from kivy.core.window import Window
 from kivy.uix.screenmanager import SlideTransition
 from kivy.garden.mapview import MapView
 from kivy.graphics.texture import Texture
-from kivy.graphics import Color, Rectangle
+from kivy.graphics import Color, Rectangle, Ellipse
 
 # ROS imports
 from sensor_msgs.msg import NavSatFix
@@ -67,6 +67,8 @@ Window.fullscreen = False
 # ROS functions
 def gpsCallback(msg):
     if msg.status > 0:
+        global cur_lat
+        global cur_lon
         cur_lat = msg.latitude
         cur_lon = msg.longitude
 
@@ -123,8 +125,17 @@ class ScreenMAP(Screen):
                          0), size_hint=(.2, .1), background_color=(1, 1, 1, 0.45), markup=True)
         backBtn.bind(on_press=changeScreen)
 
-        # Add to Map layout
         self.add_widget(mapview)
+
+        with self.canvas:
+            # Add a red color
+            Color(1., 0, 0)
+
+            # Add a rectangle
+            Rectangle(pos=(100, 100), size=(10, 10))
+
+        # Add to Map layout
+
         self.add_widget(backBtn)
 
     def on_leave(self):
