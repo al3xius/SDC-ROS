@@ -26,6 +26,8 @@ from kivy.graphics.context_instructions import Color
 from kivy.core.window import Window
 from kivy.uix.screenmanager import SlideTransition
 from kivy.garden.mapview import MapView
+from kivy.graphics.texture import Texture
+from kivy.graphics import Color, Rectangle
 
 # ROS imports
 from sensor_msgs.msg import NavSatFix
@@ -49,6 +51,10 @@ zoomLevel = 18
 
 # IMAGES:
 camImgRos = 0
+laneImgRos = 0
+objImgRos = 0
+showLanes = False
+showObjects = False
 
 # CAR DATA:
 curspeed = 0
@@ -66,20 +72,30 @@ def gpsCallback(msg):
 
 
 def laneCallback(msg):
-    self.lane_img = msg
+    try:
+        lane_image = bridge.imgmsg_to_cv2(msg, "bgr8")
+        global laneImgRos
+        laneImgRos = lane_image
+    except CvBridgeError as e:
+        rospy.loginfo(e)
 
 
 def camCallback(msg):
     try:
-        cv_image = self.bridge.imgmsg_to_cv2(msg, "bgr8")
+        cv_image = bridge.imgmsg_to_cv2(msg, "bgr8")
         global camImgRos
         camImgRos = cv_image
     except CvBridgeError as e:
         rospy.loginfo(e)
-    
+
 
 def objCallback(msg):
-    self.obj_img = msg
+    try:
+        obj_img = bridge.imgmsg_to_cv2(msg, "bgr8")
+        global objImgRos
+        objImgRos = obj_img
+    except CvBridgeError as e:
+        rospy.loginfo(e)
 
 
 def logCallback(msg):
@@ -116,7 +132,9 @@ class ScreenMAP(Screen):
 
 
 class ScreenCAV(Screen):
-    def on_enter(self):
+    def update(self, dt):
+        self.clear_widgets()
+
         # Back to Menu Button
         def changeScreen(self):
             sm.transition = SlideTransition(direction='right')
@@ -126,24 +144,71 @@ class ScreenCAV(Screen):
                          pos=(0, 0), size_hint=(.3, .12), markup=True)
         backBtn.bind(on_press=changeScreen)
 
-        # Overlay
+        # Lanes Lines
+        buf1 = cv2.flip(laneImgRos, 0)
+        buf = buf1.tostring()
+        lane_texture = Texture.create(
+            size=(laneImgRos.shape[1], laneImgRos.shape[0]), colorfmt='bgr')
+        lane_texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
+        # display image from the texture
+        self.texture = lane_texture
+
         def toggleLanes(self):
-            overlayImg = Image(
-                source="../assets/data/autobahn.jpg", width=win_x, height=win_y+90)
-            self.add_widget(overlayImg)
+            global showLanes
+            showLanes = not showLanes
 
         laneBtn = Button(
-            text="[b]OVERLAY[/b]", font_size="20sp", pos=(win_x/2-(win_x*0.15),
-                                                      0), size_hint=(.3, .12), markup=True)
+            text="[b]LANE LINES[/b]", font_size="20sp", pos=(win_x/2-(win_x*0.15),
+                                                             0), size_hint=(.3, .12), markup=True)
         laneBtn.bind(on_press=toggleLanes)
 
-        #camImg = Image(source=camImgRos, width=win_x, height=win_y)
-        
+        # Objects
+        buf1 = cv2.flip(objImgRos, 0)
+        buf = buf1.tostring()
+        object_texture = Texture.create(
+            size=(objImgRos.shape[1], objImgRos.shape[0]), colorfmt='bgr')
+        object_texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
+        # display image from the texture
+        self.texture = object_texture
+
+        """
+        def toggleObjects(self):
+            global showObjects
+            showObjects = not showObjects
+
+        objButton = Button(
+            text="[b]LANE LINES[/b]", font_size="20sp", pos=(win_x/2,
+                                                             0), size_hint=(.3, .12), markup=True)
+        objButton.bind(on_press=toggleObjects)
+        """
+
+        # Cam Feed
+        buf1 = cv2.flip(camImgRos, 0)
+        buf = buf1.tostring()
+        image_texture = Texture.create(
+            size=(camImgRos.shape[1], camImgRos.shape[0]), colorfmt='bgr')
+        image_texture.blit_buffer(buf, colorfmt='bgr', bufferfmt='ubyte')
+        # display image from the texture
+        self.texture = image_texture
+
+        with self.canvas:
+            Rectangle(texture=image_texture, pos=(0, 0), size=(win_x, win_y))
+            global showLanes
+            if showLanes:
+                Rectangle(
+                    texture=lane_texture, pos=(0, 0), size=(win_x, win_y))
+            if showObjects:
+                Rectangle(
+                    texture=object_texture, pos=(0, 0), size=(win_x, win_y))
 
         # Add to Screen
         self.add_widget(backBtn)
         self.add_widget(laneBtn)
-        #self.add_widget(camImg)
+
+    def on_enter(self):
+        t = 1.0
+        fps = 10
+        Clock.schedule_interval(self.update, t / fps)
 
     def on_leave(self):
         self.clear_widgets()
@@ -154,14 +219,14 @@ class ScreenMNS(Screen):
         # rospy.loginfo("tick")
         self.clear_widgets()
 
-        curTime=datetime.datetime.now()
+        curTime = datetime.datetime.now()
 
-        timeString=curTime.strftime("%H:%M")
-        timeLbl=Label(
+        timeString = curTime.strftime("%H:%M")
+        timeLbl = Label(
             text='[color=111111] %s [/color]' % timeString, pos=(win_x/2-70, win_y/2-20), font_size='30dp', markup=True)
 
-        dateString=curTime.strftime("%d, %b.")
-        dateLbl=Label(text='[color=111111] %s [/color]' %
+        dateString = curTime.strftime("%d, %b.")
+        dateLbl = Label(text='[color=111111] %s [/color]' %
                         dateString, font_size='20dp', pos=(win_x/2-70, win_y/2-45), markup=True)
 
         # TODO: Ausgeben ans topic
@@ -176,20 +241,22 @@ class ScreenMNS(Screen):
                 curspeed += 1
 
         # Change Speed
-        speedLbl=Label(
-        text="[color=111111][b]%d[/b][/color]" % curspeed,
+        speedLbl = Label(
+            text="[color=111111][b]%d[/b][/color]" % curspeed,
                         pos_hint={'top': 1.1}, font_size="120dp", markup=True)
 
-        speedMinus=Button(text="[color=111111][b]-[/b][/color]", pos=(330, 280),
+        speedMinus = Button(
+            text="[color=111111][b]-[/b][/color]", pos=(330, 280),
                           size_hint=(.15, .2), font_size="100dp", markup=True, background_color=(0, 0, 0, 0))
         speedMinus.bind(on_press=decSpeed)
 
-        speedPlus=Button(text="[color=111111][b]+[/b][/color]", pos=(550, 280),
+        speedPlus = Button(
+            text="[color=111111][b]+[/b][/color]", pos=(550, 280),
                          size_hint=(.15, .2), font_size="80dp", markup=True, background_color=(0, 0, 0, 0))
         speedPlus.bind(on_press=incSpeed)
 
-        einheitLbl=Label(text="[color=111111][b]km/h[/b][/color]", pos_hint={'top':
-                0.97}, font_size="45dp", markup=True)
+        einheitLbl = Label(text="[color=111111][b]km/h[/b][/color]", pos_hint={'top':
+                                                                               0.97}, font_size="45dp", markup=True)
 
         # DrivingMode:
         scale = 60
@@ -251,7 +318,7 @@ class ScreenMNS(Screen):
                 text="[color=%s]J[/color]" % jColor, pos=(win_x/2-120, win_y/2-130-(scale*3)), font_size='45dp', markup=True)
             cLbl = Label(
                 text="[color=%s]C[/color]" % cColor, pos=(win_x/2-120, win_y/2-130-(scale*4)), font_size='45dp', markup=True)
-            
+
             self.add_widget(pLbl)
             self.add_widget(rLbl)
             self.add_widget(mLbl)
@@ -278,7 +345,6 @@ class ScreenMNS(Screen):
             text="[b]CAM[/b]", font_size="20sp", pos=(win_x/2-(win_x*0.15),
                                                       0), size_hint=(.3, .12), markup=True)
         camBtn.bind(on_press=screenCam)
-
 
         # Lights
         def switchLights(left, right, light):
@@ -310,7 +376,7 @@ class ScreenMNS(Screen):
 
     def on_enter(self):
         t = 1.0
-        Clock.schedule_interval(self.update, t)        
+        Clock.schedule_interval(self.update, t)
 
     def on_leave(self):
         self.clear_widgets()
@@ -335,22 +401,21 @@ if __name__ == '__main__':
     rospy.init_node('gui', anonymous=False)
     rospy.loginfo("GUI: Node started.")
 
-    #bridge = CvBridge()
+    bridge = CvBridge()
 
     gps_sub = rospy.Subscriber('/gps', NavSatFix, gpsCallback)
     lane_sub = rospy.Subscriber('/lane/combinedImage', ROSImage, laneCallback)
     cam_sub = rospy.Subscriber('/usb_cam/image_raw', ROSImage, camCallback)
-    obj_sub = rospy.Subscriber('/objectDedector/overlayImage', ROSImage, objCallback)
+    obj_sub = rospy.Subscriber(
+        '/objectDedector/overlayImage', ROSImage, objCallback)
     state_sub = rospy.Subscriber("/state", state, stateCallback)
-    
+
     rosout_sub = rospy.Subscriber("/rosout_agg", Log, logCallback)
 
     state_pub = rospy.Publisher("/gui/state", state, queue_size=1)
-        
 
     MyApp().run()
 
-    
     try:
         MyApp().run()
     except rospy.ROSInterruptException:
