@@ -61,7 +61,6 @@ showObjects = False
 # LIGHTS:
 leftOn = False
 rightOn = False
-lightOn = False
 
 # CAR DATA:
 state_car = state()
@@ -241,6 +240,8 @@ class ScreenMNS(Screen):
         # rospy.loginfo("tick")
         self.clear_widgets()
 
+        global state_car
+
         curTime = datetime.datetime.now()
 
         timeString = curTime.strftime("%H:%M")
@@ -251,13 +252,10 @@ class ScreenMNS(Screen):
         dateLbl = Label(text='[color=111111] %s [/color]' %
                         dateString, font_size='20dp', pos=(win_x/2-70, win_y/2-45), markup=True)
 
-        # TODO: Ausgeben ans topic
         def decSpeed(self):
-            global state_car
             state_gui.targetVelocity = -1
 
         def incSpeed(self):
-            global state_car
             state_gui.targetVelocity = 1
 
         # Change Speed
@@ -321,8 +319,8 @@ class ScreenMNS(Screen):
                 pColor = stdColor
                 rColor = stdColor
                 mColor = stdColor
-                jColor = actColor
-                cColor = stdColor
+                jColor = stdColor
+                cColor = actColor
             # Nothing active
             else:
                 pColor = stdColor
@@ -348,7 +346,7 @@ class ScreenMNS(Screen):
             self.add_widget(jLbl)
             self.add_widget(cLbl)
 
-        global state_car
+        
         changeMode(state_car.mode, state_car.direction, state_car.velocity)
 
         # MenuButtons
@@ -398,7 +396,6 @@ class ScreenMNS(Screen):
         else:
             rightStr = "right-arrow"
 
-        global state_car
         if state_car.light:
             lightStr = "car-light-act"
         else:
@@ -407,28 +404,26 @@ class ScreenMNS(Screen):
         switchLights(leftStr, rightStr, lightStr)
 
         def indicLeft(self):
-            global leftOn, state_gui
+            global leftOn, rightOn
             leftOn = not leftOn
             if leftOn:
                 state_gui.indicate = "Left"
+                rightOn = False
             else:
                 state_gui.indicate = "None"
 
         def indicRight(self):
-            global rightOn, state_gui
+            global leftOn, rightOn
             rightOn = not rightOn
             if rightOn:
                 state_gui.indicate = "Right"
+                leftOn = False
             else:
                 state_gui.indicate = "None"
 
         def carLight(self):
-            global lightOn, state_gui
-            lightOn = not lightOn
-            if lightOn:
-                state_gui.light = True
-            else:
-                state_gui.light = False
+            state_gui.light = True
+
 
         indicLeftBtn = Button(pos=(win_x/2-120, win_y/2-130),
                               size_hint=(.05, .10), font_size="80dp", markup=True, background_color=(0, 0, 0, 0))
@@ -444,12 +439,7 @@ class ScreenMNS(Screen):
 
         # Toggle Cruise Control
         def toggleCruise(self):
-            global cruiseOn, state_gui
-            cruiseOn = not cruiseOn
-            if cruiseOn:
-                state_gui.mode = "cruise"
-            else:
-                state_gui.mode = "manual"
+            state_gui.mode = "cruise"                
 
         cruiseBtn = Button(
             text="[b]CRUISE CONTROL[/b]", font_size="20sp", pos=(win_x-(win_x*0.3),
@@ -478,6 +468,7 @@ class ScreenMNS(Screen):
         state_pub.publish(state_gui)
         state_gui.targetVelocity = 0
         state_gui.light = False
+        state_gui.mode = "manual"
 
     def on_enter(self):
         t = 1.0

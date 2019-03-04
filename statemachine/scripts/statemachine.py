@@ -79,6 +79,9 @@ class StateMachine():
 		else:
 			self.manIndicate = "None"
 		"""
+
+		if not arduinoIn.digital[self.gasPedalSwitchPin] and self.mode == "cruise":
+    			self.mode = "manual"
 		
 
 		#self.key = arduinoIn.digital[self.keySwitchPin] #NC
@@ -133,13 +136,19 @@ class StateMachine():
 
 	def guiCallback(self, state):
     		self.guiState = state
-		if self.guiState.targetVelocity > 1 and self.guiState.targetVelocity != self._prevTargetVel:
+		if self.guiState.targetVelocity > 0 and self.guiState.targetVelocity != self._prevTargetVel:
     			self.targetVelocity += 1
-		elif self.guiState.targetVelocity < 1 and self.guiState.targetVelocity != self._prevTargetVel:
+		elif self.guiState.targetVelocity < 0 and self.guiState.targetVelocity != self._prevTargetVel:
     			self.targetVelocity -= 1
 					
 		self._prevTargetVel = self.guiState.targetVelocity
-		toggleLight(state.light)
+		self.toggleLight(self.guiState.light)
+		if self.guiState.mode == "cruise" and self.mode == "cruise":
+    			self.mode = "manual"
+		elif self.guiState.mode == "cruise":
+    			self.mode = "cruise"
+		
+		self.publishState()
 
 
 	def publishState(self):
