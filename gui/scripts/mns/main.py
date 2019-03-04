@@ -456,6 +456,11 @@ class ScreenMNS(Screen):
                                                                  0), size_hint=(.3, .12), markup=True)
         cruiseBtn.bind(on_press=toggleCruise)
 
+        # Throttle Slider
+        throttleSlider = Slider(
+            min=0, max=100, value=state_car.throttle, orientation="vertical",
+            value_track=True, pos=(-win_x/3, win_y/4), size_hint=(1, 0.5), cursor_image='../assets/data/brake256.png')
+
         self.add_widget(speedMinus)
         self.add_widget(speedPlus)
         self.add_widget(mapBtn)
@@ -468,6 +473,7 @@ class ScreenMNS(Screen):
         self.add_widget(indicRightBtn)
         self.add_widget(carLightBtn)
         self.add_widget(targetVel)
+        self.add_widget(throttleSlider)
 
         state_pub.publish(state_gui)
         state_gui.targetVelocity = 0
@@ -475,7 +481,8 @@ class ScreenMNS(Screen):
 
     def on_enter(self):
         t = 1.0
-        Clock.schedule_interval(self.update, t)
+        fps = 120
+        Clock.schedule_interval(self.update, t/fps)
 
     def on_leave(self):
         self.clear_widgets()
