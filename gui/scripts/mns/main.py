@@ -27,7 +27,9 @@ from kivy.core.window import Window
 from kivy.uix.screenmanager import SlideTransition
 from kivy.garden.mapview import MapView
 from kivy.graphics.texture import Texture
-from kivy.graphics import Color, Rectangle, Ellipse
+from kivy.graphics import Color, Rectangle, Ellipse, Line
+from kivy.graphics.context_instructions import Translate, Scale
+
 
 # ROS imports
 from sensor_msgs.msg import NavSatFix
@@ -56,8 +58,14 @@ objImgRos = 0
 showLanes = False
 showObjects = False
 
+# LIGHTS:
+leftOn = False
+rightOn = False
+lightOn = False
+
 # CAR DATA:
-curspeed = 0
+state_car = state()
+state_car.velocity = 0
 
 # Screen Manager
 sm = ScreenManager()
@@ -105,9 +113,8 @@ def logCallback(msg):
 
 
 def stateCallback(msg):
-    state = msg
-    global curspeed
-    curspeed = state.velocity
+    global state_car
+    state_car = msg
 
 
 class ScreenMAP(Screen):
@@ -128,14 +135,12 @@ class ScreenMAP(Screen):
         self.add_widget(mapview)
 
         with self.canvas:
-            # Add a red color
-            Color(1., 0, 0)
-
-            # Add a rectangle
-            Rectangle(pos=(100, 100), size=(10, 10))
+            carSize = 15
+            Color(1, 0, 0, 1)  # set the colour to red
+            self.elliple = Ellipse(pos=self.center,
+                                   size=(carSize, carSize))
 
         # Add to Map layout
-
         self.add_widget(backBtn)
 
     def on_leave(self):
@@ -241,18 +246,20 @@ class ScreenMNS(Screen):
 
         # TODO: Ausgeben ans topic
         def decSpeed(self):
-            global curspeed
-            if curspeed > 0:
-                curspeed -= 1
+            global state_car
+            state_gui.targetVelocity = -1
 
         def incSpeed(self):
-            global curspeed
-            if curspeed < 20:
-                curspeed += 1
+            global state_car
+            state_gui.targetVelocity = 1
 
         # Change Speed
         speedLbl = Label(
-            text="[color=111111][b]%d[/b][/color]" % curspeed,
+            text="[color=111111][b]%d[/b][/color]" % state_car.targetVelocity,
+                        pos_hint={'top': 1.25}, font_size="70dp", markup=True)
+
+        targetVel = Label(
+            text="[color=111111][b]%d[/b][/color]" % state_car.velocity,
                         pos_hint={'top': 1.1}, font_size="120dp", markup=True)
 
         speedMinus = Button(
@@ -271,12 +278,11 @@ class ScreenMNS(Screen):
         # DrivingMode:
         scale = 60
 
-        #TODO: change mode from topic input
-        def changeMode(mode, curDir):
+        def changeMode(mode, curDir, vel):
             actColor = "ffd700"
             stdColor = "111111"
             # Park
-            if curspeed == 0:
+            if (vel == 0) and (mode == "manual"):
                 pColor = actColor
                 rColor = stdColor
                 mColor = stdColor
@@ -297,7 +303,7 @@ class ScreenMNS(Screen):
                 jColor = stdColor
                 cColor = stdColor
             # Joy
-            elif mode == "joy":
+            elif mode == "remote":
                 pColor = stdColor
                 rColor = stdColor
                 mColor = stdColor
@@ -335,7 +341,8 @@ class ScreenMNS(Screen):
             self.add_widget(jLbl)
             self.add_widget(cLbl)
 
-        changeMode(state.mode, state.direction)
+        global state_car
+        changeMode(state_car.mode, state_car.direction, state_car.velocity)
 
         # MenuButtons
         def screenMap(self):
@@ -374,7 +381,67 @@ class ScreenMNS(Screen):
             self.add_widget(rightImg)
             self.add_widget(lightImg)
 
-        switchLights("left-arrow", "right-arrow", "car-light-act")
+        if leftOn:
+            leftStr = "left-arrow-act"
+        else:
+            leftStr = "left-arrow"
+
+        if rightOn:
+            rightStr = "right-arrow-act"
+        else:
+            rightStr = "right-arrow"
+
+        global state_car
+        if state_car.light:
+            lightStr = "car-light-act"
+        else:
+            lightStr = "car-light"
+
+        switchLights(leftStr, rightStr, lightStr)
+
+        def indicLeft(self):
+            global leftOn, state_gui
+            leftOn = not leftOn
+            if leftOn:
+                state_gui.indicate = "Left"
+            else:
+                state_gui.indicate = "None"
+
+        def indicRight(self):
+            global rightOn, state_gui
+            rightOn = not rightOn
+            if rightOn:
+                state_gui.indicate = "Right"
+            else:
+                state_gui.indicate = "None"
+
+        def carLight(self):
+            global lightOn, state_gui
+            lightOn = not lightOn
+            if lightOn:
+                state_gui.light = True
+            else:
+                state_gui.light = False
+
+        indicLeftBtn = Button(pos=(win_x/2-120, win_y/2-130),
+                              size_hint=(.05, .10), font_size="80dp", markup=True, background_color=(0, 0, 0, 0))
+        indicLeftBtn.bind(on_press=indicLeft)
+
+        indicRightBtn = Button(pos=(win_x/2+55, win_y/2-130),
+                               size_hint=(.05, .10), font_size="80dp", markup=True, background_color=(0, 0, 0, 0))
+        indicRightBtn.bind(on_press=indicRight)
+
+        carLightBtn = Button(pos=(win_x/2-30, win_y/2-130),
+                             size_hint=(.05, .10), font_size="80dp", markup=True, background_color=(0, 0, 0, 0))
+        carLightBtn.bind(on_press=carLight)
+
+        # Toggle Cruise Control
+        def toggleCruise(self):
+            cruise = 1
+
+        cruiseBtn = Button(text="[b]CRUISE CONTROL[/b]", font_size="20sp",
+                           pos=(win_x/12, win_y/2), size_hint=(.25, .15), markup=True)
+        cruiseBtn.bind(on_press=toggleCruise)
 
         self.add_widget(speedMinus)
         self.add_widget(speedPlus)
@@ -383,6 +450,15 @@ class ScreenMNS(Screen):
         self.add_widget(timeLbl)
         self.add_widget(speedLbl)
         self.add_widget(dateLbl)
+        self.add_widget(cruiseBtn)
+        self.add_widget(indicLeftBtn)
+        self.add_widget(indicRightBtn)
+        self.add_widget(carLightBtn)
+        self.add_widget(targetVel)
+
+        state_pub.publish(state_gui)
+        state_gui.targetVelocity = 0
+        state_gui.light = False
 
     def on_enter(self):
         t = 1.0
@@ -423,6 +499,7 @@ if __name__ == '__main__':
     rosout_sub = rospy.Subscriber("/rosout_agg", Log, logCallback)
 
     state_pub = rospy.Publisher("/gui/state", state, queue_size=1)
+    state_gui = state()
 
     MyApp().run()
 
