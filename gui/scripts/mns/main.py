@@ -375,8 +375,7 @@ class ScreenMNS(Screen):
         camBtn.bind(on_press=screenCam)
 
         logBtn = Button(
-            text="[b]LOG[/b]", font_size="20sp", pos=(0,
-                                                      +90), size_hint=(.3, .12), markup=True)
+            text="[b]LOG[/b]", font_size="20sp", pos=(0, (win_y)-70), size_hint=(.3, .12), markup=True)
         logBtn.bind(on_press=screenLog)
 
         # Lights
