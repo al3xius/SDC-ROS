@@ -6,6 +6,7 @@ from sensor_msgs.msg import LaserScan
 class SafetyNode:
     def stateCallback(self, msg):
         self.state = msg
+        # calculate stoping distance
         self.stopingDistance = msg.velocity*msg.velocity * self.breakingFactor
 
         self.publish()

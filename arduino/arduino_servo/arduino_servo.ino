@@ -41,11 +41,9 @@ int posValid = 0;
 int posSync = 0;
 int staleData = 0;
 int actualCrc = 0;
-
 long result = 0;
 long lastResult = 0;
 int turns = 0;
-
 long crcCheck = 0;
 long curPos = 0;
 
@@ -58,11 +56,11 @@ const int maxPos = 360;
 const int zeroPos = 0; 
  
 
-//Subscriber callBack
+//Subscriber callback
 void messageCb( const sdc_msgs::state& data){
   //steering
   //getPos();
-  if (data.mode == "remote" || data.mode == "cruise") {
+  if (data.enableSteering) {
     stepper.enable();
     goalPos = map(data.steeringAngle, -100, 100, minPos, maxPos);
     moveSteps = goalPos - curPos;
@@ -132,34 +130,22 @@ void setup()
 
   nh.subscribe(sub);
  
+  //setup Stepper
   stepper.begin(RPM, MICROSTEPS);
   stepper.disable();
+  pinMode(8, INPUT);
 
   //SPI
   SPI.begin();
   SPI.setDataMode(SPI_MODE2);
   SPI.setBitOrder(MSBFIRST);
   SPI.setClockDivider(SPI_CLOCK_DIV4);
-  pinMode(8, INPUT_PULLUP);
+  
 }
 
 
 
 void loop()
 {
-  /*unsigned long currentMillis = millis();
-  if(currentMillis - previousMillis > 20){
-    //getPos();
-    state_out.steeringAngle = curPos;
-    if (digitalRead(8)){
-      state_out.mode = "alarm: motor";
-    }
-    else{
-      state_out.mode = "nominal";
-    }
-    previousMillis = millis();
-    p.publish(&state_out);
-  }*/
-  
   nh.spinOnce();
 }
