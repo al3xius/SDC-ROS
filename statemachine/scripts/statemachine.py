@@ -40,6 +40,7 @@ class StateMachine():
 		if input and self._prevLightIn:
 			self.light = not self.light
 			self._prevLightIn = False
+			rospy.loginfo("Toggle Light.")
 		elif not input:
 			self._prevLightIn = True
 
@@ -112,8 +113,6 @@ class StateMachine():
 				self.pervMode = "manual"
 			
 			self.mode = self.pervMode
-
-		#TODO: set correct button
 		
 		if Joy.axes[5] > 0:
     			self.targetVelocity += 1
@@ -138,8 +137,10 @@ class StateMachine():
     		self.guiState = state
 		if self.guiState.targetVelocity > 0 and self.guiState.targetVelocity != self._prevTargetVel:
     			self.targetVelocity += 1
+			rospy.loginfo("Increase Target Velocity.")
 		elif self.guiState.targetVelocity < 0 and self.guiState.targetVelocity != self._prevTargetVel:
     			self.targetVelocity -= 1
+			rospy.loginfo("Decrease Target Velocity.")
 					
 		self._prevTargetVel = self.guiState.targetVelocity
 		self.toggleLight(self.guiState.light)
@@ -150,6 +151,13 @@ class StateMachine():
 		
 		self.publishState()
 
+
+	def safetyCallback(self, state):
+    		#TODO: reset mode afterwards
+    		"""if state.mode == "emergencyBreak":
+    			self.mode = "emergencyBreak"
+			"""
+		pass
 
 	def publishState(self):
 		
@@ -198,6 +206,10 @@ class StateMachine():
 			self.light = False
 			self.indicate = "None"
 
+		if self.mode != self._prevMode:
+    			rospy.loginfo("Mode changed to {}.".format(self.mode))
+
+		self._prevMode = self.mode
 
 		# publish curent state
 		self.state.throttle = limitValue(self.throttle, 0, 100)
@@ -258,6 +270,7 @@ class StateMachine():
 		self.light = False
 		self.targetVelocity = 0
 		self._prevTargetVel = 0
+		self._prevMode = self.mode
 
 		self.state = state()
 		self.cruiseState = state()
@@ -269,6 +282,7 @@ class StateMachine():
 		self.sub2 = rospy.Subscriber('/joy', Joy, self.joyCallback)
 		self.sub3 = rospy.Subscriber('/cruise/state', state, self.cruiseCallback)
 		self.sub4 = rospy.Subscriber('/gui/state', state, self.guiCallback)
+		self.sub5 = rospy.Subscriber('/state', state, self.safetyCallback)
 
 		# publisher
 		self.pub = rospy.Publisher("/state/unchecked", state, queue_size=1)
