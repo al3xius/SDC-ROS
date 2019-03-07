@@ -346,7 +346,6 @@ class ScreenMNS(Screen):
             self.add_widget(jLbl)
             self.add_widget(cLbl)
 
-        
         changeMode(state_car.mode, state_car.direction, state_car.velocity)
 
         # MenuButtons
@@ -424,7 +423,6 @@ class ScreenMNS(Screen):
         def carLight(self):
             state_gui.light = True
 
-
         indicLeftBtn = Button(pos=(win_x/2-120, win_y/2-130),
                               size_hint=(.05, .10), font_size="80dp", markup=True, background_color=(0, 0, 0, 0))
         indicLeftBtn.bind(on_press=indicLeft)
@@ -439,7 +437,7 @@ class ScreenMNS(Screen):
 
         # Toggle Cruise Control
         def toggleCruise(self):
-            state_gui.mode = "cruise"                
+            state_gui.mode = "cruise"
 
         cruiseBtn = Button(
             text="[b]CRUISE CONTROL[/b]", font_size="20sp", pos=(win_x-(win_x*0.3),
