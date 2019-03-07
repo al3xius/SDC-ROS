@@ -66,6 +66,7 @@ rightOn = False
 state_car = state()
 state_car.velocity = 0
 cruiseOn = 0
+logText = ""
 
 # Screen Manager
 sm = ScreenManager()
@@ -109,7 +110,9 @@ def objCallback(msg):
 
 
 def logCallback(msg):
-    self.log = msg
+    global logText
+    logText += "\n" + msg.msg
+    print(logText)
 
 
 def stateCallback(msg):
@@ -357,6 +360,10 @@ class ScreenMNS(Screen):
             sm.transition = SlideTransition(direction='left')
             sm.current = "CAV"
 
+        def screenLog(self):
+            sm.transition = SlideTransition(direction='right')
+            sm.current = "LOG"
+
         mapBtn = Button(
             text="[b]MAP[/b]", font_size="20sp", pos=(0,
                                                       0), size_hint=(.3, .12), markup=True)
@@ -366,6 +373,11 @@ class ScreenMNS(Screen):
             text="[b]CAM[/b]", font_size="20sp", pos=(win_x/2-(win_x*0.15),
                                                       0), size_hint=(.3, .12), markup=True)
         camBtn.bind(on_press=screenCam)
+
+        logBtn = Button(
+            text="[b]LOG[/b]", font_size="20sp", pos=(0,
+                                                      +90), size_hint=(.3, .12), markup=True)
+        logBtn.bind(on_press=screenLog)
 
         # Lights
         def switchLights(left, right, light):
@@ -453,6 +465,7 @@ class ScreenMNS(Screen):
         self.add_widget(speedPlus)
         self.add_widget(mapBtn)
         self.add_widget(camBtn)
+        self.add_widget(logBtn)
         self.add_widget(timeLbl)
         self.add_widget(speedLbl)
         self.add_widget(dateLbl)
@@ -470,23 +483,54 @@ class ScreenMNS(Screen):
 
     def on_enter(self):
         t = 1.0
-        fps = 120
+        fps = 1
         Clock.schedule_interval(self.update, t/fps)
 
     def on_leave(self):
         self.clear_widgets()
 
 
+class ScreenLOG(Screen):
+    def update(self, dt):
+        self.clear_widgets()
+
+        # Back to Menu Button
+        def changeScreen(self):
+            sm.transition = SlideTransition(direction='right')
+            sm.current = "MNS"
+
+        backBtn = Button(text="[b]BACK[/b]", font_size="20sp", pos=(0,
+                         0), size_hint=(.2, .1), markup=True)
+        backBtn.bind(on_press=changeScreen)
+
+        # show log
+        global logText
+        logLbl = Label(text="[color=000000]" + logText + "[/color]", pos=(
+            100, (win_y/2)-70), font_size="15sp", font_color="#000000", markup=True)
+
+        # Add to Map layout
+        self.add_widget(backBtn)
+        self.add_widget(logLbl)
+
+    def on_enter(self):
+        t = 1.0
+        fps = 10
+        Clock.schedule_interval(self.update, t / fps)
+
+    def on_leave(self):
+        self.clear_widgets()
+
 sm.add_widget(ScreenMNS(name='MNS'))
 sm.add_widget(ScreenCAV(name='CAV'))
 sm.add_widget(ScreenMAP(name='MAP'))
+sm.add_widget(ScreenLOG(name='LOG'))
 
 
 # Run
 class MyApp(App):
 
     def build(self):
-        self.title = 'CONTROL PANEL | v 0.2'
+        self.title = 'CONTROL PANEL | v 1.1'
         Window.clearcolor = (1, 1, 1, 1)
         # self.icon = 'assets/car.png'
         return sm
@@ -505,7 +549,7 @@ if __name__ == '__main__':
         '/objectDedector/overlayImage', ROSImage, objCallback)
     state_sub = rospy.Subscriber("/state", state, stateCallback)
 
-    rosout_sub = rospy.Subscriber("/rosout_agg", Log, logCallback)
+    rosout_sub = rospy.Subscriber("/rosout", Log, logCallback)
 
     state_pub = rospy.Publisher("/gui/state", state, queue_size=1)
     state_gui = state()
