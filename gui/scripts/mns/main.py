@@ -111,8 +111,20 @@ def objCallback(msg):
 
 def logCallback(msg):
     global logText
-    logText += "\n" + msg.msg
-    print(logText)
+    if msg.level == 1:
+        level = "DEBUG"
+    elif msg.level == 2:
+        level = "INFO"
+    elif msg.level == 3:
+        level = "WARN"
+    elif msg.level == 4:
+        level = "ERROR"
+    elif msg.level > 4:
+        level = "FATAL"
+    else:
+        level = "?"
+
+    logText += "\n" + "[{}] ({}): ".format(level, msg.name[1:]) + msg.msg
 
 
 def stateCallback(msg):
@@ -290,7 +302,7 @@ class ScreenMNS(Screen):
             actColor = "ffd700"
             stdColor = "111111"
             # Park
-            if (vel == 0) and (mode == "manual"):
+            if (state_car.breaking > 90) and (mode == "manual"):
                 pColor = actColor
                 rColor = stdColor
                 mColor = stdColor
@@ -458,8 +470,9 @@ class ScreenMNS(Screen):
         # Throttle Slider
         throttleSlider = Slider(
             min=0, max=100, value=state_car.throttle, orientation="vertical",
-            value_track=True, pos=(-win_x/3, win_y/4), size_hint=(1, 0.5), cursor_image='../assets/data/brake256.png')
+            value_track=True, pos=(-win_x/3, win_y/4), size_hint=(1, 0.5),  cursor_image='../assets/data/brake32.png')
 
+        self.add_widget(throttleSlider)
         self.add_widget(speedMinus)
         self.add_widget(speedPlus)
         self.add_widget(mapBtn)
@@ -473,7 +486,7 @@ class ScreenMNS(Screen):
         self.add_widget(indicRightBtn)
         self.add_widget(carLightBtn)
         self.add_widget(targetVel)
-        self.add_widget(throttleSlider)
+        
 
         state_pub.publish(state_gui)
         state_gui.targetVelocity = 0
@@ -505,7 +518,7 @@ class ScreenLOG(Screen):
         # show log
         global logText
         logLbl = Label(text="[color=000000]" + logText + "[/color]", pos=(
-            100, (win_y/2)-70), font_size="15sp", font_color="#000000", markup=True)
+            10, (win_y/2)-70), font_size="15sp", font_color="#000000", markup=True)
 
         # Add to Map layout
         self.add_widget(backBtn)

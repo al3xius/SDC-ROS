@@ -40,7 +40,7 @@ class StateMachine():
 		if input and self._prevLightIn:
 			self.light = not self.light
 			self._prevLightIn = False
-			rospy.loginfo("Toggle Light.")
+			rospy.loginfo("Toggle Light. {}".format(self.light))
 		elif not input:
 			self._prevLightIn = True
 
@@ -125,6 +125,8 @@ class StateMachine():
 		if Joy.axes[1] < 0:
     			throttle *= -1
 
+		self.joyBreaking = limitValue(interp(abs(limitValue(Joy.axes[3], -1, 0)), [0, 1], [0, 100]), 0, 255)
+
 		self.joyThrottle = interp(throttle, [-1, 1], [-100, 100])
 
 		self.joySteeringAngle = interp(Joy.axes[0], [-1, 1], [100, -100])
@@ -169,6 +171,7 @@ class StateMachine():
 			self.direction = self.manDirection
 			#self.indicate = self.manIndicate
 			self.indicate = self.guiState.indicate
+			self.breaking = 0
 
 		elif self.mode == "cruise":
 			self.throttle = self.cruiseState.throttle
@@ -193,6 +196,7 @@ class StateMachine():
 			self.throttle = abs(self.joyThrottle) # make values positive
 			self.enableSteering = True
 			self.steeringAngle = self.joySteeringAngle
+			self.breaking = self.joyBreaking
 
 			# Indicate that the vehicle is controlled remotely
 			self.indicate = "Both"
@@ -203,13 +207,16 @@ class StateMachine():
 			self.enableMotor = False
 			self.throttle = 0
 			self.direction = 0
+			self.breaking = 0
 			self.light = False
 			self.indicate = "None"
 
 		if self.mode != self._prevMode:
     			rospy.loginfo("Mode changed to {}.".format(self.mode))
-
 		self._prevMode = self.mode
+
+		if self.breaking > 50:
+    			self.throttle = 0
 
 		# publish curent state
 		self.state.throttle = limitValue(self.throttle, 0, 100)
@@ -222,6 +229,7 @@ class StateMachine():
 		self.state.direction = self.direction
 		self.state.light = self.light
 		self.state.indicate = self.indicate
+		self.state.breaking = self.breaking
 		self.targetVelocity = limitValue(self.targetVelocity, 0, 10)
 		self.state.targetVelocity = self.targetVelocity
 
@@ -271,6 +279,7 @@ class StateMachine():
 		self.targetVelocity = 0
 		self._prevTargetVel = 0
 		self._prevMode = self.mode
+		self.breaking = 0
 
 		self.state = state()
 		self.cruiseState = state()
