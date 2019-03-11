@@ -159,8 +159,9 @@ class StateMachine():
 	def safetyCallback(self, state):
     		#TODO: reset mode afterwards
     		if state.mode == "emergencyBreak":
-    			self.mode = "emergencyBreak"
-		pass
+    				self.mode = "emergencyBreak"
+				self.publishState()
+				
 
 	def publishState(self):
     		if self.mode == "emergencyBreak":
