@@ -121,9 +121,12 @@ class StateMachine():
 
 		self.toggleLight(Joy.buttons[8])
 
-		throttle = Joy.axes[1]**2
+		throttle = Joy.axes[1]
 		if Joy.axes[1] < 0:
     			throttle *= -1
+
+		if Joy.button[4]:
+    			throttle / 2
 
 		self.joyBreaking = limitValue(interp(abs(limitValue(Joy.axes[3], -1, 0)), [0, 1], [0, 100]), 0, 255)
 
@@ -161,7 +164,7 @@ class StateMachine():
     		if state.mode == "emergencyBreak":
     				self.mode = "emergencyBreak"
 				self.publishState()
-				
+
 
 	def publishState(self):
     		if self.mode == "emergencyBreak":

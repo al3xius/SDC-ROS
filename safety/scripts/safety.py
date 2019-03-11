@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import rospy 
+from math import radians
 from sdc_msgs.msg import state, arduinoIn
 from sensor_msgs.msg import LaserScan
 
