@@ -13,7 +13,6 @@ from sensor_msgs.msg import Joy
 
 def limitValue(value, min, max):
     """Limits value to a min or max value
-    
     Arguments:
         value {int, float} -- value
         min {int, float} -- minValue
@@ -94,6 +93,7 @@ class StateMachine():
 		"""processes Joystick callback
 			button assigment:
 			leftStick: steering | throttle
+			rightStick: break
 			r1: enable remote control
 			start: toggle light
 			arrow up/down: change target speed
@@ -146,24 +146,32 @@ class StateMachine():
 					
 		self._prevTargetVel = self.guiState.targetVelocity
 		self.toggleLight(self.guiState.light)
-		if self.guiState.mode == "cruise" and self.mode == "cruise":
-    			self.mode = "manual"
-		elif self.guiState.mode == "cruise":
+
+		# toggle cruise
+		if self.guiState.mode == "cruise" and self.mode == "manual":
     			self.mode = "cruise"
+		elif self.guiState.mode == "cruise":
+    			self.mode = "manual"
 		
 		self.publishState()
 
 
 	def safetyCallback(self, state):
     		#TODO: reset mode afterwards
-    		"""if state.mode == "emergencyBreak":
+    		if state.mode == "emergencyBreak":
     			self.mode = "emergencyBreak"
-			"""
 		pass
 
 	def publishState(self):
+    		if self.mode == "emergencyBreak":
+    				self.enableMotor = False
+				self.direction = 0
+				self.indicate = "Both"
+				self.enableSteering = True
+				self.breaking = 100
+				self.throttle = 0
 		
-		if self.mode == "manual":
+		elif self.mode == "manual":
 			self.enableSteering = False
 			self.steeringAngle = 0
 			self.throttle = self.gasPedal

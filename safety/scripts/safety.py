@@ -34,7 +34,7 @@ class SafetyNode:
             self.state.enableMotor = False
             self.state.throttle = 0
             self.state.direction = 0
-            self.state.breaking = 255
+            self.state.breaking = 100
             #self.state.light = msg.light
             self.state.indicate = "Both"
         pass
