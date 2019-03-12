@@ -92,9 +92,10 @@ class StateMachine():
 	def joyCallback(self, Joy):
 		"""processes Joystick callback
 			button assigment:
-			leftStick: steering | throttle
-			rightStick: break
+			leftStick: throttle
+			rightStick: steering |  break
 			r1: enable remote control
+			r2: slow mode
 			start: toggle light
 			arrow up/down: change target speed
 		"""
@@ -122,17 +123,15 @@ class StateMachine():
 		self.toggleLight(Joy.buttons[8])
 
 		throttle = Joy.axes[1]
-		if Joy.axes[1] < 0:
-    			throttle *= -1
 
-		if Joy.button[4]:
-    			throttle / 2
+		if Joy.buttons[4]:
+    			throttle /= 2
 
 		self.joyBreaking = limitValue(interp(abs(limitValue(Joy.axes[3], -1, 0)), [0, 1], [0, 100]), 0, 255)
 
 		self.joyThrottle = interp(throttle, [-1, 1], [-100, 100])
 
-		self.joySteeringAngle = interp(Joy.axes[0], [-1, 1], [100, -100])
+		self.joySteeringAngle = interp(Joy.axes[2], [-1, 1], [100, -100])
 		self.publishState()
 
 	def cruiseCallback(self, state):
