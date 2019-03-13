@@ -29,7 +29,7 @@ class SafetyNode:
 
         if emergencyDistance < self.stopingDistance*0.9:
             rospy.logerr("Emergency Break!")
-            self.state.state = "emergencyBreak"
+            self.state.state = "break"
             self.state.enableSteering = True
             self.state.steeringAngle = 0 #TODO: Steer away
             self.state.enableMotor = False

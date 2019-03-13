@@ -160,13 +160,13 @@ class StateMachine():
 
 	def safetyCallback(self, state):
     		#TODO: reset mode afterwards
-    		if state.mode == "emergencyBreak":
-    				self.mode = "emergencyBreak"
+    		if state.mode == "break":
+    				self.mode = "break"
 				self.publishState()
 
 
 	def publishState(self):
-    		if self.mode == "emergencyBreak":
+    		if self.mode == "break":
     				self.enableMotor = False
 				self.direction = 0
 				self.indicate = "Both"
