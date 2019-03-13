@@ -85,7 +85,7 @@ void getPos(){
   int pos2 = SPI.transfer(0x20);
   
   crc = SPI.transfer(0x28);
-  crc = SPI.transfer(0x30);
+  //crc = SPI.transfer(0x30);
   actualCrc = crc & 0B01111111;
   staleData = crc >> 7;
 
@@ -108,8 +108,14 @@ void getPos(){
     turns ++;
   }*/
   
-  arduinoIn_msg.analog[1] = encoderPos;
-  
+  arduinoIn_msg.analog[0] = zero1;
+  arduinoIn_msg.analog[1] = zero2;
+  arduinoIn_msg.analog[2] = flags;
+  arduinoIn_msg.analog[3] = pos1;
+  arduinoIn_msg.analog[4] = pos2;
+  arduinoIn_msg.analog[5] = crc;
+  arduinoIn_msg.analog[6] = result;
+
   //TODO: crc check
   if(posValid){
     encoderPos = result + turns * 1023 - zeroPos;
@@ -151,6 +157,7 @@ void setup()
 
 void loop()
 {
+  if (nh.connected()){
   unsigned long currentMillis = millis();
 
   if(enableSteering && prevEnableSteering != enableSteering){
@@ -167,14 +174,17 @@ void loop()
     stepper.disable();
   }
 
- 
   
   getPos();
-  arduinoIn_msg.analog[0] = curPos;
-  arduinoIn_msg.analog[1] = encoderPos;
+  //arduinoIn_msg.analog[0] = curPos;
+  //arduinoIn_msg.analog[1] = encoderPos;
+
   if(currentMillis - previousMillis > 20){
     previousMillis = millis();
     p.publish(&arduinoIn_msg);
+  }
+  }else{
+    stepper.disable();
   }
   nh.spinOnce();
 }

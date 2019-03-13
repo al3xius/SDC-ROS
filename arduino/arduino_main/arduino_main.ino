@@ -13,7 +13,7 @@
 ros::NodeHandle nh;
 
 sdc_msgs::arduinoIn arduinoIn_msg;
-sdc_msgs::state starte_msg;
+sdc_msgs::state state_msg;
 
 //publisher
 ros::Publisher p("/arduino/in", &arduinoIn_msg);
@@ -189,6 +189,8 @@ ISR(TIMER1_COMPA_vect) {//Interrupt at freq of 1kHz to measure reed switch
 
 void loop()
 {
+  if(nh.connected()){
+
   unsigned long currentMillis = millis();
   
   //Analog IN
@@ -237,6 +239,15 @@ void loop()
   if(currentMillis - previousMillis > 20){
     previousMillis = millis();
     p.publish(&arduinoIn_msg);
+  }
+  }
+  else{
+    state_msg.mode = "manual";
+    state_msg.throttle = 0;
+    state_msg.indicate = "None";
+    state_msg.enableMotor = false;
+    state_msg.direction = 0;
+    messageCb(state_msg);
   }
   
   nh.spinOnce(); //ROS
