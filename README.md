@@ -13,28 +13,22 @@ Don't forget to install Python and Pip:
 
 ### 2. Install all ros extention packages:
 
-    `sudo apt install ros-kinetic-joy ros-kinetic-rosserial-arduino ros-kinetic-rosserial ros-kinetic-rosserial-server ros-kinetic-rplidar-ros ros-kinetic-cv-bridge ros-kinetic-cv-camera ros-kinetic-usb_cam ros-kinetic-openni2-launch`
+`sudo apt install ros-kinetic-joy ros-kinetic-rosserial-arduino ros-kinetic-rosserial ros-kinetic-rosserial-server ros-kinetic-rplidar-ros ros-kinetic-cv-bridge ros-kinetic-cv-camera ros-kinetic-usb_cam ros-kinetic-openni2-launch`
 
 
 ### 3. Install the required Python Packages:
 
-    `sudo pip install opencv-contrib-python`
-    
-    `sudo pip install scipy`
-    
-    `sudo pip install ipdb`
-    
-    `sudo pip install simple-pid`
-    
-    `sudo pip install futures requests`
-    
-    `sudo pip install python3-yaml`
-    
-    `sudo pip install kivy-garden`
-    
-    `sudo pip3 install --user rospkg catkin_pkg simple-pid`
-    
-    `sudo pip3 install adafruit-circuitpython-gps`
+```
+sudo pip install opencv-contrib-python
+sudo pip install scipy
+sudo pip install ipdb
+sudo pip install simple-pid
+sudo pip install futures requests
+sudo pip install python3-yaml
+sudo pip install kivy-garden
+sudo pip3 install --user rospkg catkin_pkg simple-pid
+sudo pip3 install adafruit-circuitpython-gps
+```
 
 
 ### 4. Install Kivy:
@@ -49,50 +43,50 @@ Don't forget to install Python and Pip:
 
 ### 5. Install Tensorflow preferably use their own Guide https://www.tensorflow.org/install/pip.
     
-    If their guide is not working for you try:
-    
-    `sudo pip install tensorflow`
+If their guide is not working for you try:
 
-    or
-    
-    
-    `virtualenv --system-site-packages ~/tensorflow`
-    
-    `source ~/tensorflow/bin/activate`
-    
-    `easy_install -U pip`
-    
-    `pip install --upgrade tensorflow`
+`sudo pip install tensorflow`
+
+or
+
+
+`virtualenv --system-site-packages ~/tensorflow`
+
+`source ~/tensorflow/bin/activate`
+
+`easy_install -U pip`
+
+`pip install --upgrade tensorflow`
 
 ### 6. Clone the repository:
     
-    `cd ~/catkin_ws`
-    
-    `git clone https://github.com/al3xius/SDC-ROS.git`
+`cd ~/catkin_ws`
 
-    Rename the folder to src:
-    
-    `sudo mv SDC-ROS src`
+`git clone https://github.com/al3xius/SDC-ROS.git`
+
+Rename the folder to src:
+
+`sudo mv SDC-ROS src`
 
 ### 7. Clone dependend repoyitorys:
     
-    `cd ~/catkin_ws/src`
-    
-    `git clone https://github.com/Kukanani/vision_msgs.git`
+`cd ~/catkin_ws/src`
+
+`git clone https://github.com/Kukanani/vision_msgs.git`
 
 ### 8. Run sdccommands:
     
-    `cd ~/catkin_ws/src/commands`
-    
-    `sudo bash sdccommands`
+`cd ~/catkin_ws/src/commands`
+
+`sudo bash sdccommands`
 
 ### 9. Buld:
     
-    `sdcmake`
+`sdcmake`
 
 ### 10. Try to run:
     
-    `sdclaunch`
-    
-    If you get any error messages telling you to install missing Packages, try to do so.
-    If not all required hardware is connected you will get error messages.
+`sdclaunch`
+
+If you get any error messages telling you to install missing Packages, try to do so.
+If not all required hardware is connected you will get error messages.
