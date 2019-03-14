@@ -25,37 +25,35 @@ high_threshold = rospy.get_param("/lane/high_threshold")
 laneLines = 0
 
 
-
-
 def calcLaneLines(roiImage):
-	rho = 2
-	theta = np.pi/180
-	threshold = 15
-	minLineLength = 25
-	maxLineGap = 100
-	laneLines = []
-	laneLines = cv2.HoughLinesP(roiImage, rho, theta, threshold, np.array(
-		[]), minLineLength, maxLineGap)
+    rho = 2
+    theta = np.pi/180
+    threshold = 15
+    minLineLength = 25
+    maxLineGap = 100
+    laneLines = []
+    laneLines = cv2.HoughLinesP(roiImage, rho, theta, threshold, np.array(
+            []), minLineLength, maxLineGap)
 
-	return laneLines
+    return laneLines
 
 
 # Perform Hough Transformation on ROI-Image
 # Draw Lines on Blank Image
 def houghTransformation(roiImage):
-	laneLines = calcLaneLines(roiImage)
-	houghTransformation.laneLines = laneLines
-	laneLineImage = np.zeros(
-		(roiImage.shape[0], roiImage.shape[1], 3), dtype=np.uint8)
+    laneLines = calcLaneLines(roiImage)
+    houghTransformation.laneLines = laneLines
+    laneLineImage = np.zeros(
+            (roiImage.shape[0], roiImage.shape[1], 3), dtype=np.uint8)
 
-	try:
-		for line in laneLines:
-			for x1, y1, x2, y2 in line:
-			    cv2.line(laneLineImage, (x1, y1), (x2, y2), [0, 0, 255], 2)
-	except:
-		result = "no Lines"
+    try:
+        for line in laneLines:
+            for x1, y1, x2, y2 in line:
+                cv2.line(laneLineImage, (x1, y1), (x2, y2), [0, 0, 255], 2)
+    except:
+        result = "no Lines"
 
-	return laneLineImage
+    return laneLineImage
 
 
 # Delete all unnecessary objects from canny image
@@ -72,13 +70,13 @@ def regionOfInterest(img):
     top_left = [imshape[1]/cM-imshape[1]/hM, imshape[0]/cM+imshape[0]/hM]
     top_right = [imshape[1]/cM+imshape[1]/hM, imshape[0]/cM+imshape[0]/hM]
     vertices = [np.array([lower_left, top_left, top_right,
-                            lower_right], dtype=np.int32)]
+                          lower_right], dtype=np.int32)]
 
     # Black Image in same size as original
     mask = np.zeros_like(img)
 
     #filling pixels inside the polygon defined by "vertices" with the fill color
-    cv2.fillPoly(mask, vertices, 255)
+    cv2.fillPoly(mask, vertices, [255, 255, 0])
 
     #returning the image only where mask pixels are nonzero
     masked_image = cv2.bitwise_and(img, mask)
@@ -97,4 +95,3 @@ def getLaneLines(img):
     laneLineImage = houghTransformation(roiImage)
 
     return laneLineImage
-
