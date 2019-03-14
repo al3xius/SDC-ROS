@@ -19,7 +19,6 @@ Don't forget to install Python and Pip:
 3. Install required Python Packages:
 
     `sudo pip install opencv-contrib-python`
-
     `sudo pip install scipy`
     
     `sudo pip install ipdb`
