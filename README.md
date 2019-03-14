@@ -39,13 +39,13 @@ Don't forget to install Python and Pip:
 
 ### 4. Install Kivy:
     
-    `sudo add-apt-repository ppa:kivy-team/kivy`
-    
-    `sudo apt update`
-    
-    `sudo apt install python-kivy python3-kivy`
-    
-    `sudo garden install mapview`
+`sudo add-apt-repository ppa:kivy-team/kivy`
+
+`sudo apt update`
+
+`sudo apt install python-kivy python3-kivy`
+
+`sudo garden install mapview`
 
 ### 5. Install Tensorflow preferably use their own Guide https://www.tensorflow.org/install/pip.
     
