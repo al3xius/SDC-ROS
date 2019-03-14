@@ -162,7 +162,7 @@ class StateMachine():
 	def safetyCallback(self, state):
     		#TODO: reset mode afterwards
     		if state.mode == "break":
-    				self.mode = "break"
+    				self.mode = "bretüak"
 				self.publishState()
 
 

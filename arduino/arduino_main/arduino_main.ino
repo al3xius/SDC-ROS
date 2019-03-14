@@ -189,9 +189,9 @@ ISR(TIMER1_COMPA_vect) {//Interrupt at freq of 1kHz to measure reed switch
 
 void loop()
 {
+  unsigned long currentMillis = millis();
   if(nh.connected()){
 
-  unsigned long currentMillis = millis();
   
   //Analog IN
   for(int i = 0; i < 5; i++){
@@ -204,6 +204,37 @@ void loop()
   }
   
   //---INDICATE---
+  
+  arduinoIn_msg.digital[50] = indicatorState;
+  //---END---
+
+ 
+  arduinoIn_msg.analog[6] = speedKMH;
+
+  //publish only every 20s so serial Port doesn't get overloaded
+  if(currentMillis - previousMillis > 20){
+    previousMillis = millis();
+    p.publish(&arduinoIn_msg);
+  }
+  }
+  else{
+    state_msg.mode = "manual";
+    state_msg.throttle = 0;
+    state_msg.indicate = "None";
+    state_msg.enableMotor = false;
+    state_msg.direction = 0;
+    messageCb(state_msg);
+  }
+
+  //indicator
+  if(currentMillis - indicateMillis > 500){
+    indicateMillis = millis();
+    if (indicatorState == LOW)
+      indicatorState = HIGH;
+    else
+      indicatorState = LOW;
+  }
+  
   if (indicate == "Left"){
     digitalWrite(16, indicatorState);
     digitalWrite(17, LOW);
@@ -220,34 +251,6 @@ void loop()
   else{
     digitalWrite(16, LOW);
     digitalWrite(17, LOW);
-  }
-  arduinoIn_msg.digital[50] = indicatorState;
-  //---END---
-
- 
-  //indicator
-  if(currentMillis - indicateMillis > 500){
-    indicateMillis = millis();
-    if (indicatorState == LOW)
-      indicatorState = HIGH;
-    else
-      indicatorState = LOW;
-  }
-  arduinoIn_msg.analog[6] = speedKMH;
-
-  //publish only every 20s so serial Port doesn't get overloaded
-  if(currentMillis - previousMillis > 20){
-    previousMillis = millis();
-    p.publish(&arduinoIn_msg);
-  }
-  }
-  else{
-    state_msg.mode = "manual";
-    state_msg.throttle = 0;
-    state_msg.indicate = "None";
-    state_msg.enableMotor = false;
-    state_msg.direction = 0;
-    messageCb(state_msg);
   }
   
   nh.spinOnce(); //ROS
