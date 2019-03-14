@@ -9,14 +9,14 @@ Don't forget to install Python and Pip:
 
 `sudo apt install python-pip python-dev python-virtualenv`
 
-1. Install ROS Kinetic according to their tutorial http://wiki.ros.org/kinetic/Installation.
+### 1. Install ROS Kinetic according to their tutorial http://wiki.ros.org/kinetic/Installation.
 
-2. Install all ros extention packages:
+### 2. Install all ros extention packages:
 
     `sudo apt install ros-kinetic-joy ros-kinetic-rosserial-arduino ros-kinetic-rosserial ros-kinetic-rosserial-server ros-kinetic-rplidar-ros ros-kinetic-cv-bridge ros-kinetic-cv-camera ros-kinetic-usb_cam ros-kinetic-openni2-launch`
 
 
-3. Install the required Python Packages:
+### 3. Install the required Python Packages:
 
     `sudo pip install opencv-contrib-python`
     
@@ -37,7 +37,7 @@ Don't forget to install Python and Pip:
     `sudo pip3 install adafruit-circuitpython-gps`
 
 
-4. Install Kivy:
+### 4. Install Kivy:
     
     `sudo add-apt-repository ppa:kivy-team/kivy`
     
@@ -47,7 +47,7 @@ Don't forget to install Python and Pip:
     
     `sudo garden install mapview`
 
-5. Install Tensorflow preferably use their own Guide https://www.tensorflow.org/install/pip.
+### 5. Install Tensorflow preferably use their own Guide https://www.tensorflow.org/install/pip.
     
     If their guide is not working for you try:
     
@@ -64,7 +64,7 @@ Don't forget to install Python and Pip:
     
     `pip install --upgrade tensorflow`
 
-6. Clone the repository:
+### 6. Clone the repository:
     
     `cd ~/catkin_ws`
     
@@ -74,23 +74,23 @@ Don't forget to install Python and Pip:
     
     `sudo mv SDC-ROS src`
 
-7. Clone dependend repoyitorys:
+### 7. Clone dependend repoyitorys:
     
     `cd ~/catkin_ws/src`
     
     `git clone https://github.com/Kukanani/vision_msgs.git`
 
-8. Run sdccommands:
+### 8. Run sdccommands:
     
     `cd ~/catkin_ws/src/commands`
     
     `sudo bash sdccommands`
 
-9. Buld:
+### 9. Buld:
     
     `sdcmake`
 
-10. Try to run:
+### 10. Try to run:
     
     `sdclaunch`
     
