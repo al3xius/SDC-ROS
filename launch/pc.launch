@@ -1,10 +1,10 @@
 <launch>
     <rosparam file="$(find sdcparams)/params.yaml" command="load" ns="/"/>
     <node pkg="rosserial_python" name="arduino_main" type="serial_node.py">
-	<param name="port" value="/dev/ttyUSB0"/>
+	<param name="port" value="/dev/arduino0"/>
     </node>
     <node pkg="rosserial_python" name="arduino_servo" type="serial_node.py">
-	<param name="port" value="/dev/ttyUSB1"/>
+	<param name="port" value="/dev/arduino1"/>
     </node>
     <node pkg="usb_cam" name="usb_cam" type="usb_cam_node"/>
     <node pkg="joy" name="joy" type="joy_node"/>
@@ -12,7 +12,9 @@
     <node pkg="safety" name="safetyNode" type="safety.py"/>
     <node pkg="lanekeeping" name="lanekeeping" type="lanekeeping.py"/> 
     <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="screen">
-        <!--<param name="serial_port"         type="string" value="/dev/ttyUSB3"/>-->
+        <!--
+        -->
+        <param name="serial_port"         type="string" value="/dev/lidar0"/>
         <param name="serial_baudrate"     type="int"    value="115200"/><!--A1/A2 -->
         <param name="frame_id"            type="string" value="laser"/>
         <param name="inverted"            type="bool"   value="false"/>

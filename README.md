@@ -90,3 +90,19 @@ sudo bash sdccommands
 
 If you get any error messages telling you to install missing Packages, try to do so.
 If not all required hardware is connected you will get error messages.
+
+
+## Make USB Devices static:
+
+Get unique ID with `udevadm info --name=/dev/ttyUSBxx --attribute-walk`.
+
+edit rules.d `sudo nano /etc/udev/rules.d/99-usb-serial.rules`
+
+paste 
+```
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="xxxx", SYMLINK+="arudino0"
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="xxxx", SYMLINK+="arudino1" 
+KERNEL=="ttyUSB*", ATTRS{idVendor}=="xxxx", SYMLINK+="lidar0"
+```
+
+reload rules ```udevadm control --reload-rules```
