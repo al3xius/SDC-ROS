@@ -486,7 +486,6 @@ class ScreenMNS(Screen):
         self.add_widget(indicRightBtn)
         self.add_widget(carLightBtn)
         self.add_widget(targetVel)
-        
 
         state_pub.publish(state_gui)
         state_gui.targetVelocity = 0

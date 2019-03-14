@@ -1,5 +1,5 @@
 arduino:
-  port: /dev/ttyUSB0
+  port: /dev/ttyUSB2
   pin:
     battery: adc0
     gasPedal: adc1
@@ -30,11 +30,11 @@ gaspedal:
   max: 900
 
 lane:
-  heightmultiplier: 9
+  heightmultiplier: 10
   cropmultiplier: 2
-  bottommultiplier: 9
+  bottommultiplier: 1
   low_threshold: 50
-  high_threshold: 150
+  high_threshold: 250
 
 usb_cam:
   video_device: /dev/video0
@@ -46,8 +46,8 @@ usb_cam:
   fov: 50
   flip_image: True
 
-lidar:
-  port: /dev/ttUSB1
+rplidarNode:
+  serial_port: /dev/ttyUSB2
 
 steering:
   p: 1
