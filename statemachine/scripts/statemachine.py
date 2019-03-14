@@ -105,16 +105,17 @@ class StateMachine():
 		if Joy.buttons[5] and not self._remote:
 			self.pervMode = self.mode # reset to previous mode
 
-		if Joy.buttons[5]:
+		if Joy.buttons[5] and self.mode != "break":
 			self._remote = True
 			self.mode = "remote"
 		else:
 			self._remote = False
 			# safety: prevent gettings stuck in a loop
-			if self.pervMode == "remote" or self.pervMode == "cruise":
+			if self.mode == "break":
+    				pass
+			elif self.pervMode == "remote" or self.pervMode == "cruise" or self.pervMode != "break":
 				self.pervMode = "manual"
-			
-			self.mode = self.pervMode
+				self.mode = self.pervMode
 		
 		if Joy.axes[5] > 0:
     			self.targetVelocity += 1
@@ -130,6 +131,7 @@ class StateMachine():
 
 		if Joy.buttons[9] and self.mode == "break":
     			self.mode = "manual"
+			self.pervMode = "manual"
 
 		self.joyBreaking = limitValue(interp(abs(limitValue(Joy.axes[3], -1, 0)), [0, 1], [0, 100]), 0, 255)
 
@@ -164,7 +166,7 @@ class StateMachine():
 
 	def safetyCallback(self, state):
     		#TODO: reset mode afterwards
-    		if state.mode == "break":
+    		if state.mode == "break" and self.mode != "break":
     				self.mode = "break"
 				self.publishState()
 

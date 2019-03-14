@@ -1,1 +1,1 @@
-rosparam load ~/catkin_ws/src/params/params.yaml
+rosparam load ~/catkin_ws/src/sdcparams/params.yaml
