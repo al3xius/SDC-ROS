@@ -11,14 +11,15 @@ Don't forget to install Python and Pip:
 
 1. Install ROS Kinetic according to their tutorial http://wiki.ros.org/kinetic/Installation.
 
-2. Install all ros extentions packages:
+2. Install all ros extention packages:
 
     `sudo apt install ros-kinetic-joy ros-kinetic-rosserial-arduino ros-kinetic-rosserial ros-kinetic-rosserial-server ros-kinetic-rplidar-ros ros-kinetic-cv-bridge ros-kinetic-cv-camera ros-kinetic-usb_cam ros-kinetic-openni2-launch`
 
 
-3. Install required Python Packages:
+3. Install the required Python Packages:
 
     `sudo pip install opencv-contrib-python`
+    
     `sudo pip install scipy`
     
     `sudo pip install ipdb`
@@ -67,7 +68,7 @@ Don't forget to install Python and Pip:
     
     `cd ~/catkin_ws`
     
-    `git clone https://github.com/al3xius/SDC-ROS`
+    `git clone https://github.com/al3xius/SDC-ROS.git`
 
     Rename the folder to src:
     
@@ -94,3 +95,4 @@ Don't forget to install Python and Pip:
     `sdclaunch`
     
     If you get any error messages telling you to install missing Packages, try to do so.
+    If not all required hardware is connected you will get error messages.
