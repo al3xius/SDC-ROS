@@ -15,9 +15,9 @@ from PIL import Image
 
 
 # Get settings
-hM = rospy.get_param("/lane/heightmultiplier")
-cM = rospy.get_param("/lane/cropmultiplier")
-bM = rospy.get_param("/lane/bottommultiplier")
+topWidth = rospy.get_param("/lane/topWidth")
+height = rospy.get_param("/lane/height")
+bottomWidth = rospy.get_param("/lane/bottomWidth")
 low_threshold = rospy.get_param("/lane/low_threshold")
 high_threshold = rospy.get_param("/lane/high_threshold")
 
@@ -61,16 +61,17 @@ def houghTransformation(roiImage):
 
 def regionOfInterest(img):
     # get params
-    hM = rospy.get_param("/lane/heightmultiplier")
-    cM = rospy.get_param("/lane/cropmultiplier")
-    bM = rospy.get_param("/lane/bottommultiplier")
+    topWidth = rospy.get_param("/lane/topWidth")
+    height = rospy.get_param("/lane/height")
+    bottomWidth = rospy.get_param("/lane/bottomWidth")
+
     imshape = img.shape
-    lower_left = [imshape[1]/bM, imshape[0]]
-    lower_right = [imshape[1]-imshape[1]/bM, imshape[0]]
-    top_left = [imshape[1]/cM-imshape[1]/hM, imshape[0]/cM+imshape[0]/hM]
-    top_right = [imshape[1]/cM+imshape[1]/hM, imshape[0]/cM+imshape[0]/hM]
+    lower_left = [imshape[1]/bottomWidth, imshape[0]]
+    lower_right = [imshape[1]-imshape[1]/bottomWidth, imshape[0]]
+    top_left = [imshape[1]/2-imshape[1]/topWidth, imshape[0]/height]
+    top_right = [imshape[1]/2+imshape[1]/topWidth, imshape[0]/height]
     vertices = [np.array([lower_left, top_left, top_right,
-                          lower_right], dtype=np.int32)]
+							lower_right], dtype=np.int32)]
 
     # Black Image in same size as original
     mask = np.zeros_like(img)
@@ -80,18 +81,19 @@ def regionOfInterest(img):
 
     #returning the image only where mask pixels are nonzero
     masked_image = cv2.bitwise_and(img, mask)
+    cv2.polylines(masked_image, vertices, True, (0,255,255))
+
     return masked_image
 
 
 # Get Lanelines from Image
 def getLaneLines(img):
     grayImage = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    maskWhite = cv2.inRange(grayImage, 200, 255)
+    maskWhite = cv2.inRange(grayImage, rospy.get_param("/lane/whiteMaskLow"), rospy.get_param("/lane/whiteMaskHigh"))
     gaussBlur = cv2.GaussianBlur(maskWhite, (5, 5), 0)
     lowEnd = rospy.get_param("/lane/low_threshold")
     highEnd = rospy.get_param("/lane/high_threshold")
     cannyConverted = cv2.Canny(gaussBlur, lowEnd, highEnd)
     roiImage = regionOfInterest(cannyConverted)
     laneLineImage = houghTransformation(roiImage)
-
     return laneLineImage

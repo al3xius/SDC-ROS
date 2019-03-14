@@ -92,7 +92,7 @@ If you get any error messages telling you to install missing Packages, try to do
 If not all required hardware is connected you will get error messages.
 
 
-## Make USB Devices static:
+## Make USB Devices static https://msadowski.github.io/linux-static-port/:
 
 Get unique ID with `udevadm info --name=/dev/ttyUSBxx --attribute-walk`.
 

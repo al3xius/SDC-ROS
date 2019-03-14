@@ -17,6 +17,7 @@ pub = rospy.Publisher('/lane/combinedImage', Image, queue_size=1)
 pub2 = rospy.Publisher('/lane/result', Int32, queue_size=1)
 
 
+
 # get image
 def callback(data):
 	# convert to correct format
@@ -72,14 +73,30 @@ def callback(data):
 
 		# draw lane centre
 		cv2.circle(mask, (laneCenter, yDist), circeRadius, [255, 255, 0], 2)
+
+		
 	
 
 		result = offset
 	except:
 		result = 0
 
-	
-	combinedImage = cv2.addWeighted(image, 0.5, mask, 0.5, 0)
+	topWidth = rospy.get_param("/lane/topWidth")
+	height = rospy.get_param("/lane/height")
+	bottomWidth = rospy.get_param("/lane/bottomWidth")
+
+	imshape = image.shape
+	lower_left = [imshape[1]/bottomWidth, imshape[0]]
+	lower_right = [imshape[1]-imshape[1]/bottomWidth, imshape[0]]
+	top_left = [imshape[1]/2-imshape[1]/topWidth, imshape[0]/height]
+	top_right = [imshape[1]/2+imshape[1]/topWidth, imshape[0]/height]
+	vertices = [np.array([lower_left, top_left, top_right,
+							lower_right], dtype=np.int32)]
+
+	cv2.polylines(mask, vertices, True, (0,255,255))
+		
+
+	combinedImage = cv2.addWeighted(image, 0.7, mask, 0.5, 0)
 	
 	pub.publish(bridge.cv2_to_imgmsg(combinedImage, encoding="rgb8"))
 	pub2.publish(result)
