@@ -301,7 +301,6 @@ class StateMachine():
 		self.state = state()
 		self.cruiseState = state()
 		self.guiState = state()
-		self.arduInit = arduinoIn()
 
 		# subscriber
 		self.sub1 = rospy.Subscriber('/arduino/in', arduinoIn, self.arduCallback)
@@ -317,7 +316,9 @@ class StateMachine():
 		# service
 		#param_serv = rospy.Service('updateParams', statemachine.srv.updateParams, self.updateParams)
 
-		self.arduCallback(self.arduInit)
+		# initial run so all variables get declared
+		self.arduCallback(arduinoIn())
+		self.joyCallback(Joy())
 
 		rospy.spin()
 
