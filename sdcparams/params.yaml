@@ -1,5 +1,5 @@
 arduino:
-  port: /dev/ttyUSB2
+  port: /dev/arduino0
   pin:
     battery: adc0
     gasPedal: adc1
@@ -49,7 +49,7 @@ usb_cam:
   flip_image: True
 
 rplidarNode:
-  serial_port: /dev/ttyUSB2
+  serial_port: /dev/lidar0
 
 steering:
   p: 1

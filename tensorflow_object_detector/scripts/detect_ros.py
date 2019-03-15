@@ -95,7 +95,6 @@ class Detector:
         scores = detection_graph.get_tensor_by_name('detection_scores:0')
         classes = detection_graph.get_tensor_by_name('detection_classes:0')
         num_detections = detection_graph.get_tensor_by_name('num_detections:0')
-
         (boxes, scores, classes, num_detections) = self.sess.run([boxes, scores, classes, num_detections],
             feed_dict={image_tensor: image_np_expanded})
 
@@ -107,7 +106,7 @@ class Detector:
             category_index,
             use_normalized_coordinates=True,
             line_thickness=2)
-
+        print(objects)
         objArray.detections =[]
         objArray.header=data.header
         object_count=1

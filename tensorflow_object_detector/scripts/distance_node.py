@@ -26,6 +26,7 @@ class DistanceNode:
         
         # init messages
         self.lastScan = LaserScan()
+        self.lastScan.angle_increment = 1
         self.lastObj = Detection2DArray()
         self.lastPub = Detection3DArray()
 
@@ -53,7 +54,7 @@ class DistanceNode:
 
         image=cv2.cvtColor(cv_image,cv2.COLOR_BGR2RGB)
         mask = np.zeros_like(image)
-
+        objCount = 0
         for obj in self.lastPub.detections:
             center_x = obj.bbox.center.position.x
             center_y = obj.bbox.center.position.y
@@ -64,8 +65,10 @@ class DistanceNode:
             objCount += 1
 
             # draw Text
-            cv2.putText(mask, str(distance)+"m", pos,self.font, 1, (0,255,0),2, cv2.LINE_AA, False)
-
+            try:
+                cv2.putText(mask, str(distance)+"m", pos,self.font, 1, (0,255,0),2, cv2.LINE_AA, False)
+            except TypeError:
+                pass
 
         # combine image with mask
         combinedImage = cv2.addWeighted(image, 1, mask, 1, 0)
@@ -93,6 +96,8 @@ class DistanceNode:
             # calculate values
             angle, angle_min, angle_max = self.calcAngle(obj.bbox.center.x, obj.bbox.size_x)
             distance = self.getDistance(angle, angle_min, angle_max)
+            if distance == None:
+                distance = 0
 
             # add calculated values
             newObj.bbox.center.orientation.w = angle
