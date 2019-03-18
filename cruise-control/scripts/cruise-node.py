@@ -1,9 +1,10 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 
 import rospy
 from std_msgs.msg import Int32
 from sdc_msgs.msg import state
 from simple_pid import PID
+
 
 class ControlNode():
     def __init__(self):
@@ -20,12 +21,12 @@ class ControlNode():
         self.p_steer = float(rospy.get_param("/steering/p"))
         self.i_steer = float(rospy.get_param("/steering/i"))
         self.d_steer = float(rospy.get_param("/steering/d"))
-        self.steerPid = PID(self.p_steer, self.i_steer, self.d_steer, setpoint=0)
-
+        self.steerPid = PID(
+            self.p_steer, self.i_steer, self.d_steer, setpoint=0)
 
         # init varible
         self.throttle = 0
-
+        self.steeringAngle = 0
 
         # subscriber
         self.lane = rospy.Subscriber('/lane/result', Int32, self.laneCallback)
@@ -41,9 +42,8 @@ class ControlNode():
         self.steeringAngle = self.steerPid(self.offset)
         self.publishMsg()
 
-
     def stateCallback(self, data):
-        self.state = data.state
+        self.state = data.mode
 
         if state == "cruise":
             # get curent velocity
@@ -63,10 +63,10 @@ class ControlNode():
 
 
 if __name__ == '__main__':
-    # create statemachine node
-	rospy.init_node('cruiseControl', anonymous=False)
+    rospy.init_node('cruiseControl', anonymous=False)
     rospy.loginfo("Cruise Control: Node started.")
-	try:
-		node = ControlNode()
-	except rospy.ROSInterruptException:  
-		rospy.logerr("Cruise Control: Node stoped.")
+
+    try:
+        node = ControlNode()
+    except rospy.ROSInterruptException:
+        rospy.logerr("Cruise Control: Node stoped.")

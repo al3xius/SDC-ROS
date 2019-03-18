@@ -30,12 +30,12 @@ gaspedal:
   max: 900
 
 lane:
-  low_threshold: 50
+  low_threshold: 200
   high_threshold: 250
   whiteMaskLow: 160
   whiteMaskHigh: 255
   topWidth: 10
-  height: 2.9
+  height: 2.3
   bottomWidth: 100
 
 usb_cam:
@@ -48,8 +48,6 @@ usb_cam:
   fov: 50
   flip_image: True
 
-rplidarNode:
-  serial_port: /dev/lidar0
 
 steering:
   p: 1
