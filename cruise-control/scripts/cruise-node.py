@@ -5,6 +5,7 @@ from std_msgs.msg import Int32
 from sdc_msgs.msg import state
 from simple_pid import PID
 
+
 class ControlNode():
     def __init__(self):
 
@@ -28,7 +29,6 @@ class ControlNode():
         self.throttle = 0
         self.steeringAngle = 0
 
-
         # subscriber
         self.lane = rospy.Subscriber('/lane/result', Int32, self.laneCallback)
         self.state = rospy.Subscriber('/state', state, self.stateCallback)
@@ -42,7 +42,6 @@ class ControlNode():
         self.offset = int(data.data)
         self.steeringAngle = self.steerPid(self.offset)
         self.publishMsg()
-
 
     def stateCallback(self, data):
         self.state = data.mode
