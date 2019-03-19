@@ -155,8 +155,8 @@ class DistanceNode:
                 distance = min(self.lastScan.ranges[index_min:index_max])
 
             return distance
-        except ZeroDivisionError as e:
-            rospy.logerr("Can't get distance value! Error: {}".format(e))
+        except:
+            rospy.logerr("Can't get distance value! Error: {}")
 
 
 if __name__ == "__main__":

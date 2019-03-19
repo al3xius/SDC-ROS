@@ -44,22 +44,22 @@ class ControlNode():
         self.publishMsg()
 
     def stateCallback(self, data):
-        self.state = data.mode
 
-        if state == "cruise":
+        if data.mode == "cruise":
             # get curent velocity
             self.vel = data.velocity
             self.targetVelocity = data.targetVelocity
 
-            self.velPid.setpoit = self.targetVelocity
+            self.velPid.setpoint = self.targetVelocity
             self.throttle = self.velPid(self.vel)
         else:
             self.throttle = 0
+    
         self.publishMsg()
 
     def publishMsg(self):
         self.cruiseState.steeringAngle = int(self.steeringAngle)
-        self.cruiseState.throttle = self.throttle
+        self.cruiseState.throttle = int(self.throttle)
         self.pub.publish(self.cruiseState)
 
 

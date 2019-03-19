@@ -11,6 +11,7 @@
     <node pkg="statemachine" name="stateMachine" type="statemachine.py"/>
     <node pkg="safety" name="safetyNode" type="safety.py"/>
     <node pkg="lanekeeping" name="lanekeeping" type="lanekeeping.py"/> 
+    <node pkg="cruise-control" name="cruiseControl" type="cruise-node.py"/>
     <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="screen">
         <!--
         -->
@@ -20,10 +21,9 @@
         <param name="inverted"            type="bool"   value="false"/>
         <param name="angle_compensate"    type="bool"   value="true"/>
     </node>
+    <!--
     <node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"/>
     <node pkg="tensorflow_object_detector" name="object_distance" type="distance_node.py"/>
-    <node pkg="cruise-control" name="cruiseControl" type="cruise-node.py"/>
-    <!--
     <node pkg="gui" name="gui" type="main.py"/>
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rplidar_ros)/rviz/rplidar.rviz" />
     -->

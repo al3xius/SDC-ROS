@@ -5,3 +5,6 @@ tensorflow_object_detector/src/object_detection/utils/__init__.pyc
 tensorflow_object_detector/src/object_detection/protos/string_int_label_map_pb2.pyc
 tensorflow_object_detector/src/object_detection/protos/__init__.pyc
 lanekeeping/scripts/StillLaneDetection.pyc
+tensorflow_object_detector/src/object_detection/utils/visualization_utils.pyc
+tensorflow_object_detector/src/object_detection/utils/label_map_util.pyc
+tensorflow_object_detector/src/object_detection/utils/__init__.pyc

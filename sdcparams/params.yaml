@@ -55,9 +55,9 @@ steering:
   d: 0.5
 
 throttle:
-  p: 1
+  p: 10
   i: 0.1
-  d: 0.5
+  d: 1.0
 
 gui:
   version: v 0.2

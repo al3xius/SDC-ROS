@@ -129,9 +129,15 @@ class StateMachine():
 		if Joy.buttons[4]:
     			throttle /= 2
 
-		if Joy.buttons[9] and self.mode == "break":
+		if Joy.buttons[12] and self.mode == "break":
     			self.mode = "manual"
 			self.pervMode = "manual"
+
+		if Joy.buttons[9] and self.mode != "cruise":
+    			self.mode = "cruise"
+		elif self.mode == "cruise":
+    			self.mode = "manual"
+		
 
 		self.joyBreaking = limitValue(interp(abs(limitValue(Joy.axes[3], -1, 0)), [0, 1], [0, 100]), 0, 255)
 
@@ -142,6 +148,7 @@ class StateMachine():
 
 	def cruiseCallback(self, state):
 		self.cruiseState = state
+		self.publishState()
 
 	def guiCallback(self, state):
     		self.guiState = state
