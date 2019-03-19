@@ -168,6 +168,8 @@ void loop()
     stepper.enable();
     moveSteps = goalPos - curPos;
     stepper.move(moveSteps);
+
+    //stepper.getStepsCompleted();
     curPos += moveSteps;
   }
   else{

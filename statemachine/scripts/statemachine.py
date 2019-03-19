@@ -318,7 +318,7 @@ class StateMachine():
 
 		# initial run so all variables get declared
 		self.arduCallback(arduinoIn())
-		self.joyCallback(Joy())
+		#self.joyCallback(Joy())
 
 		rospy.spin()
 

@@ -36,13 +36,22 @@ def callback(data):
 	try:
 		for line in laneLines:
 				for x1, y1, x2, y2 in line:
-					if (x1 <= middle) or (x2 <= middle):
-					    leftValues.append(x1)
-					    leftValues.append(x2)
+    					if x2 > x1:
+    						k = (y2-y1)/(x2-x1)
 					else:
-					    rightValues.append(x1)
-					    rightValues.append(x2)
-					cv2.line(mask, (x1, y1), (x2, y2), [0, 0, 255], 2)
+    						k = (y1-y2)/(x1-x2)
+
+					if (x2 <= middle) and k < -1.8:
+    						leftValues.append(x1)
+					    	leftValues.append(x2)
+						cv2.line(mask, (x1, y1), (x2, y2), [0, 0, 255], 2)
+					elif (x1 > middle) and k > 1.8:
+    						rightValues.append(x1)
+					    	rightValues.append(x2)
+						cv2.line(mask, (x1, y1), (x2, y2), [0, 0, 255], 2)
+					else:
+    						pass
+					pass
 	except:
 		result = "no Lines"
 
@@ -73,9 +82,6 @@ def callback(data):
 
 		# draw lane centre
 		cv2.circle(mask, (laneCenter, yDist), circeRadius, [255, 255, 0], 2)
-
-		
-	
 
 		result = offset
 	except:

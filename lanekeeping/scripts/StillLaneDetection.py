@@ -26,7 +26,7 @@ laneLines = 0
 
 
 def calcLaneLines(roiImage):
-    rho = 2
+    rho = 1
     theta = np.pi/180
     threshold = 15
     minLineLength = 25
