@@ -56,7 +56,7 @@ def callback(data):
 		result = "no Lines"
 
 	# draw center circle
-	cv2.circle(mask, (int(width/2), int(height-200)), circeRadius, [0, 255, 0], 5)
+	cv2.circle(mask, (int(width/2), int(height-100)), circeRadius, [0, 255, 0], 5)
 
 	try:
 		# Get Smallest and Biggest Values of List
@@ -66,17 +66,19 @@ def callback(data):
 		maxRight = max(rightValues)
 
 		# Draw circles for those values
-		yDist = height-200
+		yDist = height-100
 		cv2.circle(mask, (minLeft, yDist), circeRadius, [255, 0, 0], 2)
 		cv2.circle(mask, (maxLeft, yDist), circeRadius, [255, 0, 0], 2)
 		cv2.circle(mask, (minRight, yDist), circeRadius, [255, 0, 0], 2)
 		cv2.circle(mask, (maxRight, yDist), circeRadius, [255, 0, 0], 2)
 		
 		center = width/2
+		left = minLeft + (maxLeft - minLeft)/2
+		right = minRight + (maxRight - minLeft)/2
 		l_dist = center - maxLeft
 		r_dist = minRight - center
 
-		laneCenter = maxLeft - (maxLeft - minRight)/2 
+		laneCenter = minLeft - (minLeft - maxRight)/2 
 
 		offset = center - laneCenter
 

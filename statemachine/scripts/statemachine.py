@@ -97,8 +97,10 @@ class StateMachine():
 			rightStick: steering |  break
 			r1: enable remote control
 			r2: slow mode
-			start: toggle light
+			select: toggle light
 			arrow up/down: change target speed
+			home: reset after emergency break
+			start: cruise control
 		"""
 
 		# set mode to remote
