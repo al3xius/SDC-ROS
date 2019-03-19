@@ -1,10 +1,10 @@
 <launch>
     <rosparam file="$(find sdcparams)/params.yaml" command="load" ns="/"/>
     <node pkg="rosserial_python" name="arduino_main" type="serial_node.py">
-	<param name="port" value="/dev/arduino0"/>
+	<param name="port" value="/dev/ttyUSB0"/>
     </node>
     <node pkg="rosserial_python" name="arduino_servo" type="serial_node.py">
-	<param name="port" value="/dev/arduino1"/>
+	<param name="port" value="/dev/ttyUSB1"/>
     </node>
     <node pkg="usb_cam" name="usb_cam" type="usb_cam_node"/>
     <node pkg="joy" name="joy" type="joy_node"/>
@@ -22,6 +22,7 @@
     </node>
     <node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"/>
     <node pkg="tensorflow_object_detector" name="object_distance" type="distance_node.py"/>
+    <node pkg="cruise-control" name="cruiseControl" type="cruise-node.py"/>
     <!--
     <node pkg="gui" name="gui" type="main.py"/>
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rplidar_ros)/rviz/rplidar.rviz" />

@@ -39,7 +39,7 @@ lane:
   bottomWidth: 100
 
 usb_cam:
-  video_device: /dev/video0
+  video_device: /dev/video1
   image_width: 640
   image_height: 480
   pixel_format: yuyv
