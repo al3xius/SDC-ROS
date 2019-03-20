@@ -8,7 +8,6 @@ from simple_pid import PID
 
 class ControlNode():
     def __init__(self):
-
         # pid controler
         # throttle
         self.p_vel = float(rospy.get_param("/throttle/p"))
@@ -17,15 +16,14 @@ class ControlNode():
         self.velPid = PID(self.p_vel, self.i_vel, self.d_vel, setpoint=0)
         self.velPid.output_limits = (0, 100)
 
-        # steering TODO: get absolute value from lanekeeping
+        # steering
         self.p_steer = float(rospy.get_param("/steering/p"))
         self.i_steer = float(rospy.get_param("/steering/i"))
         self.d_steer = float(rospy.get_param("/steering/d"))
         self.steerPid = PID(self.p_steer, self.i_steer, self.d_steer, setpoint=0)
         self.steerPid.output_limits = (-100, 100)
 
-
-        # init varible
+        # init varibles
         self.throttle = 0
         self.steeringAngle = 0
 
