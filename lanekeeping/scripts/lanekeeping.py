@@ -23,16 +23,15 @@ def callback(data):
 	# convert to correct format
 	image = bridge.imgmsg_to_cv2(data, desired_encoding="bgr8")
 
-	
 	height, width, channels = image.shape
 	mask = np.zeros_like(image)
+	middle = int(width/2)
 
 	laneDetection.getLaneLines(image)
 	laneLines = laneDetection.houghTransformation.laneLines
 
 	leftValues = []
 	rightValues = []
-	middle = int(width/2)
 	try:
 		for line in laneLines:
 				for x1, y1, x2, y2 in line:
@@ -41,6 +40,7 @@ def callback(data):
 					else:
     						k = (y1-y2)/(x1-x2)
 
+					# add lanes to left and make sure k is bigger than 1.8
 					if (x2 <= middle) and k < -1.8:
     						leftValues.append(x1)
 					    	leftValues.append(x2)
@@ -64,31 +64,29 @@ def callback(data):
 		maxLeft = max(leftValues)
 		minRight = min(rightValues)
 		maxRight = max(rightValues)
+		center = width/2
 
-		# Draw circles for those values
+		# draw circles for those values
 		yDist = height-100
 		cv2.circle(mask, (minLeft, yDist), circeRadius, [255, 0, 0], 2)
 		cv2.circle(mask, (maxLeft, yDist), circeRadius, [255, 0, 0], 2)
 		cv2.circle(mask, (minRight, yDist), circeRadius, [255, 0, 0], 2)
 		cv2.circle(mask, (maxRight, yDist), circeRadius, [255, 0, 0], 2)
+		cv2.circle(mask, (laneCenter, yDist), circeRadius, [255, 255, 0], 2)
 		
-		center = width/2
 		left = minLeft + (maxLeft - minLeft)/2
 		right = minRight + (maxRight - minLeft)/2
 		l_dist = center - maxLeft
 		r_dist = minRight - center
 
+		# calculate offset
 		laneCenter = minLeft - (minLeft - maxRight)/2 
-
 		offset = center - laneCenter
-
-		# draw lane centre
-		cv2.circle(mask, (laneCenter, yDist), circeRadius, [255, 255, 0], 2)
-
 		result = offset
 	except:
 		result = 0
 
+	# ROI
 	topWidth = rospy.get_param("/lane/topWidth")
 	height = rospy.get_param("/lane/height")
 	bottomWidth = rospy.get_param("/lane/bottomWidth")
@@ -101,18 +99,19 @@ def callback(data):
 	vertices = [np.array([lower_left, top_left, top_right,
 							lower_right], dtype=np.int32)]
 
-	cv2.polylines(mask, vertices, True, (0,255,255))
+	cv2.polylines(mask, vertices, True, (0,255,255)) # draw ROI
 		
 
 	combinedImage = cv2.addWeighted(image, 0.7, mask, 0.5, 0)
 	
+	# publish mask
 	pub.publish(bridge.cv2_to_imgmsg(combinedImage, encoding="rgb8"))
+	# publish offset
 	pub2.publish(result)
 
 
 def returnMask():	
 	return bridge.cv2_to_imgmsg(combinedImage, encoding="rgb8")
-
 
 
 def simpleLaneKeeping():
