@@ -1,30 +1,28 @@
 <launch>
     <rosparam file="$(find sdcparams)/params.yaml" command="load" ns="/"/>
     <node pkg="rosserial_python" name="arduino_main" type="serial_node.py">
-	<param name="port" value="/dev/ttyUSB0"/>
+	    <param name="port" value="/dev/arduino0"/>
     </node>
     <node pkg="rosserial_python" name="arduino_servo" type="serial_node.py">
-	<param name="port" value="/dev/ttyUSB1"/>
+	    <param name="port" value="/dev/arduino1"/>
     </node>
     <node pkg="usb_cam" name="usb_cam" type="usb_cam_node"/>
     <node pkg="joy" name="joy" type="joy_node"/>
     <node pkg="statemachine" name="stateMachine" type="statemachine.py"/>
     <node pkg="safety" name="safetyNode" type="safety.py"/>
     <node pkg="lanekeeping" name="lanekeeping" type="lanekeeping.py"/> 
+</launch>
+    <!--
     <node pkg="cruise-control" name="cruiseControl" type="cruise-node.py"/>
     <node name="rplidarNode"          pkg="rplidar_ros"  type="rplidarNode" output="screen">
-        <!--
-        -->
         <param name="serial_port"         type="string" value="/dev/lidar0"/>
-        <param name="serial_baudrate"     type="int"    value="115200"/><!--A1/A2 -->
+        <param name="serial_baudrate"     type="int"    value="115200"/>
         <param name="frame_id"            type="string" value="laser"/>
         <param name="inverted"            type="bool"   value="false"/>
         <param name="angle_compensate"    type="bool"   value="true"/>
     </node>
-    <!--
     <node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"/>
     <node pkg="tensorflow_object_detector" name="object_distance" type="distance_node.py"/>
     <node pkg="gui" name="gui" type="main.py"/>
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rplidar_ros)/rviz/rplidar.rviz" />
     -->
-</launch>

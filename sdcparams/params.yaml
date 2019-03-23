@@ -32,14 +32,14 @@ gaspedal:
 lane:
   low_threshold: 200
   high_threshold: 250
-  whiteMaskLow: 160
+  whiteMaskLow: 210
   whiteMaskHigh: 255
   topWidth: 10
   height: 2.3
   bottomWidth: 100
 
 usb_cam:
-  video_device: /dev/video1
+  video_device: /dev/video0
   image_width: 640
   image_height: 480
   pixel_format: yuyv
