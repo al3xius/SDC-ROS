@@ -190,39 +190,44 @@ ISR(TIMER1_COMPA_vect) {//Interrupt at freq of 1kHz to measure reed switch
 void loop()
 {
   unsigned long currentMillis = millis();
-  if(nh.connected()){
-
-  
-  //Analog IN
-  for(int i = 0; i < 5; i++){
-    arduinoIn_msg.analog[i] = analogRead(i);
-  }
-
   //Digital IN
   for (int i = 0; i < sizeof(pullUpPins); i++){
     arduinoIn_msg.digital[pullUpPins[i]] = digitalRead(pullUpPins[i]);
   }
-  
-  //---INDICATE---
-  
   arduinoIn_msg.digital[50] = indicatorState;
-  //---END---
 
- 
+  //Analog IN
+  for(int i = 0; i < 5; i++){
+    arduinoIn_msg.analog[i] = analogRead(i);
+  }
   arduinoIn_msg.analog[6] = speedKMH;
 
-  //publish only every 20s so serial Port doesn't get overloaded
-  if(currentMillis - previousMillis > 20){
-    previousMillis = millis();
-    p.publish(&arduinoIn_msg);
+  if(nh.connected()){  
+    //publish only every 20s so serial Port doesn't get overloaded
+    if(currentMillis - previousMillis > 20){
+      previousMillis = millis();
+      p.publish(&arduinoIn_msg);
+    }
   }
-  }
-  else{
+  else{ //drive if ros not conneted
+  
+    state_msg.throttle = map(arduinoIn_msg.analog[1], 472, 900, 0, 100);
+    //direction
+    if(arduinoIn_msg.digital[10] == false){
+      state.direction = 1;
+    }
+    else if (arduinoIn_msg.digital[9] == false){
+      state.direction = -1;
+    }
+    else{
+      state.direction = 0;
+    }
+
+    if(arduinoIn_msg.digital[18] == false && state_msg.direction != 0){
+      state.enableMotor = true;
+    }
     state_msg.mode = "manual";
-    state_msg.throttle = 0;
     state_msg.indicate = "None";
-    state_msg.enableMotor = false;
-    state_msg.direction = 0;
     messageCb(state_msg);
   }
 
@@ -234,7 +239,6 @@ void loop()
     else
       indicatorState = LOW;
   }
-  
   if (indicate == "Left"){
     digitalWrite(16, indicatorState);
     digitalWrite(17, LOW);
