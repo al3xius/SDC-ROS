@@ -20,7 +20,10 @@ height = rospy.get_param("/lane/height")
 bottomWidth = rospy.get_param("/lane/bottomWidth")
 low_threshold = rospy.get_param("/lane/low_threshold")
 high_threshold = rospy.get_param("/lane/high_threshold")
-
+lowEnd = rospy.get_param("/lane/low_threshold")
+highEnd = rospy.get_param("/lane/high_threshold")
+whiteMaskLow = rospy.get_param("/lane/whiteMaskLow")
+whiteMaskHigh = rospy.get_param("/lane/whiteMaskHigh")
 
 laneLines = 0
 
@@ -61,17 +64,17 @@ def houghTransformation(roiImage):
 
 def regionOfInterest(img):
     # get params
+    """
     topWidth = rospy.get_param("/lane/topWidth")
     height = rospy.get_param("/lane/height")
-    bottomWidth = rospy.get_param("/lane/bottomWidth")
+    bottomWidth = rospy.get_param("/lane/bottomWidth")"""
 
     imshape = img.shape
     lower_left = [imshape[1]/bottomWidth, imshape[0]]
     lower_right = [imshape[1]-imshape[1]/bottomWidth, imshape[0]]
     top_left = [imshape[1]/2-imshape[1]/topWidth, imshape[0]/height]
     top_right = [imshape[1]/2+imshape[1]/topWidth, imshape[0]/height]
-    vertices = [np.array([lower_left, top_left, top_right,
-							lower_right], dtype=np.int32)]
+    vertices = [np.array([lower_left, top_left, top_right, lower_right], dtype=np.int32)]
 
     # Black Image in same size as original
     mask = np.zeros_like(img)
@@ -89,10 +92,8 @@ def regionOfInterest(img):
 # Get Lanelines from Image
 def getLaneLines(img):
     grayImage = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    maskWhite = cv2.inRange(grayImage, rospy.get_param("/lane/whiteMaskLow"), rospy.get_param("/lane/whiteMaskHigh"))
+    maskWhite = cv2.inRange(grayImage, whiteMaskLow, whiteMaskHigh)
     gaussBlur = cv2.GaussianBlur(maskWhite, (5, 5), 0)
-    lowEnd = rospy.get_param("/lane/low_threshold")
-    highEnd = rospy.get_param("/lane/high_threshold")
     cannyConverted = cv2.Canny(gaussBlur, lowEnd, highEnd)
     roiImage = regionOfInterest(cannyConverted)
     laneLineImage = houghTransformation(roiImage)
