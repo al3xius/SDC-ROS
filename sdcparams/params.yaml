@@ -39,7 +39,7 @@ lane:
   bottomWidth: 100
 
 usb_cam:
-  video_device: /dev/video0
+  video_device: /dev/video2
   image_width: 640
   image_height: 480
   pixel_format: yuyv
@@ -69,3 +69,10 @@ safety:
   normVelocity: 10
   normBreakingDistance: 2 # distance at normVelocity in m
   emergencyBreakAngle: 10 # +- angle form 0
+
+rplidarNode:
+  serial_port: /dev/lidar0
+  serial_baudrate: 115200
+  frame_id: laser
+  inverted: True
+  angle_compensate: True
