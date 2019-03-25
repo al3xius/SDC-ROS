@@ -32,7 +32,7 @@ gaspedal:
 lane:
   low_threshold: 200
   high_threshold: 250
-  whiteMaskLow: 210
+  whiteMaskLow: 160
   whiteMaskHigh: 255
   topWidth: 10
   height: 2.3
@@ -43,6 +43,7 @@ usb_cam:
   image_width: 640
   image_height: 480
   pixel_format: yuyv
+  framerate: 25
   camera_frame_id: usb_cam
   io_method: mmap
   fov: 50
@@ -50,14 +51,20 @@ usb_cam:
 
 
 steering:
-  p: 1
-  i: 0.1
-  d: 0.5
+  p: -0.2
+  i: 0.02
+  d: 5
+  limitLow: -30
+  limitHigh: 30
 
 throttle:
   p: 10
   i: 0.1
   d: 1.0
+  limitLow: 0
+  limitHigh: 50
+
+
 
 gui:
   version: v 0.2
