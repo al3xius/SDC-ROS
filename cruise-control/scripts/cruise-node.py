@@ -74,7 +74,7 @@ class ControlNode():
 
         self.steeringAngle = self.steerPid(self.offset)
         self.cruiseState.steeringAngle = int(self.steeringAngle)
-        
+
         self.pub.publish(self.cruiseState)
 
 
