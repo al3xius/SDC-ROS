@@ -7,19 +7,19 @@ from simple_pid import PID
 from numpy import interp
 
 
-
 class ControlNode():
     def __init__(self):
         # pid controler
-        self.testing = True
-        
+        self.testing = False
+
         # throttle
         self.p_vel = float(rospy.get_param("/throttle/p"))
         self.i_vel = float(rospy.get_param("/throttle/i"))
         self.d_vel = float(rospy.get_param("/throttle/d"))
         self.velPid = PID(self.p_vel, self.i_vel, self.d_vel, setpoint=0)
         self.velPid.sample_time = 0.01
-        self.velPid.output_limits = (int(rospy.get_param("/throttle/limitLow")),int(rospy.get_param("/throttle/limitHigh")))
+        self.velPid.output_limits = (int(rospy.get_param(
+            "/throttle/limitLow")), int(rospy.get_param("/throttle/limitHigh")))
 
         # steering
         self.p_steer = float(rospy.get_param("/steering/p"))
@@ -32,7 +32,8 @@ class ControlNode():
         self.steeringLimitLow = int(rospy.get_param("/steering/limitLow"))
         self.steeringLimitHigh = int(rospy.get_param("/steering/limitHigh"))
 
-        self.steerPid.output_limits = (self.steeringLimitLow, self.steeringLimitHigh)
+        self.steerPid.output_limits = (
+            self.steeringLimitLow, self.steeringLimitHigh)
 
         # init varibles
         self.throttle = 0
@@ -51,7 +52,8 @@ class ControlNode():
         rospy.spin()
 
     def laneCallback(self, data):
-        self.offset = interp(int(data.data),[-50,50],[self.steeringLimitLow, self.steeringLimitHigh])
+        self.offset = interp(
+            int(data.data), [-50, 50], [self.steeringLimitLow, self.steeringLimitHigh])
         self.publishMsg()
 
     def stateCallback(self, data):
@@ -59,8 +61,10 @@ class ControlNode():
 
     def publishMsg(self):
         if self.testing:
-            self.velPid.output_limits = (int(rospy.get_param("/throttle/limitLow")),int(rospy.get_param("/throttle/limitHigh")))
-            self.steerPid.output_limits = (int(rospy.get_param("/steering/limitLow")),int(rospy.get_param("/steering/limitHigh")))
+            self.velPid.output_limits = (int(rospy.get_param(
+                "/throttle/limitLow")), int(rospy.get_param("/throttle/limitHigh")))
+            self.steerPid.output_limits = (int(rospy.get_param(
+                "/steering/limitLow")), int(rospy.get_param("/steering/limitHigh")))
 
         self.vel = self.lastState.velocity
         self.targetVelocity = self.lastState.targetVelocity
@@ -81,3 +85,4 @@ if __name__ == '__main__':
         node = ControlNode()
     except rospy.ROSInterruptException:
         rospy.logerr("Cruise Control: Node stoped.")
+

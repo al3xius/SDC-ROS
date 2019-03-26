@@ -36,7 +36,7 @@ def calcLaneLines(roiImage):
     maxLineGap = 100
     laneLines = []
     laneLines = cv2.HoughLinesP(roiImage, rho, theta, threshold, np.array(
-            []), minLineLength, maxLineGap)
+        []), minLineLength, maxLineGap)
 
     return laneLines
 
@@ -47,7 +47,7 @@ def houghTransformation(roiImage):
     laneLines = calcLaneLines(roiImage)
     houghTransformation.laneLines = laneLines
     laneLineImage = np.zeros(
-            (roiImage.shape[0], roiImage.shape[1], 3), dtype=np.uint8)
+        (roiImage.shape[0], roiImage.shape[1], 3), dtype=np.uint8)
 
     try:
         for line in laneLines:
@@ -74,17 +74,18 @@ def regionOfInterest(img):
     lower_right = [imshape[1]-imshape[1]/bottomWidth, imshape[0]]
     top_left = [imshape[1]/2-imshape[1]/topWidth, imshape[0]/height]
     top_right = [imshape[1]/2+imshape[1]/topWidth, imshape[0]/height]
-    vertices = [np.array([lower_left, top_left, top_right, lower_right], dtype=np.int32)]
+    vertices = [np.array([lower_left, top_left, top_right,
+                          lower_right], dtype=np.int32)]
 
     # Black Image in same size as original
     mask = np.zeros_like(img)
 
-    #filling pixels inside the polygon defined by "vertices" with the fill color
+    # filling pixels inside the polygon defined by "vertices" with the fill color
     cv2.fillPoly(mask, vertices, [255, 255, 0])
 
-    #returning the image only where mask pixels are nonzero
+    # returning the image only where mask pixels are nonzero
     masked_image = cv2.bitwise_and(img, mask)
-    cv2.polylines(masked_image, vertices, True, (0,255,255))
+    cv2.polylines(masked_image, vertices, True, (0, 255, 255))
 
     return masked_image
 

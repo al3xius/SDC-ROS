@@ -32,14 +32,14 @@ gaspedal:
 lane:
   low_threshold: 200
   high_threshold: 250
-  whiteMaskLow: 210
+  whiteMaskLow: 160
   whiteMaskHigh: 255
   topWidth: 10
   height: 2.3
   bottomWidth: 100
 
 usb_cam:
-  video_device: /dev/video1
+  video_device: /dev/video2
   image_width: 640
   image_height: 480
   pixel_format: yuyv
@@ -51,18 +51,20 @@ usb_cam:
 
 
 steering:
-  p: 1
-  i: 0.1
-  d: 0.5
-  limitLow: -10
-  limitHigh: 10
+  p: -0.2
+  i: 0.02
+  d: 5
+  limitLow: -30
+  limitHigh: 30
 
 throttle:
   p: 10
   i: 0.1
   d: 1.0
   limitLow: 0
-  limitHigh: 25
+  limitHigh: 50
+
+
 
 gui:
   version: v 0.2
@@ -74,3 +76,10 @@ safety:
   normVelocity: 10
   normBreakingDistance: 2 # distance at normVelocity in m
   emergencyBreakAngle: 10 # +- angle form 0
+
+rplidarNode:
+  serial_port: /dev/lidar0
+  serial_baudrate: 115200
+  frame_id: laser
+  inverted: True
+  angle_compensate: True

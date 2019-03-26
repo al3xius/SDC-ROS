@@ -29,14 +29,8 @@ unsigned long indicateMillis = 0;
 int indicatorState = LOW;
 //---END---
 
-//---PIN_DEF---
-int pullUpPins[] = {18, 22, 23, 24, 25, 26, 27};
-int outputPins[] = {2, 4, 9, 10, 12, 16, 17, 19};
-//---END---
-
-
 //---SPEEDOMETER---
-const int speedometerPin = A2;
+const int speedometerPin = 25;
 const int circumference = 1000; //in mm
 int maxSpeedCounter = 100;      //min time (in ms) of one rotation (for debouncing)
 int speedCounter;
@@ -45,6 +39,10 @@ long timer = 0;                 // time between one full rotation (in ms)
 float speedKMH = 0.00;
 //---END---
 
+//---PIN_DEF---
+int pullUpPins[] = {18, 22, 23, 24, 25, 26, 27};
+int outputPins[] = {2, 4, 9, 10, 12, 16, 17, 19};
+//---END---
 
 //Subscriber callback
 void messageCb( const sdc_msgs::state& data){
@@ -109,8 +107,6 @@ void setup()
   for (int i = 0; i < sizeof(pullUpPins); i++){
     pinMode(pullUpPins[i], INPUT_PULLUP);
   }
-  //Pinput 
-  pinMode(speedometerPin, INPUT);
 
   //Output
   for (int i = 0; i < sizeof(outputPins); i++){
@@ -162,7 +158,7 @@ long adc_timer;
 //speedomerter 
 ISR(TIMER1_COMPA_vect) {//Interrupt at freq of 1kHz to measure reed switch
   speedVal = digitalRead(speedometerPin);//get val of A3
-  if (speedVal){//if reed switch is closed
+  if (speedVal == false){//if reed switch is closed
     if (speedCounter == 0){//min time between pulses has passed
       speedKMH = (3600*float(circumference))/float(timer);//calculate km per hour
       timer = 0;//reset timer
@@ -212,19 +208,25 @@ void loop()
   else{ //drive if ros not conneted
   
     state_msg.throttle = map(arduinoIn_msg.analog[1], 472, 900, 0, 100);
-    //direction
-    if(arduinoIn_msg.digital[10] == false){
-      state.direction = 1;
+    if(state_msg.throttle > 100){
+      state_msg.throttle = 100;
     }
-    else if (arduinoIn_msg.digital[9] == false){
-      state.direction = -1;
+    else if(state_msg.throttle <= 0){
+      state_msg.throttle = 0;
+    }
+    //direction
+    if(arduinoIn_msg.digital[27] == false and arduinoIn_msg.digital[26] and arduinoIn_msg.digital[18] == false){
+      state_msg.direction = -1;
+    }
+    else if (arduinoIn_msg.digital[26] == false and arduinoIn_msg.digital[27] and arduinoIn_msg.digital[18] == false){
+      state_msg.direction = 1;
     }
     else{
-      state.direction = 0;
+      state_msg.direction = 0;
     }
 
     if(arduinoIn_msg.digital[18] == false && state_msg.direction != 0){
-      state.enableMotor = true;
+      state_msg.enableMotor = true;
     }
     state_msg.mode = "manual";
     state_msg.indicate = "None";

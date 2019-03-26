@@ -3,7 +3,9 @@
 # GPS module
 # parts of code from https://learn.adafruit.com/adafruit-ultimate-gps/circuitpython-parsing
 
-import time, serial, rospy
+import time
+import serial
+import rospy
 import adafruit_gps
 from sensor_msgs.msg import NavSatFix
 
@@ -28,7 +30,6 @@ def gps_talker():
     seq = 0
     lastPub = time.monotonic()
 
-    
     while not rospy.is_shutdown():
         gps.update()
         currentTime = time.monotonic()
@@ -56,23 +57,23 @@ def gps_talker():
                 # Try again if no fix
                 msg.status.status = int(0)
 
-                #publish
+                # publish
                 pub.publish(msg)
                 continue
             else:
                 msg.status.status = int(1)
-        
+
             msg.status.service = int(0)
-            
+
             # position
             msg.latitude = float(gps.latitude)
             msg.longitude = float(gps.longitude)
-            
+
             #!!!!!!using altitude as velocity!!!!!
             if gps.gps.speed_knots is not None:
                 msg.altitude = float(gps.speed_knots)*1.852
 
-            #publish
+            # publish
             pub.publish(msg)
 
 
@@ -80,7 +81,7 @@ if __name__ == '__main__':
     try:
         # init
         rospy.init_node('gps', anonymous=False)
-        
+
         # start node
         gps_talker()
     except rospy.ROSInterruptException:
