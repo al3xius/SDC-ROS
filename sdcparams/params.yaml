@@ -64,8 +64,6 @@ throttle:
   limitLow: 0
   limitHigh: 50
 
-
-
 gui:
   version: v 0.2
   winX: 640
@@ -83,3 +81,13 @@ rplidarNode:
   frame_id: laser
   inverted: True
   angle_compensate: True
+
+joy:
+  deadzone: 0.01
+  autorepeat_rate: 1
+
+arduino_main:
+  port: /dev/arduino0
+
+arduino_main:
+  port: /dev/arduino1
