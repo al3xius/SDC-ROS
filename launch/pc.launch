@@ -12,10 +12,10 @@
     <node pkg="statemachine" name="stateMachine" type="statemachine.py"/>
     <node pkg="lanekeeping" name="lanekeeping" type="lanekeeping.py"/> 
     <!--
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rplidar_ros)/rviz/rplidar.rviz" />
     <node pkg="cruise-control" name="cruiseControl" type="cruise-node.py"/>
     <node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"/>
     <node pkg="tensorflow_object_detector" name="object_distance" type="distance_node.py"/>
     <node pkg="gui" name="gui" type="main.py"/>
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rplidar_ros)/rviz/rplidar.rviz" />
     -->
 </launch>

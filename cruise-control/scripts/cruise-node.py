@@ -17,7 +17,7 @@ class ControlNode():
         self.i_vel = float(rospy.get_param("/throttle/i"))
         self.d_vel = float(rospy.get_param("/throttle/d"))
         self.velPid = PID(self.p_vel, self.i_vel, self.d_vel, setpoint=0)
-        self.velPid.sample_time = 0.01
+        self.velPid.sample_time = 0.1
         self.velPid.output_limits = (int(rospy.get_param(
             "/throttle/limitLow")), int(rospy.get_param("/throttle/limitHigh")))
 
@@ -27,7 +27,8 @@ class ControlNode():
         self.d_steer = float(rospy.get_param("/steering/d"))
         self.steerPid = PID(
             self.p_steer, self.i_steer, self.d_steer, setpoint=0)
-        self.steerPid.sample_time = 0.01
+        self.steerPid.sample_time = 0.1
+        self.steerPid.proportional_on_measurement = True
 
         self.steeringLimitLow = int(rospy.get_param("/steering/limitLow"))
         self.steeringLimitHigh = int(rospy.get_param("/steering/limitHigh"))
@@ -53,7 +54,7 @@ class ControlNode():
 
     def laneCallback(self, data):
         self.offset = interp(
-            int(data.data), [-50, 50], [self.steeringLimitLow, self.steeringLimitHigh])
+            int(data.data), [-100, 100], [self.steeringLimitLow, self.steeringLimitHigh])
         self.publishMsg()
 
     def stateCallback(self, data):
