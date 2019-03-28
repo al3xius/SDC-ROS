@@ -54,7 +54,7 @@ class ControlNode():
 
     def laneCallback(self, data):
         if data.data != 0:
-            if abs(offset - interp(int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh])) < 20 or i > 10:
+            if abs(self.offset - interp(int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh])) < 20 or i > 10:
                 self.offset = interp(
                     int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh])
                 self.publishMsg()
