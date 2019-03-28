@@ -525,7 +525,7 @@ class ScreenLOG(Screen):
 
     def on_enter(self):
         t = 1.0
-        fps = 10
+        fps = 1
         Clock.schedule_interval(self.update, t / fps)
 
     def on_leave(self):

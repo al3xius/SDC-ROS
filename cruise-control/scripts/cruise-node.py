@@ -92,4 +92,3 @@ if __name__ == '__main__':
         node = ControlNode()
     except rospy.ROSInterruptException:
         rospy.logerr("Cruise Control: Node stoped.")
-
