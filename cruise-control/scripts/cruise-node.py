@@ -39,6 +39,7 @@ class ControlNode():
         # init varibles
         self.throttle = 0
         self.steeringAngle = 0
+        self.offset = 0
 
         self.i = 0
 
@@ -54,13 +55,13 @@ class ControlNode():
 
     def laneCallback(self, data):
         if data.data != 0:
-            if abs(offset - interp(int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh])) < 20 or i > 10:
+            if abs(self.offset - interp(int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh])) < 20 or self.i > 10:
                 self.offset = interp(
                     int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh])
-                self.publishMsg()
                 self.i = 0
             else:
                 self.i += 1
+            self.publishMsg()
 
     def stateCallback(self, data):
         self.lastState = data
@@ -76,7 +77,7 @@ class ControlNode():
         self.targetVelocity = self.lastState.targetVelocity
         self.velPid.setpoint = self.targetVelocity
         self.throttle = self.velPid(self.vel)
-        #self.throttle = 25
+        self.throttle = 25
         self.cruiseState.throttle = int(self.throttle)
 
         self.steeringAngle = self.steerPid(self.offset)
