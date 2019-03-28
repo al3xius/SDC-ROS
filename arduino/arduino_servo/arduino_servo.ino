@@ -168,10 +168,12 @@ void loop()
 
   if(enableSteering) {
     stepper.enable();
-    if (abs(goalPos - prevGoalPos) > 50){
+    if (curPos - goalPos > 10){
       //stop move
-      remainingSteps = stepper.stop();
-      curPos -= remainingSteps;
+      //remainingSteps = stepper.getCurrentState();
+      stepper.stop();
+      //stepper.startMove(moveSteps);
+      //curPos -= remainingSteps.steps_remaining;
     }
     moveSteps = goalPos - curPos;
     stepper.move(moveSteps);
@@ -181,6 +183,12 @@ void loop()
     prevGoalPos = goalPos;
   }
   else{
+    if(curPos != 0){
+      goalPos = 0;
+      moveSteps = goalPos - curPos;
+      stepper.move(moveSteps);
+      curPos += moveSteps;
+    }
     stepper.disable();
   }
 
