@@ -1,21 +1,22 @@
 <launch>
     <rosparam file="$(find sdcparams)/params.yaml" command="load" ns="/"/>
+    <node pkg="gui" name="gui" type="main.py"/>
     <!--USB Devices-->
+    <node respawn="true" respawn_delay="3" pkg="usb_cam" name="usb_cam" type="usb_cam_node"/>
     <node respawn="true" respawn_delay="3" pkg="joy" name="joy" type="joy_node"/>
-    <node respawn="true" respawn_delay="3" pkg="rplidar_ros" name="rplidarNode" type="rplidarNode"/>
     <node respawn="true" respawn_delay="3" pkg="rosserial_python" name="arduino_main" type="serial_node.py"/>
     <node respawn="true" respawn_delay="3" pkg="rosserial_python" name="arduino_servo" type="serial_node.py"/>
-    <node respawn="true" respawn_delay="3" pkg="usb_cam" name="usb_cam" type="usb_cam_node"/>
+    <node respawn="true" respawn_delay="3" pkg="rplidar_ros" name="rplidarNode" type="rplidarNode"/>
 
     <!--Nodes-->
     <node pkg="safety" name="safetyNode" type="safety.py"/>
     <node pkg="statemachine" name="stateMachine" type="statemachine.py"/>
     <node pkg="lanekeeping" name="lanekeeping" type="lanekeeping.py"/> 
-    <!--
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rplidar_ros)/rviz/rplidar.rviz" />
     <node pkg="cruise-control" name="cruiseControl" type="cruise-node.py"/>
-    <node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"/>
+    <!--
+
     <node pkg="tensorflow_object_detector" name="object_distance" type="distance_node.py"/>
-    <node pkg="gui" name="gui" type="main.py"/>
+    <node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"/>
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rplidar_ros)/rviz/rplidar.rviz" />
     -->
 </launch>

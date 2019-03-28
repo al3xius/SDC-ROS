@@ -55,6 +55,8 @@ long encoderPos = 0;
 
 //rotary dimentions in steps
 int goalPos = 0;
+int prevGoalPos = 0;
+int remainingSteps = 0;
 int moveSteps = 0;
 const int minPos = -700; 
 const int maxPos = 700; 
@@ -166,11 +168,17 @@ void loop()
 
   if(enableSteering) {
     stepper.enable();
+    if (abs(goalPos - prevGoalPos) > 50){
+      //stop move
+      remainingSteps = stepper.stop();
+      curPos -= remainingSteps;
+    }
     moveSteps = goalPos - curPos;
     stepper.move(moveSteps);
 
     //stepper.getStepsCompleted();
     curPos += moveSteps;
+    prevGoalPos = goalPos;
   }
   else{
     stepper.disable();
