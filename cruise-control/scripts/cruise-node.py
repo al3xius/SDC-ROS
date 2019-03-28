@@ -55,17 +55,14 @@ class ControlNode():
 
     def laneCallback(self, data):
         if data.data != 0:
-<<<<<<< HEAD
-            if abs(self.offset - interp(int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh])) < 20 or i > 10:
-=======
-            if abs(self.offset - interp(int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh])) < 20 or self.i > 10:
->>>>>>> c29135db23fa3a8010ea164b51f1f116ad834f85
+            if abs(self.offset - interp(int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh])) < 30 or self.i > 10:
                 self.offset = interp(
                     int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh])
                 self.i = 0
             else:
                 self.i += 1
-            self.publishMsg()
+        print(self.i)
+        self.publishMsg()
 
     def stateCallback(self, data):
         self.lastState = data

@@ -39,7 +39,7 @@ lane:
   bottomWidth: 100
 
 usb_cam:
-  video_device: /dev/video1
+  video_device: /dev/cam0
   image_width: 640
   image_height: 480
   pixel_format: yuyv
@@ -76,7 +76,7 @@ safety:
   emergencyBreakAngle: 10 # +- angle form 0
 
 rplidarNode:
-  serial_port: /dev/ttyUSB2
+  serial_port: /dev/lidar0
   serial_baudrate: 115200
   frame_id: laser
   inverted: True
@@ -87,7 +87,7 @@ joy:
   autorepeat_rate: 1
 
 arduino_main:
-  port: /dev/ttyUSB0
+  port: /dev/arduino0
 
-arduino_main:
-  port: /dev/ttyUSB1
+arduino_servo:
+  port: /dev/arduino1
