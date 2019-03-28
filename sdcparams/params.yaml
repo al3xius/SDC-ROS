@@ -35,7 +35,7 @@ lane:
   whiteMaskLow: 160
   whiteMaskHigh: 255
   topWidth: 10
-  height: 2.3
+  height: 2.0
   bottomWidth: 100
 
 usb_cam:
@@ -51,9 +51,9 @@ usb_cam:
 
 
 steering:
-  p: -0.2
-  i: 0.02
-  d: 5
+  p: 0.15
+  i: 0.001
+  d: 2.5
   limitLow: -30
   limitHigh: 30
 
