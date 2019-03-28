@@ -15,6 +15,7 @@
     <node pkg="cruise-control" name="cruiseControl" type="cruise-node.py"/>
     <!--
 
+    <node respawn="true" respawn_delay="3" pkg="rplidar_ros" name="rplidarNode" type="rplidarNode"/>
     <node pkg="tensorflow_object_detector" name="object_distance" type="distance_node.py"/>
     <node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"/>
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find rplidar_ros)/rviz/rplidar.rviz" />
