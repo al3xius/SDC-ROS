@@ -51,22 +51,31 @@ class ControlNode():
         self.pub = rospy.Publisher('/cruise/state', state, queue_size=1)
         self.cruiseState = state()
         self.lastState = state()
+
+        r = rospy.Rate(5)
+        while not rospy.is_shutdown():
+            self.publishMsg()
+            r.sleep()
+
         rospy.spin()
 
     def laneCallback(self, data):
         if data.data != 0:
-            if abs(self.offset - interp(int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh])) < 20 or self.i > 10:
+            print(self.offset)
+            print(interp(int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh]))
+            print("")
+            if abs(self.offset - interp(int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh])) < 15 or self.i > 10:
                 self.offset = interp(
                     int(data.data), [-75, 75], [self.steeringLimitLow, self.steeringLimitHigh])
                 self.i = 0
             else:
                 self.i += 1
-            self.publishMsg()
+            self.updateMsg()
 
     def stateCallback(self, data):
         self.lastState = data
 
-    def publishMsg(self):
+    def updateMsg(self):
         if self.testing:
             self.velPid.output_limits = (int(rospy.get_param(
                 "/throttle/limitLow")), int(rospy.get_param("/throttle/limitHigh")))
@@ -83,6 +92,8 @@ class ControlNode():
         self.steeringAngle = self.steerPid(self.offset)
         self.cruiseState.steeringAngle = int(self.steeringAngle)
 
+    
+    def publishMsg(self):
         self.pub.publish(self.cruiseState)
 
 
