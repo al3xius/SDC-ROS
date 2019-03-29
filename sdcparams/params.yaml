@@ -52,14 +52,14 @@ usb_cam:
 
 steering:
   p: 0.15
-  i: 0.001
-  d: 2.5
+  i: 0.05
+  d: 2.0
   limitLow: -30
   limitHigh: 30
 
 throttle:
-  p: 0.12
-  i: 0.00001
+  p: 50
+  i: 0.001
   d: 2.5
   limitLow: 0
   limitHigh: 50
@@ -71,8 +71,8 @@ gui:
   fullscreen: False
 
 safety:
-  normVelocity: 10
-  normBreakingDistance: 2 # distance at normVelocity in m
+  normVelocity: 100.0
+  normBreakingDistance: 7.0 # distance at normVelocity in m
   emergencyBreakAngle: 10 # +- angle form 0
 
 rplidarNode:

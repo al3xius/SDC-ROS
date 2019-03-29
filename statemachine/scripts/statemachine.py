@@ -72,19 +72,19 @@ class StateMachine():
             self.manDirection = 0
 
         """
-		# toggle light, NC
-		self.toggleLight(not arduinoIn.digital[self.lightInPin])
+                # toggle light, NC
+                self.toggleLight(not arduinoIn.digital[self.lightInPin])
 
-		# set indicator, NC
-		if not arduinoIn.digital[self.indicatorInLPin]:
-			self.manIndicate= "Left"
-		elif not arduinoIn.digital[self.indicatorInRPin]:
-			self.manIndicate = "Right"
-		else:
-			self.manIndicate = "None"
+                # set indicator, NC
+                if not arduinoIn.digital[self.indicatorInLPin]:
+                        self.manIndicate= "Left"
+                elif not arduinoIn.digital[self.indicatorInRPin]:
+                        self.manIndicate = "Right"
+                else:
+                        self.manIndicate = "None"
 
-		self.key = arduinoIn.digital[self.keySwitchPin] # NC
-		"""
+                self.key = arduinoIn.digital[self.keySwitchPin] # NC
+                """
 
         if not arduinoIn.digital[self.gasPedalSwitchPin] and self.mode == "cruise":
             self.mode = "manual"
@@ -188,7 +188,7 @@ class StateMachine():
             self.enableMotor = False
             self.direction = 0
             self.indicate = "Both"
-            self.enableSteering = True
+            self.enableSteering = False
             self.breaking = 100
             self.throttle = 0
 

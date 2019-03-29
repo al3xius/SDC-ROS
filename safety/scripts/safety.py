@@ -11,7 +11,8 @@ class SafetyNode:
         self.state = msg
 
         # calculate stoping distance
-        self.stopingDistance = msg.velocity*msg.velocity * self.breakingFactor
+        self.stopingDistance = msg.throttle*msg.throttle * self.breakingFactor
+        print(self.stopingDistance)
 
         self.publish()
         pass
@@ -36,10 +37,10 @@ class SafetyNode:
         emergencyDistance = min_n
 
         # break if object in front of car
-        if emergencyDistance < 1.0 or emergencyDistance < self.stopingDistance * 0.9:
+        if emergencyDistance < 2.0 or emergencyDistance < self.stopingDistance * 0.9:
             rospy.logerr("Emergency Break!")
             self.state.mode = "break"
-            self.state.enableSteering = True
+            self.state.enableSteering = False
             self.state.steeringAngle = 0  # TODO: Steer away
             self.state.enableMotor = False
             self.state.throttle = 0
@@ -59,13 +60,16 @@ class SafetyNode:
         rospy.loginfo("Starting SafetyNode.")
 
         self.stopingDistance = None
-        normBreakingDistance = rospy.get_param(
-            "/safety/normBreakingDistance", default="10")
-        normVelocity = rospy.get_param("/safety/normVelocity", default="10")
+        normBreakingDistance = float(rospy.get_param(
+            "/safety/normBreakingDistance", default="10"))
+        normVelocity = float(
+            rospy.get_param("/safety/normVelocity", default="10"))
         self.emergencyBreakAngle = rospy.get_param(
             "/safety/emergencyBreakAngle", default="10")
 
-        self.breakingFactor = normBreakingDistance/(normVelocity*normVelocity)
+        self.breakingFactor = float(
+            normBreakingDistance)/(normVelocity*normVelocity)
+        print("breakf:" + str(self.breakingFactor))
 
         # subscribe
         rospy.Subscriber("/state/unchecked", state, self.stateCallback)
