@@ -95,23 +95,22 @@ def callback(data):
     result = offset
     cv2.circle(mask, (laneCenter, yDist), circeRadius, [255, 255, 0], 2)
 
+    # ROI - for testing only (is adding latency)
     """
-	# ROI - for testing only (is adding latency)
+    topWidth = rospy.get_param("/lane/topWidth")
+    height = rospy.get_param("/lane/height")
+    bottomWidth = rospy.get_param("/lane/bottomWidth")
 
-	topWidth = rospy.get_param("/lane/topWidth")
-	height = rospy.get_param("/lane/height")
-	bottomWidth = rospy.get_param("/lane/bottomWidth")
+    imshape = image.shape
+    lower_left = [imshape[1]/bottomWidth, imshape[0]]
+    lower_right = [imshape[1]-imshape[1]/bottomWidth, imshape[0]]
+    top_left = [imshape[1]/2-imshape[1]/topWidth, imshape[0]/height]
+    top_right = [imshape[1]/2+imshape[1]/topWidth, imshape[0]/height]
+    vertices = [np.array(
+        [lower_left, top_left, top_right, lower_right], dtype=np.int32)]
 
-	imshape = image.shape
-	lower_left = [imshape[1]/bottomWidth, imshape[0]]
-	lower_right = [imshape[1]-imshape[1]/bottomWidth, imshape[0]]
-	top_left = [imshape[1]/2-imshape[1]/topWidth, imshape[0]/height]
-	top_right = [imshape[1]/2+imshape[1]/topWidth, imshape[0]/height]
-	vertices = [np.array([lower_left, top_left, top_right, lower_right], dtype=np.int32)]
-
-	cv2.polylines(mask, vertices, True, (0, 255, 255))  # draw ROI
-	"""
-
+    cv2.polylines(mask, vertices, True, (0, 255, 255))  # draw ROI
+    """
     combinedImage = cv2.addWeighted(image, 0.7, mask, 0.5, 0)
 
     # publish mask

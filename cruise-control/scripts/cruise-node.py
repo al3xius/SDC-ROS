@@ -80,8 +80,9 @@ class ControlNode():
         self.targetVelocity = self.lastState.targetVelocity
         self.velPid.setpoint = self.targetVelocity
         self.throttle = self.velPid(self.vel)
+        self.throttle = self.targetVelocity * 5
+
         self.cruiseState.throttle = int(self.throttle)
-        self.throttle = 25
 
         prevAngle = self.steeringAngle
         self.steeringAngle = self.steerPid(self.offset)
