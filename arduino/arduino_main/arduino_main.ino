@@ -228,6 +228,9 @@ void loop()
     if(arduinoIn_msg.digital[18] == false && state_msg.direction != 0){
       state_msg.enableMotor = true;
     }
+    else{
+      state_msg.enableMotor = false;
+    }
     state_msg.mode = "manual";
     state_msg.indicate = "None";
     messageCb(state_msg);

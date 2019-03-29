@@ -89,19 +89,20 @@ class StateMachine():
         if not arduinoIn.digital[self.gasPedalSwitchPin] and self.mode == "cruise":
             self.mode = "manual"
 
-        self.publishState()
+        if self.mode != "cruise":
+            self.publishState()
 
     def joyCallback(self, Joy):
         """processes Joystick callback
-                button assignment:
-                        leftStick: throttle
-                        rightStick: steering |  break
-                        r1: enable remote control
-                        r2: slow mode
-                        select: toggle light
-                        arrow up/down: change target speed
-                        home: reset after emergency break
-                        start: cruise control
+            button assignment:
+                leftStick: throttle
+                rightStick: steering |  break
+                r1: enable remote control
+                r2: slow mode
+                select: toggle light
+                arrow up/down: change target speed
+                home: reset after emergency break
+                start: cruise control
         """
 
         # set mode to remote
