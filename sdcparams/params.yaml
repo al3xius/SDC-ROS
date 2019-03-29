@@ -81,6 +81,7 @@ rplidarNode:
   frame_id: laser
   inverted: True
   angle_compensate: True
+  scan_mode: Standard
 
 joy:
   deadzone: 0.01
@@ -91,3 +92,4 @@ arduino_main:
 
 arduino_servo:
   port: /dev/arduino1
+  baud: 9600
