@@ -5,20 +5,20 @@
 #endif
 
 #include "BasicStepperDriver.h"
-#include "SPI.h"
+//#include "SPI.h"
 
 #include <ros.h>
-#include <std_msgs/Int32.h>
+//#include <std_msgs/Int32.h>
 #include <sdc_msgs/state.h>
-#include <std_msgs/String.h>
-#include <sdc_msgs/arduinoIn.h>
+//#include <std_msgs/String.h>
+//#include <sdc_msgs/arduinoIn.h>
 
 ros::NodeHandle nh;
 
 sdc_msgs::state state_msg;
-sdc_msgs::arduinoIn arduinoIn_msg;
+//sdc_msgs::arduinoIn arduinoIn_msg;
 
-ros::Publisher p("/servo/in", &arduinoIn_msg);
+//ros::Publisher p("/servo/in", &arduinoIn_msg);
 
 // Motor steps per revolution. Most steppers are 200 steps or 1.8 degrees/step
 #define MOTOR_STEPS 200
@@ -40,6 +40,7 @@ unsigned long indicateMillis = 0;
 //encoder vars
 int crc = 0;
 
+/*
 int zeroPoint = 0;
 int posValid = 0;
 int posSync = 0;
@@ -49,6 +50,7 @@ long result = 0;
 long lastResult = 0;
 int turns = 0;
 long crcCheck = 0;
+*/
 
 long curPos = 0;
 long encoderPos = 0;
@@ -72,7 +74,7 @@ void messageCb( const sdc_msgs::state& data){
   enableSteering = data.enableSteering;
   goalPos = map(data.steeringAngle, -100, 100, minPos, maxPos);
 }
-
+/*
 void getPos(){
   //get curent positon  of encoder
   int zero1 = SPI.transfer(0x00); //zero
@@ -99,7 +101,7 @@ void getPos(){
   crcCheck = crcCheck * 256 + crc;
   crcCheck = crcCheck >> 7;*/
   
-  result = pos1 * 256 + pos2;
+// result = pos1 * 256 + pos2;
 
   /*
   if(abs(result - lastResult) > 1000){
@@ -109,7 +111,7 @@ void getPos(){
   {
     turns ++;
   }*/
-  
+  /*
   arduinoIn_msg.analog[0] = zero1;
   arduinoIn_msg.analog[1] = zero2;
   arduinoIn_msg.analog[2] = flags;
@@ -125,7 +127,7 @@ void getPos(){
   else{
     encoderPos = curPos;
   }
-}
+}*/
 
 ros::Subscriber<sdc_msgs::state> sub("state", &messageCb);
 
@@ -133,7 +135,7 @@ void setup()
 { 
   
   nh.getHardware()->setBaud(57600);
-  Serial.begin(57600);
+  //Serial.begin(9600);
   nh.initNode();
 
   nh.subscribe(sub);
@@ -145,14 +147,15 @@ void setup()
   //pinMode(8, INPUT);
 
   //SPI
+  /*
   SPI.begin();
   SPI.setDataMode(SPI_MODE2);
   SPI.setBitOrder(MSBFIRST);
   SPI.setClockDivider(SPI_CLOCK_DIV4);
-  
+  */
   //getPos();
   //zeroPos = curPos;
-  nh.advertise(p);
+//  nh.advertise(p);
 }
 
 
@@ -168,13 +171,13 @@ void loop()
 
   if(enableSteering) {
     stepper.enable();
-    if (curPos - goalPos > 10){
+    /*if (curPos - goalPos > 10){
       //stop move
       //remainingSteps = stepper.getCurrentState();
       stepper.stop();
       //stepper.startMove(moveSteps);
       //curPos -= remainingSteps.steps_remaining;
-    }
+    }*/
     moveSteps = goalPos - curPos;
     stepper.move(moveSteps);
 
@@ -193,13 +196,13 @@ void loop()
   }
 
   
-  getPos();
+  //getPos();
   //arduinoIn_msg.analog[0] = curPos;
   //arduinoIn_msg.analog[1] = encoderPos;
 
-  if(currentMillis - previousMillis > 20){
+  if(currentMillis - previousMillis > 1000){
     previousMillis = millis();
-    p.publish(&arduinoIn_msg);
+    //p.publish(&arduinoIn_msg);
   }
   }else{
     stepper.disable();
