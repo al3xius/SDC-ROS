@@ -34,11 +34,11 @@ def calcLaneLines(roiImage):
     # smaller = less lines
     rho = 1
     theta = np.pi/180
-    maxLineGap = 5 # (original = 100)
+    maxLineGap = 100 # (original = 100) 5
 
     # larger = less lines
-    threshold = 100 # (original = 15)
-    minLineLength = 40 # (original = 25)
+    threshold = 15 # (original = 15), 100
+    minLineLength = 25 # (original = 25), 40
     
     laneLines = []
     laneLines = cv2.HoughLinesP(roiImage, rho, theta, threshold, np.array(

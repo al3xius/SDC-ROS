@@ -31,21 +31,22 @@ gaspedal:
 
 lane:
   # canny Edge old (200, 250)
-  low_threshold: 50
-  high_threshold: 150
+  low_threshold: 200
+  high_threshold: 250
+  # 50, 150
 
   # whiteMask
   whiteMaskLow: 170
-  whiteMaskHigh: 255
+  whiteMaskHigh: 200
 
   #ROI
-  topWidth: 1
-  height: 6
+  topWidth: 2
+  height: 2.1
   bottomWidth: 1000
-  bottomHeight: 1000
+  bottomHeight: 0
 
 usb_cam:
-  video_device: /dev/cam0
+  video_device: /dev/video1
   image_width: 640
   image_height: 480
   pixel_format: yuyv

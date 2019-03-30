@@ -21,18 +21,21 @@ height = rospy.get_param("/lane/height")
 bottomWidth = rospy.get_param("/lane/bottomWidth")
 
 def makeCoordinates(img, lineParmeters):
-    k, d = lineParmeters
-    y1 = img.shape[0]
-    y2 = int(y1 * (3/4))
-    x1 = int((y1 - d)/k)
-    x2 = int((y2 - d)/k)
-    return np.array([x1, y1, x2, y2])
+    print(lineParmeters)
+    if lineParmeters is not None:
+        k = lineParmeters[0]
+        d = lineParmeters[1]
+        y1 = img.shape[0]
+        y2 = int(y1 * (3/4))
+        x1 = int((y1 - d)/k)
+        x2 = int((y2 - d)/k)
+        return np.array([x1, y1, x2, y2])
 
 
 def averageSlopeIntercept(img, lines):
     leftFit = []
     rightFit = []
-    if lines != None:
+    if lines is not None:
         for line in lines:
             x1, y1, x2, y2 = line.reshape(4)
             parameters = np.polyfit((x1, x2), (y1, y2), 1)
@@ -52,7 +55,7 @@ def averageSlopeIntercept(img, lines):
 
 def printLines(img, lines):
     lineImg = np.zeros_like(img)
-    if lines != None:
+    if lines is not None:
         for x1, y1, x2, y2 in lines:
             cv2.line(lineImg, (x1, y1), (x2, y2), (255, 0, 0), 4)
     
@@ -70,10 +73,10 @@ def callback(data):
 
     laneDetection.getLaneLines(image)
     laneLines = laneDetection.houghTransformation.laneLines
-    avgLines = averageSlopeIntercept(mask, laneLines)
-    mask = printLines(mask, avgLines)
+    #avgLines = averageSlopeIntercept(mask, laneLines)
+    #mask = printLines(mask, avgLines)
 
-    """
+    
     leftValues = []
     rightValues = []
     try:
@@ -85,11 +88,11 @@ def callback(data):
                     k = (y1-y2)/(x1-x2)
 
                 # add lanes to left and make sure k is bigger than 1.8
-                if (x2 <= middle) and k < -0.5:
+                if (x2 <= middle) and k < -1:
                     leftValues.append(x1)
                     leftValues.append(x2)
                     cv2.line(mask, (x1, y1), (x2, y2), [0, 0, 255], 4)
-                elif (x2 > middle) and k > 0.5:
+                elif (x2 > middle) and k > 1:
                     rightValues.append(x1)
                     rightValues.append(x2)
                     cv2.line(mask, (x1, y1), (x2, y2), [0, 0, 255], 4)
@@ -99,9 +102,9 @@ def callback(data):
     except:
         result = "no Lines"
         
-    """
+    
 
-
+    
     # Get Smallest and Biggest Values of List
     try:
         minLeft = min(leftValues)
@@ -137,7 +140,7 @@ def callback(data):
     offset = center - laneCenter
     result = offset
     cv2.circle(mask, (laneCenter, yDist), circeRadius, [255, 255, 0], 2)
-
+    
     # ROI - for testing only (is adding latency)
     """
     topWidth = rospy.get_param("/lane/topWidth")
