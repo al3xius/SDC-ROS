@@ -18,6 +18,8 @@ from PIL import Image
 topWidth = rospy.get_param("/lane/topWidth")
 height = rospy.get_param("/lane/height")
 bottomWidth = rospy.get_param("/lane/bottomWidth")
+bottomHeight = rospy.get_param("/lane/bottomHeight")
+
 low_threshold = rospy.get_param("/lane/low_threshold")
 high_threshold = rospy.get_param("/lane/high_threshold")
 lowEnd = rospy.get_param("/lane/low_threshold")
@@ -29,11 +31,15 @@ laneLines = 0
 
 
 def calcLaneLines(roiImage):
+    # smaller = less lines
     rho = 1
     theta = np.pi/180
-    threshold = 15
-    minLineLength = 25
-    maxLineGap = 100
+    maxLineGap = 5 # (original = 100)
+
+    # larger = less lines
+    threshold = 100 # (original = 15)
+    minLineLength = 40 # (original = 25)
+    
     laneLines = []
     laneLines = cv2.HoughLinesP(roiImage, rho, theta, threshold, np.array(
         []), minLineLength, maxLineGap)
@@ -49,12 +55,14 @@ def houghTransformation(roiImage):
     laneLineImage = np.zeros(
         (roiImage.shape[0], roiImage.shape[1], 3), dtype=np.uint8)
 
+    """
     try:
         for line in laneLines:
             for x1, y1, x2, y2 in line:
                 cv2.line(laneLineImage, (x1, y1), (x2, y2), [0, 0, 255], 2)
     except:
         result = "no Lines"
+    """
 
     return laneLineImage
 
@@ -70,10 +78,11 @@ def regionOfInterest(img):
     bottomWidth = rospy.get_param("/lane/bottomWidth")"""
 
     imshape = img.shape
-    lower_left = [imshape[1]/bottomWidth, imshape[0]]
-    lower_right = [imshape[1]-imshape[1]/bottomWidth, imshape[0]]
+    lower_left = [imshape[1]/bottomWidth, imshape[0] - bottomHeight]
+    lower_right = [imshape[1]-imshape[1]/bottomWidth, imshape[0] - bottomHeight]
     top_left = [imshape[1]/2-imshape[1]/topWidth, imshape[0]/height]
     top_right = [imshape[1]/2+imshape[1]/topWidth, imshape[0]/height]
+
     vertices = [np.array([lower_left, top_left, top_right,
                           lower_right], dtype=np.int32)]
 
@@ -94,7 +103,7 @@ def regionOfInterest(img):
 def getLaneLines(img):
     grayImage = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     maskWhite = cv2.inRange(grayImage, whiteMaskLow, whiteMaskHigh)
-    gaussBlur = cv2.GaussianBlur(maskWhite, (5, 5), 0)
+    gaussBlur = cv2.GaussianBlur(maskWhite, (5, 5), 0)  # reduce noise
     cannyConverted = cv2.Canny(gaussBlur, lowEnd, highEnd)
     roiImage = regionOfInterest(cannyConverted)
     laneLineImage = houghTransformation(roiImage)

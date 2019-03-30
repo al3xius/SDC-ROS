@@ -30,13 +30,19 @@ gaspedal:
   max: 900
 
 lane:
-  low_threshold: 200
-  high_threshold: 250
+  # canny Edge old (200, 250)
+  low_threshold: 50
+  high_threshold: 150
+
+  # whiteMask
   whiteMaskLow: 170
   whiteMaskHigh: 255
+
+  #ROI
   topWidth: 1
   height: 6
   bottomWidth: 1000
+  bottomHeight: 1000
 
 usb_cam:
   video_device: /dev/cam0

@@ -20,6 +20,44 @@ topWidth = rospy.get_param("/lane/topWidth")
 height = rospy.get_param("/lane/height")
 bottomWidth = rospy.get_param("/lane/bottomWidth")
 
+def makeCoordinates(img, lineParmeters):
+    k, d = lineParmeters
+    y1 = img.shape[0]
+    y2 = int(y1 * (3/4))
+    x1 = int((y1 - d)/k)
+    x2 = int((y2 - d)/k)
+    return np.array([x1, y1, x2, y2])
+
+
+def averageSlopeIntercept(img, lines):
+    leftFit = []
+    rightFit = []
+    if lines != None:
+        for line in lines:
+            x1, y1, x2, y2 = line.reshape(4)
+            parameters = np.polyfit((x1, x2), (y1, y2), 1)
+            k = parameters[0]
+            d = parameters[1]
+            if k < 0:
+                leftFit.append((k, d))
+            else:
+                rightFit.append((k, d))
+        leftFitAvg = np.average(leftFit, axis=0)
+        rightFitAvg = np.average(rightFit, axis=0)
+        leftLane = makeCoordinates(img, leftFitAvg)
+        rightLane = makeCoordinates(img, rightFitAvg)
+        return np.array([leftLane, rightLane])
+    else:
+        return None
+
+def printLines(img, lines):
+    lineImg = np.zeros_like(img)
+    if lines != None:
+        for x1, y1, x2, y2 in lines:
+            cv2.line(lineImg, (x1, y1), (x2, y2), (255, 0, 0), 4)
+    
+    return lineImg
+
 
 # get image
 def callback(data):
@@ -32,7 +70,10 @@ def callback(data):
 
     laneDetection.getLaneLines(image)
     laneLines = laneDetection.houghTransformation.laneLines
+    avgLines = averageSlopeIntercept(mask, laneLines)
+    mask = printLines(mask, avgLines)
 
+    """
     leftValues = []
     rightValues = []
     try:
@@ -47,20 +88,19 @@ def callback(data):
                 if (x2 <= middle) and k < -0.5:
                     leftValues.append(x1)
                     leftValues.append(x2)
-                    cv2.line(mask, (x1, y1), (x2, y2), [0, 0, 255], 2)
+                    cv2.line(mask, (x1, y1), (x2, y2), [0, 0, 255], 4)
                 elif (x2 > middle) and k > 0.5:
                     rightValues.append(x1)
                     rightValues.append(x2)
-                    cv2.line(mask, (x1, y1), (x2, y2), [0, 0, 255], 2)
+                    cv2.line(mask, (x1, y1), (x2, y2), [0, 0, 255], 4)
                 else:
                     pass
                 pass
     except:
         result = "no Lines"
+        
+    """
 
-    # draw center circle
-    cv2.circle(mask, (int(width/2), int(height-100)),
-               circeRadius, [0, 255, 0], 5)
 
     # Get Smallest and Biggest Values of List
     try:
@@ -79,6 +119,9 @@ def callback(data):
 
     center = width/2
 
+    # draw center circle
+    cv2.circle(mask, (int(width/2), int(height-100)),
+               circeRadius, [0, 255, 0], 5)
     # draw circles for those values
     yDist = height-100
 
@@ -111,7 +154,7 @@ def callback(data):
 
     cv2.polylines(mask, vertices, True, (0, 255, 255))  # draw ROI
     """
-    combinedImage = cv2.addWeighted(image, 0.7, mask, 0.5, 0)
+    combinedImage = cv2.addWeighted(image, 0.8, mask, 1, 1)
 
     # publish mask
     pub.publish(bridge.cv2_to_imgmsg(combinedImage, encoding="rgb8"))
