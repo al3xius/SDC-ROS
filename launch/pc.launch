@@ -1,12 +1,10 @@
 <launch>
     <rosparam file="$(find sdcparams)/params.yaml" command="load" ns="/"/>
-    <node pkg="gui" name="gui" type="main.py"/>
     <!--USB Devices-->
     <node respawn="true" respawn_delay="3" pkg="usb_cam" name="usb_cam" type="usb_cam_node"/>
     <node respawn="true" respawn_delay="3" pkg="joy" name="joy" type="joy_node"/>
     <node respawn="true" respawn_delay="3" pkg="rosserial_python" name="arduino_main" type="serial_node.py"/>
     <node respawn="true" respawn_delay="1" pkg="rosserial_python" name="arduino_servo" type="serial_node.py"/>
-    <node respawn="true" respawn_delay="3" pkg="rplidar_ros" name="rplidarNode" type="rplidarNode"/>
 
     <!--Nodes-->
     <node pkg="safety" name="safetyNode" type="safety.py"/>
@@ -14,7 +12,9 @@
     <node pkg="lanekeeping" name="lanekeeping" type="lanekeeping.py"/> 
     <node pkg="cruise-control" name="cruiseControl" type="cruise-node.py"/>
     <!--
+    <node respawn="true" respawn_delay="3" pkg="rplidar_ros" name="rplidarNode" type="rplidarNode"/>
 
+    <node pkg="gui" name="gui" type="main.py"/>
     <node respawn="true" respawn_delay="3" pkg="rplidar_ros" name="rplidarNode" type="rplidarNode"/>
     <node pkg="tensorflow_object_detector" name="object_distance" type="distance_node.py"/>
     <node pkg= "tensorflow_object_detector" name="detect_ros" type="detect_ros.py"/>
