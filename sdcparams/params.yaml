@@ -36,17 +36,17 @@ lane:
   # 50, 150
 
   # whiteMask
-  whiteMaskLow: 170
-  whiteMaskHigh: 200
+  whiteMaskLow: 180
+  whiteMaskHigh: 250
 
   #ROI
   topWidth: 2
-  height: 2.1
+  height: 4
   bottomWidth: 1000
   bottomHeight: 0
 
 usb_cam:
-  video_device: /dev/video1
+  video_device: /dev/cam0
   image_width: 640
   image_height: 480
   pixel_format: yuyv
@@ -58,9 +58,9 @@ usb_cam:
 
 
 steering:
-  p: 0.15
-  i: 0.1
-  d: 0.0
+  p: 0.5
+  i: 0.5
+  d: 0.7
   limitLow: -30
   limitHigh: 30
 
