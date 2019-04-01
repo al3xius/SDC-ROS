@@ -132,6 +132,7 @@ def stateCallback(msg):
     state_car = msg
 
 
+# Map Screen
 class ScreenMAP(Screen):
     def on_enter(self):
         # Map with Zoom and Coordinates
@@ -158,8 +159,12 @@ class ScreenMAP(Screen):
         # Add to Map layout
         self.add_widget(backBtn)
 
+    # Clear widgets on Exit
     def on_leave(self):
         self.clear_widgets()
+
+
+# Camera View Screen
 
 
 class ScreenCAV(Screen):
@@ -194,7 +199,7 @@ class ScreenCAV(Screen):
                                                                  0), size_hint=(.3, .12), markup=True)
             laneBtn.bind(on_press=toggleLanes)
 
-            # Objects
+            # Object detection screen
             buf1 = cv2.flip(objImgRos, 0)
             buf = buf1.tostring()
             object_texture = Texture.create(
@@ -241,18 +246,21 @@ class ScreenCAV(Screen):
 
         self.add_widget(backBtn)
 
+    # Update Screen every second
     def on_enter(self):
         t = 1.0
         fps = 10
         Clock.schedule_interval(self.update, t / fps)
 
+    # Clear all widgets on exit
     def on_leave(self):
         self.clear_widgets()
+
+# Main Screen
 
 
 class ScreenMNS(Screen):
     def update(self, dt):
-        # rospy.loginfo("tick")
         self.clear_widgets()
 
         global state_car
@@ -273,7 +281,7 @@ class ScreenMNS(Screen):
         def incSpeed(self):
             state_gui.targetVelocity = 1
 
-        # Change Speed
+        # CSpeed Labels and Target velocity + Buttons
         speedLbl = Label(
             text="[color=111111][b]%d[/b][/color]" % state_car.targetVelocity,
                         pos_hint={'top': 1.25}, font_size="70dp", markup=True)
@@ -298,6 +306,7 @@ class ScreenMNS(Screen):
         # DrivingMode:
         scale = 60
 
+        # Define current modes and set / change on press
         def changeMode(mode, curDir, vel):
             actColor = "ffd700"
             stdColor = "111111"
@@ -363,7 +372,7 @@ class ScreenMNS(Screen):
 
         changeMode(state_car.mode, state_car.direction, state_car.velocity)
 
-        # MenuButtons
+        # Menu Buttons
         def screenMap(self):
             sm.transition = SlideTransition(direction='left')
             sm.current = "MAP"
@@ -390,7 +399,7 @@ class ScreenMNS(Screen):
             text="[b]LOG[/b]", font_size="20sp", pos=(0, (win_y)-70), size_hint=(.3, .12), markup=True)
         logBtn.bind(on_press=screenLog)
 
-        # Lights
+        # Lane indicators and Lights
         def switchLights(left, right, light):
             # left = "left-arrow"
             leftPath = '../assets/data/%s.png' % left
@@ -408,6 +417,7 @@ class ScreenMNS(Screen):
             self.add_widget(rightImg)
             self.add_widget(lightImg)
 
+        # Activate lights and indicators on-press
         if leftOn:
             leftStr = "left-arrow-act"
         else:
@@ -446,6 +456,7 @@ class ScreenMNS(Screen):
         def carLight(self):
             state_gui.light = True
 
+        # Place Buttons
         indicLeftBtn = Button(pos=(win_x/2-120, win_y/2-130),
                               size_hint=(.05, .10), font_size="80dp", markup=True, background_color=(0, 0, 0, 0))
         indicLeftBtn.bind(on_press=indicLeft)
@@ -472,6 +483,7 @@ class ScreenMNS(Screen):
             min=0, max=100, value=state_car.throttle, orientation="vertical",
             value_track=True, pos=(-win_x/3, win_y/4), size_hint=(1, 0.5),  cursor_image='../assets/data/brake32.png')
 
+        # Add all widgets to the screen
         self.add_widget(throttleSlider)
         self.add_widget(speedMinus)
         self.add_widget(speedPlus)
@@ -492,15 +504,18 @@ class ScreenMNS(Screen):
         state_gui.light = False
         state_gui.mode = "manual"
 
+    # Update every second
     def on_enter(self):
         t = 1.0
         fps = 1
         Clock.schedule_interval(self.update, t/fps)
 
+    # Clear widgets on exit
     def on_leave(self):
         self.clear_widgets()
 
 
+# LOG Screen
 class ScreenLOG(Screen):
     def update(self, dt):
         self.clear_widgets()
@@ -519,35 +534,38 @@ class ScreenLOG(Screen):
         logLbl = Label(text="[color=000000]" + logText + "[/color]", pos=(
             10, (win_y/2)-70), font_size="15sp", font_color="#000000", markup=True)
 
-        # Add to Map layout
+        # Add to screen
         self.add_widget(backBtn)
         self.add_widget(logLbl)
 
+    # Update every second
     def on_enter(self):
         t = 1.0
         fps = 1
         Clock.schedule_interval(self.update, t / fps)
 
+    # clear all widgets on exit
     def on_leave(self):
         self.clear_widgets()
 
+# add screen to sreen manager
 sm.add_widget(ScreenMNS(name='MNS'))
 sm.add_widget(ScreenCAV(name='CAV'))
 sm.add_widget(ScreenMAP(name='MAP'))
 sm.add_widget(ScreenLOG(name='LOG'))
 
 
-# Run
+# Run program
 class MyApp(App):
 
     def build(self):
-        self.title = 'CONTROL PANEL | v 1.1'
+        self.title = 'CONTROL PANEL | v 1.2'
         Window.clearcolor = (1, 1, 1, 1)
         # self.icon = 'assets/car.png'
         return sm
 
 if __name__ == '__main__':
-    # subscriber
+    # get ROS subscribers/publishers
     rospy.init_node('gui', anonymous=False)
     rospy.loginfo("GUI: Node started.")
 
@@ -567,6 +585,7 @@ if __name__ == '__main__':
 
     MyApp().run()
 
+    # run app / ros exception
     try:
         MyApp().run()
     except rospy.ROSInterruptException:
